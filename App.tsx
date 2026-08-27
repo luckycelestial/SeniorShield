@@ -24,6 +24,7 @@ import {
   AlertCircle,
   Lightbulb,
   MessageSquareText,
+  Radio,
 } from 'lucide-react-native';
 
 import { Header } from './src/components/Header';
@@ -36,6 +37,7 @@ import {
   CampaignState,
   DeviceEvent,
   MockScenario,
+  ScamReport,
 } from './src/types/scam';
 import {
   createInitialCampaignState,
@@ -50,6 +52,7 @@ import {
   requestNotificationPermissions,
   setupNotificationListener,
 } from './src/services/notificationReader';
+import { autonomousSmsWatcher } from './src/services/autonomousSmsWatcher';
 import { MOCK_SCAM_SCENARIOS } from './src/constants/mockScams';
 
 export default function App() {
@@ -69,11 +72,37 @@ export default function App() {
   const [isSimulationVisible, setIsSimulationVisible] = useState<boolean>(false);
   const [isSmsAnalyzerVisible, setIsSmsAnalyzerVisible] = useState<boolean>(false);
 
-  // Initial Auto-Analysis and Background Notification Reader
+  // Initial Auto-Analysis, Notification Reader, and Autonomous SMS Inbox Watcher
   useEffect(() => {
     runInitialBaseline();
     initializeNotificationReader();
+    startAutonomousSmsMonitoring();
+
+    return () => {
+      autonomousSmsWatcher.stopWatching();
+    };
   }, []);
+
+  const startAutonomousSmsMonitoring = async () => {
+    await autonomousSmsWatcher.startWatching(
+      (event: DeviceEvent, report: ScamReport) => {
+        console.log('[App] ⚡ Received Autonomous Gemini 3.5 Verdict for SMS:', event.senderOrNumber);
+        setActiveScenarioTitle(`Live SMS: ${event.senderOrNumber}`);
+        setCampaignState((prevState) =>
+          updateCampaignState(prevState, [event], report)
+        );
+
+        if (report.is_scam && report.threat_level === 'CRITICAL') {
+          Alert.alert(
+            '⚠️ SCAM THREAT DETECTED BY AI',
+            `SeniorShield AI analyzed an incoming message from ${event.senderOrNumber}.\n\nVerdict: ${report.senior_explanation}\n\nAction: ${report.action_required}`,
+            [{ text: 'Understood & Shielded', style: 'default' }]
+          );
+        }
+      },
+      geminiApiKey
+    );
+  };
 
   const initializeNotificationReader = async () => {
     await requestNotificationPermissions();
@@ -251,6 +280,14 @@ export default function App() {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
+            {/* Live Autonomous Sentinel Active Pill */}
+            <View style={styles.sentinelBanner}>
+              <Radio size={14} color="#10B981" />
+              <Text style={styles.sentinelText}>
+                Autonomous Gemini Sentinel: <Text style={styles.sentinelHighlight}>Active & Monitoring Inbox</Text>
+              </Text>
+            </View>
+
             {/* Cumulative Risk Exposure StatCard */}
             <View style={styles.gaugeCard}>
               <View style={styles.gaugeHeader}>
@@ -484,6 +521,27 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 40,
     paddingTop: 8,
+  },
+  sentinelBanner: {
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 10,
+  },
+  sentinelText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#166534',
+  },
+  sentinelHighlight: {
+    fontWeight: '900',
+    color: '#15803D',
   },
   gaugeCard: {
     backgroundColor: '#FFFFFF',
