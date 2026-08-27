@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  AppState,
-  AppStateStatus,
   Linking,
   Modal,
   ScrollView,
@@ -15,7 +13,6 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import * as Clipboard from 'expo-clipboard';
 import {
   RefreshCw,
   Sparkles,
@@ -27,7 +24,6 @@ import {
   AlertCircle,
   Lightbulb,
   MessageSquareText,
-  ClipboardPaste,
 } from 'lucide-react-native';
 
 import { Header } from './src/components/Header';
@@ -72,32 +68,12 @@ export default function App() {
   const [isSettingsVisible, setIsSettingsVisible] = useState<boolean>(false);
   const [isSimulationVisible, setIsSimulationVisible] = useState<boolean>(false);
   const [isSmsAnalyzerVisible, setIsSmsAnalyzerVisible] = useState<boolean>(false);
-  const [detectedClipboardMsg, setDetectedClipboardMsg] = useState<string | null>(null);
 
   // Initial Auto-Analysis and Background Notification Reader
   useEffect(() => {
     runInitialBaseline();
     initializeNotificationReader();
-
-    // AppState sniffer for copied friend messages / SMS
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
-    return () => {
-      subscription.remove();
-    };
   }, []);
-
-  const handleAppStateChange = async (nextAppState: AppStateStatus) => {
-    if (nextAppState === 'active') {
-      try {
-        const text = await Clipboard.getStringAsync();
-        if (text && text.trim().length > 15 && text !== detectedClipboardMsg) {
-          setDetectedClipboardMsg(text.trim());
-        }
-      } catch (err) {
-        console.log('[App] AppState clipboard check skipped:', err);
-      }
-    }
-  };
 
   const initializeNotificationReader = async () => {
     await requestNotificationPermissions();
@@ -146,7 +122,6 @@ export default function App() {
   const handleAnalyzeCustomSms = async (sender: string, text: string) => {
     setIsScanning(true);
     setActiveScenarioTitle(`SMS from ${sender}`);
-    setDetectedClipboardMsg(null);
 
     const newEvent: DeviceEvent = {
       id: `custom_sms_${Date.now()}`,
@@ -276,29 +251,6 @@ export default function App() {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {/* Quick Copied Message Banner */}
-            {detectedClipboardMsg && (
-              <View style={styles.detectedBanner}>
-                <View style={styles.detectedHeader}>
-                  <ClipboardPaste size={15} color="#0284C7" />
-                  <Text style={styles.detectedTitle}>RECENT COPIED MESSAGE DETECTED</Text>
-                  <TouchableOpacity onPress={() => setDetectedClipboardMsg(null)}>
-                    <X size={14} color="#8E8E93" />
-                  </TouchableOpacity>
-                </View>
-                <Text style={styles.detectedText} numberOfLines={1}>
-                  "{detectedClipboardMsg}"
-                </Text>
-                <TouchableOpacity
-                  style={styles.detectedAction}
-                  onPress={() => handleAnalyzeCustomSms('Incoming / Friend', detectedClipboardMsg)}
-                  activeOpacity={0.88}
-                >
-                  <Text style={styles.detectedActionText}>⚡ Analyze with Gemini 3.5 Now</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-
             {/* Cumulative Risk Exposure StatCard */}
             <View style={styles.gaugeCard}>
               <View style={styles.gaugeHeader}>
@@ -532,45 +484,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 40,
     paddingTop: 8,
-  },
-  detectedBanner: {
-    backgroundColor: '#F0F9FF',
-    borderWidth: 1,
-    borderColor: '#BAE6FD',
-    borderRadius: 16,
-    padding: 12,
-    marginBottom: 10,
-  },
-  detectedHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  detectedTitle: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#0284C7',
-    letterSpacing: 0.5,
-    flex: 1,
-    marginLeft: 6,
-  },
-  detectedText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#1F1F1F',
-    marginBottom: 8,
-  },
-  detectedAction: {
-    backgroundColor: '#0284C7',
-    paddingVertical: 8,
-    borderRadius: 9999,
-    alignItems: 'center',
-  },
-  detectedActionText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '800',
   },
   gaugeCard: {
     backgroundColor: '#FFFFFF',
