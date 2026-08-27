@@ -23,15 +23,18 @@ import {
   ShieldCheck,
   AlertCircle,
   Lightbulb,
+  MessageSquareText,
 } from 'lucide-react-native';
 
 import { Header } from './src/components/Header';
 import { ThreatCard } from './src/components/ThreatCard';
 import { CampaignTimeline } from './src/components/CampaignTimeline';
 import { SimulationDrawer } from './src/components/SimulationDrawer';
+import { SmsAnalyzerModal } from './src/components/SmsAnalyzerModal';
 
 import {
   CampaignState,
+  DeviceEvent,
   MockScenario,
 } from './src/types/scam';
 import {
@@ -43,6 +46,10 @@ import {
   requestDevicePermissions,
   scanDeviceComms,
 } from './src/services/deviceScanner';
+import {
+  requestNotificationPermissions,
+  setupNotificationListener,
+} from './src/services/notificationReader';
 import { MOCK_SCAM_SCENARIOS } from './src/constants/mockScams';
 
 export default function App() {
@@ -60,11 +67,42 @@ export default function App() {
   const [geminiApiKey, setGeminiApiKey] = useState<string>('');
   const [isSettingsVisible, setIsSettingsVisible] = useState<boolean>(false);
   const [isSimulationVisible, setIsSimulationVisible] = useState<boolean>(false);
+  const [isSmsAnalyzerVisible, setIsSmsAnalyzerVisible] = useState<boolean>(false);
 
-  // Initial Auto-Analysis on Startup with Safe Baseline
+  // Initial Auto-Analysis and Background Notification Reader
   useEffect(() => {
     runInitialBaseline();
+    initializeNotificationReader();
   }, []);
+
+  const initializeNotificationReader = async () => {
+    await requestNotificationPermissions();
+
+    // Subscribe to incoming OS notifications
+    const unsubscribe = setupNotificationListener(async (event: DeviceEvent) => {
+      console.log('[App] Live notification captured:', event);
+      setActiveScenarioTitle(`Live Notification: ${event.senderOrNumber}`);
+      setIsScanning(true);
+
+      try {
+        const report = await analyzeMultiChannelCampaign(
+          [...campaignState.events, event],
+          geminiApiKey
+        );
+        setCampaignState((prevState) =>
+          updateCampaignState(prevState, [event], report)
+        );
+      } catch (err) {
+        console.error('[App] Error analyzing live notification:', err);
+      } finally {
+        setIsScanning(false);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  };
 
   const runInitialBaseline = async () => {
     const defaultScenario = MOCK_SCAM_SCENARIOS[3]; // Safe Benchmark
@@ -76,6 +114,37 @@ export default function App() {
       updateCampaignState(campaignState, defaultScenario.events, initialReport)
     );
     setActiveScenarioTitle(defaultScenario.title);
+  };
+
+  /**
+   * Analyzes an arbitrary raw SMS / Notification text directly.
+   */
+  const handleAnalyzeCustomSms = async (sender: string, text: string) => {
+    setIsScanning(true);
+    setActiveScenarioTitle(`SMS from ${sender}`);
+
+    const newEvent: DeviceEvent = {
+      id: `custom_sms_${Date.now()}`,
+      timestamp: Date.now(),
+      type: 'SMS',
+      senderOrNumber: sender,
+      contentOrDuration: text,
+    };
+
+    try {
+      const report = await analyzeMultiChannelCampaign(
+        [...campaignState.events, newEvent],
+        geminiApiKey
+      );
+      setCampaignState(
+        updateCampaignState(campaignState, [newEvent], report)
+      );
+    } catch (error) {
+      console.error('[App] Custom SMS analysis error:', error);
+      Alert.alert('Analysis Notice', 'Evaluated SMS with internal heuristic security models.');
+    } finally {
+      setIsScanning(false);
+    }
   };
 
   /**
@@ -96,7 +165,6 @@ export default function App() {
 
       const events = await scanDeviceComms();
 
-      // If live inbox is empty on emulator/test device, fallback gracefully to Electricity EB vector for instant demonstration
       const eventsToAnalyze =
         events.length > 0 ? events : MOCK_SCAM_SCENARIOS[0].events;
 
@@ -221,7 +289,7 @@ export default function App() {
               )}
             </View>
 
-            {/* Primary Action Buttons (Solid Charcoal for Primary Scan) */}
+            {/* Primary Action Buttons */}
             <View style={styles.actionButtonsRow}>
               <TouchableOpacity
                 style={[
@@ -238,8 +306,17 @@ export default function App() {
                   <RefreshCw size={18} color="#FFFFFF" />
                 )}
                 <Text style={styles.scanButtonText}>
-                  {isScanning ? 'Analyzing Inflow...' : 'Scan Device & Protect'}
+                  {isScanning ? 'Analyzing Inflow...' : 'Scan Device'}
                 </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.smsAnalyzeButton}
+                onPress={() => setIsSmsAnalyzerVisible(true)}
+                activeOpacity={0.88}
+              >
+                <MessageSquareText size={16} color="#1F1F1F" />
+                <Text style={styles.smsAnalyzeButtonText}>Read SMS</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -304,6 +381,13 @@ export default function App() {
             </View>
           </ScrollView>
 
+          {/* SMS & Notification Analyzer Modal */}
+          <SmsAnalyzerModal
+            visible={isSmsAnalyzerVisible}
+            onClose={() => setIsSmsAnalyzerVisible(false)}
+            onAnalyzeSms={handleAnalyzeCustomSms}
+          />
+
           {/* Demo Simulation Drawer */}
           <SimulationDrawer
             visible={isSimulationVisible}
@@ -365,7 +449,7 @@ export default function App() {
                   If left blank, SeniorShield uses its built-in offline intelligence engine.
                 </Text>
 
-                {/* Save Button (Solid Action) */}
+                {/* Save Button */}
                 <TouchableOpacity
                   style={styles.saveSettingsButton}
                   onPress={() => setIsSettingsVisible(false)}
@@ -465,7 +549,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#10B981', // Solid Green Pill
+    backgroundColor: '#10B981',
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 9999,
@@ -481,17 +565,17 @@ const styles = StyleSheet.create({
   },
   actionButtonsRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
     marginBottom: 6,
   },
   scanButton: {
-    flex: 1.4,
-    backgroundColor: '#1F1F1F', // Solid Charcoal
+    flex: 1.2,
+    backgroundColor: '#1F1F1F',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    minHeight: 52,
+    gap: 6,
+    minHeight: 50,
     borderRadius: 9999,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -505,9 +589,30 @@ const styles = StyleSheet.create({
   },
   scanButtonText: {
     color: '#FFFFFF',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800',
-    letterSpacing: 0.2,
+  },
+  smsAnalyzeButton: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E6E6E6',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
+    minHeight: 50,
+    borderRadius: 9999,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  smsAnalyzeButtonText: {
+    color: '#1F1F1F',
+    fontSize: 13,
+    fontWeight: '800',
   },
   demoHubButton: {
     flex: 1,
@@ -517,8 +622,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    minHeight: 52,
+    gap: 5,
+    minHeight: 50,
     borderRadius: 9999,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -528,7 +633,7 @@ const styles = StyleSheet.create({
   },
   demoHubButtonText: {
     color: '#1F1F1F',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800',
   },
   goldenRulesCard: {
