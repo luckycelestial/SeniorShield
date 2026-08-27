@@ -61,7 +61,7 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({
                 return (
                   <TouchableOpacity
                     key={scenario.id}
-                    className={`rounded-2xl p-4 border active:scale-[0.99] ${
+                    className={`rounded-2xl p-4 border ${
                       isDanger
                         ? 'bg-slate-900/90 border-rose-500/40 shadow-md shadow-rose-950/30'
                         : 'bg-slate-900/90 border-emerald-500/40 shadow-md shadow-emerald-950/30'

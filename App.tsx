@@ -153,10 +153,11 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView className="flex-1 bg-obsidian-950">
-        <StatusBar barStyle="light-content" backgroundColor="#030712" />
+      <View style={{ flex: 1, backgroundColor: '#030712' }} className="flex-1 bg-obsidian-950">
+        <SafeAreaView style={{ flex: 1 }} className="flex-1">
+          <StatusBar barStyle="light-content" backgroundColor="#030712" />
 
-        {/* Header */}
+          {/* Header */}
         <Header
           threatLevel={currentThreatLevel}
           onCallHelpline={handleCallHelpline}
@@ -370,7 +371,8 @@ export default function App() {
             </View>
           </View>
         </Modal>
-      </SafeAreaView>
+        </SafeAreaView>
+      </View>
     </SafeAreaProvider>
   );
 }

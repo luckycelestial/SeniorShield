@@ -100,7 +100,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Direct Cyber Helpline (1930) Bar */}
       <TouchableOpacity
-        className="bg-gradient-to-r from-red-600 to-rose-700 bg-rose-600 flex-row items-center justify-center gap-2.5 py-2.5 rounded-xl border border-rose-400/40 active:opacity-90 shadow-md shadow-rose-900/50"
+        className="bg-rose-600 flex-row items-center justify-center gap-2.5 py-2.5 rounded-xl border border-rose-400/40 active:opacity-90 shadow-md shadow-rose-900/50"
         onPress={onCallHelpline}
         activeOpacity={0.85}
         accessibilityRole="button"
