@@ -30,6 +30,7 @@ import { Header } from './src/components/Header';
 import { ThreatCard } from './src/components/ThreatCard';
 import { CampaignTimeline } from './src/components/CampaignTimeline';
 import { SimulationDrawer } from './src/components/SimulationDrawer';
+import { PreCallAlertCard } from './src/components/PreCallAlertCard';
 
 import {
   CampaignState,
@@ -51,6 +52,7 @@ import {
   setupNotificationListener,
 } from './src/services/notificationReader';
 import { autonomousSmsWatcher } from './src/services/autonomousSmsWatcher';
+import { preCallSentinel, PreCallReputation } from './src/services/preCallSentinel';
 import { MOCK_SCAM_SCENARIOS } from './src/constants/mockScams';
 
 export default function App() {
@@ -62,6 +64,7 @@ export default function App() {
   const [activeScenarioTitle, setActiveScenarioTitle] = useState<string | null>(
     null
   );
+  const [preCallAlert, setPreCallAlert] = useState<PreCallReputation | null>(null);
 
   // Settings & Configuration
   const [guardianPhone, setGuardianPhone] = useState<string>('+919876543210');
@@ -74,11 +77,20 @@ export default function App() {
     runInitialBaseline();
     initializeNotificationReader();
     startAutonomousSmsMonitoring();
+    startPreCallMonitoring();
 
     return () => {
       autonomousSmsWatcher.stopWatching();
+      preCallSentinel.stopPreCallMonitoring();
     };
   }, []);
+
+  const startPreCallMonitoring = async () => {
+    await preCallSentinel.startPreCallMonitoring((alert: PreCallReputation) => {
+      console.log('[App] 🚨 Pre-Call Incoming Alert Triggered:', alert.callerName);
+      setPreCallAlert(alert);
+    });
+  };
 
   const startAutonomousSmsMonitoring = async () => {
     await autonomousSmsWatcher.startWatching(
@@ -189,6 +201,23 @@ export default function App() {
     setActiveScenarioTitle(scenario.title);
 
     try {
+      // If Pre-Call scenario, trigger pre-call reputation banner
+      if (scenario.id === 'scenario_pre_call_scam') {
+        const callAlert: PreCallReputation = {
+          phoneNumber: '+91 98841 00999',
+          callerName: '⚠️ FAKE TELECOM OFFICER (REPORTED)',
+          spamScore: 98,
+          threatCategory: 'CRITICAL_SCAM',
+          impersonationTag: 'Fake TRAI / Telecom Official',
+          seniorDirective: 'DO NOT ANSWER! Known scammer with 428 fraud reports. Let it ring.',
+          isMultiChannelAttack: true,
+          reportsCount: 428,
+        };
+        setPreCallAlert(callAlert);
+      } else {
+        setPreCallAlert(null);
+      }
+
       const report = await analyzeMultiChannelCampaign(
         scenario.events,
         geminiApiKey
@@ -254,9 +283,19 @@ export default function App() {
             <View style={styles.sentinelBanner}>
               <Radio size={14} color="#10B981" />
               <Text style={styles.sentinelText}>
-                Autonomous Gemini Sentinel: <Text style={styles.sentinelHighlight}>Active & Monitoring Inbox</Text>
+                Autonomous Sentinel: <Text style={styles.sentinelHighlight}>Active (SMS & Pre-Call Guard)</Text>
               </Text>
             </View>
+
+            {/* Pre-Call Incoming Scammer Alert Banner */}
+            <PreCallAlertCard
+              alert={preCallAlert}
+              onDismiss={() => setPreCallAlert(null)}
+              onBlockCaller={(number) => {
+                setPreCallAlert(null);
+                Alert.alert('Number Blocked', `${number} has been blocked and flagged in community database.`);
+              }}
+            />
 
             {/* Cumulative Risk Exposure StatCard */}
             <View style={styles.gaugeCard}>

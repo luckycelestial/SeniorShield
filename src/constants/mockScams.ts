@@ -99,4 +99,28 @@ export const MOCK_SCAM_SCENARIOS: MockScenario[] = [
       },
     ],
   },
+  {
+    id: 'scenario_pre_call_scam',
+    title: 'Pre-Call Truecaller Flagging Alert',
+    category: 'Real-Time Pre-Call Telephony Sniffing',
+    description: 'Instant reputation lookup flags an incoming call from a known cyber syndicate (428 community fraud reports) before you pick up.',
+    expectedThreatLevel: 'CRITICAL',
+    expectedScamType: 'Pre-Call Scam Interception & High-Risk Caller',
+    events: [
+      {
+        id: 'evt_precall_1',
+        timestamp: Date.now() - 1000 * 60 * 2, // 2 mins ago
+        type: 'SMS',
+        senderOrNumber: '+91 98841 00999',
+        contentOrDuration: 'TRAI Alert: Your mobile SIM number will be permanently disconnected within 2 hours. Call our verification desk immediately.',
+      },
+      {
+        id: 'evt_precall_2',
+        timestamp: Date.now(), // Incoming Now
+        type: 'CALL',
+        senderOrNumber: '+91 98841 00999 (Reported: Fake Telecom Officer)',
+        contentOrDuration: 'Incoming Call (Ringing Now). Reputation Score: 98% Spam. Truecaller Community Reports: 428 Fraud Flags.',
+      },
+    ],
+  },
 ];
