@@ -29,6 +29,8 @@ import { Header } from './src/components/Header';
 import { ThreatCard } from './src/components/ThreatCard';
 import { CampaignTimeline } from './src/components/CampaignTimeline';
 import { SimulationDrawer } from './src/components/SimulationDrawer';
+import { OnboardingWizard } from './src/onboarding/OnboardingWizard';
+import { OnboardingState } from './src/onboarding/types';
 
 import {
   CampaignState,
@@ -46,6 +48,9 @@ import {
 import { MOCK_SCAM_SCENARIOS } from './src/constants/mockScams';
 
 export default function App() {
+  // Onboarding Navigation State
+  const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean>(false);
+
   // Core Campaign & Defense State
   const [campaignState, setCampaignState] = useState<CampaignState>(
     createInitialCampaignState()
@@ -60,6 +65,13 @@ export default function App() {
   const [geminiApiKey, setGeminiApiKey] = useState<string>('');
   const [isSettingsVisible, setIsSettingsVisible] = useState<boolean>(false);
   const [isSimulationVisible, setIsSimulationVisible] = useState<boolean>(false);
+
+  const handleOnboardingComplete = (data: OnboardingState) => {
+    setIsOnboardingCompleted(true);
+    if (data.emergencyContacts.length > 0) {
+      setGuardianPhone(data.emergencyContacts[0].phone);
+    }
+  };
 
   // Initial Auto-Analysis on Startup with Safe Baseline
   useEffect(() => {
@@ -167,16 +179,20 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <View style={styles.rootContainer}>
-        <SafeAreaView style={styles.safeArea}>
-          <StatusBar barStyle="dark-content" backgroundColor="#FCFCFC" />
+      {!isOnboardingCompleted ? (
+        <OnboardingWizard onComplete={handleOnboardingComplete} />
+      ) : (
+        <View style={styles.rootContainer}>
+          <SafeAreaView style={styles.safeArea}>
+            <StatusBar barStyle="dark-content" backgroundColor="#FCFCFC" />
 
-          {/* Header */}
-          <Header
-            threatLevel={currentThreatLevel}
-            onCallHelpline={handleCallHelpline}
-            onOpenSettings={() => setIsSettingsVisible(true)}
-          />
+            {/* Header */}
+            <Header
+              threatLevel={currentThreatLevel}
+              onCallHelpline={handleCallHelpline}
+              onOpenSettings={() => setIsSettingsVisible(true)}
+              onOpenOnboarding={() => setIsOnboardingCompleted(false)}
+            />
 
           <ScrollView
             style={styles.scrollView}
@@ -379,6 +395,7 @@ export default function App() {
           </Modal>
         </SafeAreaView>
       </View>
+      )}
     </SafeAreaProvider>
   );
 }

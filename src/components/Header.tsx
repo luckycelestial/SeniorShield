@@ -7,16 +7,18 @@ interface HeaderProps {
   threatLevel: ThreatLevel;
   onCallHelpline: () => void;
   onOpenSettings: () => void;
+  onOpenOnboarding?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   threatLevel,
   onCallHelpline,
   onOpenSettings,
+  onOpenOnboarding,
 }) => {
   return (
     <View style={styles.container}>
-      {/* Top Brand Bar (Shield icon removed as requested) */}
+      {/* Top Brand Bar */}
       <View style={styles.topRow}>
         <View style={styles.brandGroup}>
           <View style={styles.titleBadgeRow}>
@@ -29,16 +31,28 @@ export const Header: React.FC<HeaderProps> = ({
           <Text style={styles.appSubtitle}>Autonomous Scam Defense</Text>
         </View>
 
-        {/* Settings Pill */}
-        <TouchableOpacity
-          style={styles.settingsButton}
-          onPress={onOpenSettings}
-          activeOpacity={0.8}
-          accessibilityLabel="Setup & Guardian Config"
-        >
-          <SlidersHorizontal size={15} color="#1F1F1F" />
-          <Text style={styles.settingsText}>Setup</Text>
-        </TouchableOpacity>
+        <View style={styles.headerRightActions}>
+          {onOpenOnboarding && (
+            <TouchableOpacity
+              style={styles.onboardingHeaderButton}
+              onPress={onOpenOnboarding}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.onboardingHeaderText}>Guide</Text>
+            </TouchableOpacity>
+          )}
+
+          {/* Settings Pill */}
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={onOpenSettings}
+            activeOpacity={0.8}
+            accessibilityLabel="Setup & Guardian Config"
+          >
+            <SlidersHorizontal size={15} color="#1F1F1F" />
+            <Text style={styles.settingsText}>Setup</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Emergency Cyber Helpline (1930) Solid Capsule Button */}
@@ -104,6 +118,24 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#8E8E93',
     marginTop: 2,
+  },
+  headerRightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  onboardingHeaderButton: {
+    backgroundColor: '#F0F9FF',
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 9999,
+  },
+  onboardingHeaderText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#0284C7',
   },
   settingsButton: {
     backgroundColor: '#FFFFFF',
