@@ -1,5 +1,6 @@
 import { Platform, PermissionsAndroid, NativeModules, NativeEventEmitter } from 'react-native';
 import { DeviceEvent } from '../types/scam';
+import { reputationService, NumberReputation } from './reputationService';
 
 export interface PreCallReputation {
   phoneNumber: string;
@@ -10,6 +11,7 @@ export interface PreCallReputation {
   seniorDirective: string; // Plain English instruction for senior
   isMultiChannelAttack: boolean; // Correlated with recent SMS/Link
   reportsCount: number;
+  trafficLight: 'RED' | 'YELLOW' | 'GREEN';
 }
 
 export type PreCallCallback = (alert: PreCallReputation) => void;
@@ -47,9 +49,10 @@ class PreCallSentinel {
     phoneNumber: string,
     recentEvents: DeviceEvent[] = []
   ): Promise<PreCallReputation> {
-    const cleanNumber = phoneNumber.replace(/[^0-9+]/g, '');
+    // Step 1: Query Truecaller-style lightweight reputation lookup
+    const rep: NumberReputation = await reputationService.lookupReputation(phoneNumber);
 
-    // Step 1: Check multi-channel correlation with recent SMS/links
+    // Step 2: Check multi-channel correlation with recent SMS/links
     const hasRecentScamSms = recentEvents.some((e) => {
       const text = (e.contentOrDuration || '').toLowerCase();
       return (
@@ -64,10 +67,6 @@ class PreCallSentinel {
       );
     });
 
-    // Step 2: Detect typical known Indian scam patterns and virtual numbers
-    const isPersonalMobileAsOfficial = cleanNumber.startsWith('+919') || cleanNumber.startsWith('+918') || cleanNumber.startsWith('+917') || cleanNumber.length === 10;
-    const isVoipOrInternationalSpoof = cleanNumber.startsWith('+92') || cleanNumber.startsWith('+1') || cleanNumber.startsWith('+44') || cleanNumber.startsWith('+880');
-
     // High Risk: Follow-up Call after a Scam SMS (Multi-Channel Coercion)
     if (hasRecentScamSms) {
       return {
@@ -78,48 +77,52 @@ class PreCallSentinel {
         impersonationTag: 'Fake Official Follow-up Call',
         seniorDirective: 'DO NOT ANSWER! This caller is trying to steal your money after sending a fake message.',
         isMultiChannelAttack: true,
-        reportsCount: 428,
+        reportsCount: Math.max(428, rep.reportsCount),
+        trafficLight: 'RED',
       };
     }
 
     // High Risk: International / VoIP Spoof
-    if (isVoipOrInternationalSpoof) {
+    if (rep.trafficLight === 'RED') {
       return {
         phoneNumber,
-        callerName: '⚠️ UNVERIFIED INTERNATIONAL CALLER',
-        spamScore: 92,
+        callerName: rep.callerName,
+        spamScore: rep.score,
         threatCategory: 'CRITICAL_SCAM',
-        impersonationTag: 'Digital Arrest / Cyber Cartel',
-        seniorDirective: 'DO NOT PICK UP! Foreign/Spoofed number attempting fraud.',
+        impersonationTag: rep.spamType,
+        seniorDirective: 'DO NOT PICK UP! Reported as fraud by community users.',
         isMultiChannelAttack: false,
-        reportsCount: 615,
+        reportsCount: rep.reportsCount,
+        trafficLight: 'RED',
       };
     }
 
     // Medium Risk: Unknown Personal Mobile calling as business
-    if (isPersonalMobileAsOfficial && !recentEvents.some(e => e.senderOrNumber.includes('daughter') || e.senderOrNumber.includes('son'))) {
+    if (rep.trafficLight === 'YELLOW') {
       return {
         phoneNumber,
-        callerName: 'Unknown Mobile Caller',
-        spamScore: 65,
+        callerName: rep.callerName,
+        spamScore: rep.score,
         threatCategory: 'SUSPICIOUS',
-        impersonationTag: 'Unverified Personal Number',
+        impersonationTag: rep.spamType,
         seniorDirective: 'Be cautious. Never share OTPs or passwords with this caller.',
         isMultiChannelAttack: false,
-        reportsCount: 42,
+        reportsCount: rep.reportsCount,
+        trafficLight: 'YELLOW',
       };
     }
 
     // Safe / Verified
     return {
       phoneNumber,
-      callerName: 'Known Contact / Verified',
-      spamScore: 5,
+      callerName: rep.callerName,
+      spamScore: rep.score,
       threatCategory: 'SAFE_VERIFIED',
       impersonationTag: 'None',
       seniorDirective: 'Safe to answer.',
       isMultiChannelAttack: false,
       reportsCount: 0,
+      trafficLight: 'GREEN',
     };
   }
 

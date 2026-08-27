@@ -1,7 +1,7 @@
 import { CampaignStage, CampaignState, DeviceEvent, ScamReport } from '../types/scam';
 
 /**
- * Calculates cumulative risk score (0-100) by evaluating multi-channel correlation patterns.
+ * Calculates cumulative risk score (0-100) by connecting the dots across time, SMS, Calls, and OTP extraction.
  */
 export function calculateCumulativeExposure(
   events: DeviceEvent[],
@@ -29,13 +29,24 @@ export function calculateCumulativeExposure(
   // Cross-channel correlation check: Rapid follow-up call after an SMS from the same number or within 1 hour
   const hasSMS = events.some((e) => e.type === 'SMS');
   const hasCall = events.some((e) => e.type === 'CALL');
+  const hasOtpOrMoneySms = events.some((e) => {
+    const text = (e.contentOrDuration || '').toLowerCase();
+    return text.includes('otp') || text.includes('pin') || text.includes('debit') || text.includes('transfer');
+  });
 
+  // Rule 1: Multi-Channel Coordination (SMS + Follow-up Call)
   if (hasSMS && hasCall) {
     baseScore += 20;
-    activeThreats.push('Multi-Channel Coordination (SMS + Follow-up Call)');
+    activeThreats.push('Multi-Channel Attack (SMS Threat + Follow-up Coercion Call)');
   }
 
-  // Frequency escalation check
+  // Rule 2: Active Call + OTP Extraction (Critical Danger)
+  if (hasCall && hasOtpOrMoneySms) {
+    baseScore += 30;
+    activeThreats.push('🚨 Live Credential Theft: OTP received during active scam interaction!');
+  }
+
+  // Rule 3: Rapid Frequency Escalation
   if (events.length >= 3) {
     baseScore += 10;
   }
@@ -43,9 +54,9 @@ export function calculateCumulativeExposure(
   const clampedScore = Math.min(100, Math.max(0, baseScore));
 
   let stage: CampaignStage = 'DORMANT';
-  if (clampedScore > 80) {
+  if (clampedScore > 80 || (hasCall && hasOtpOrMoneySms)) {
     stage = 'EXTRACTION_ATTEMPT';
-  } else if (clampedScore > 50) {
+  } else if (clampedScore > 50 || (hasSMS && hasCall)) {
     stage = 'URGENCY_ESCALATION';
   } else if (clampedScore > 20) {
     stage = 'RECONNAISSANCE';

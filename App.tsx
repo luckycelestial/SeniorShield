@@ -163,6 +163,7 @@ export default function App() {
           seniorDirective: 'DO NOT ANSWER! Known scammer with 428 fraud reports. Let it ring.',
           isMultiChannelAttack: true,
           reportsCount: 428,
+          trafficLight: 'RED',
         };
         setPreCallAlert(callAlert);
       } else {
