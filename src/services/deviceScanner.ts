@@ -1,5 +1,21 @@
-import { Platform, PermissionsAndroid } from 'react-native';
+import { Platform, PermissionsAndroid, NativeModules } from 'react-native';
 import { DeviceEvent } from '../types/scam';
+
+/**
+ * Resolves the native SMS module instance.
+ */
+function getSmsModule(): any {
+  if (NativeModules.Sms) {
+    return NativeModules.Sms;
+  }
+  try {
+    const mod = require('react-native-get-sms-android');
+    return mod?.default || mod || NativeModules.Sms;
+  } catch (e) {
+    console.log('[DeviceScanner] react-native-get-sms-android fallback failed:', e);
+    return NativeModules.Sms;
+  }
+}
 
 /**
  * Request runtime permissions for SMS and Call Log access on Android.
@@ -30,8 +46,7 @@ export async function requestDevicePermissions(): Promise<boolean> {
 }
 
 /**
- * Fetch recent SMS messages from device inbox using react-native-get-sms-android.
- * Returns empty array defensively if permission is denied or module unavailable.
+ * Fetch recent SMS messages from device inbox using native Sms module.
  */
 export async function fetchRecentSMS(limit = 10): Promise<DeviceEvent[]> {
   if (Platform.OS !== 'android') {
@@ -39,15 +54,10 @@ export async function fetchRecentSMS(limit = 10): Promise<DeviceEvent[]> {
   }
 
   try {
-    // Dynamic import to support graceful fallback across Expo managed and prebuild environments
-    let SmsAndroid: any = null;
-    try {
-      SmsAndroid = require('react-native-get-sms-android');
-    } catch {
-      console.log('[DeviceScanner] react-native-get-sms-android not loaded in this environment.');
-    }
+    const SmsModule = getSmsModule();
 
-    if (!SmsAndroid || !SmsAndroid.list) {
+    if (!SmsModule || !SmsModule.list) {
+      console.warn('[DeviceScanner] SmsModule.list not found on NativeModules.Sms.');
       return [];
     }
 
@@ -57,7 +67,7 @@ export async function fetchRecentSMS(limit = 10): Promise<DeviceEvent[]> {
     };
 
     return new Promise((resolve) => {
-      SmsAndroid.list(
+      SmsModule.list(
         JSON.stringify(filter),
         (fail: string) => {
           console.warn('[DeviceScanner] Failed to fetch SMS:', fail);
@@ -65,7 +75,12 @@ export async function fetchRecentSMS(limit = 10): Promise<DeviceEvent[]> {
         },
         (count: number, smsListString: string) => {
           try {
-            const list = JSON.parse(smsListString);
+            const list = typeof smsListString === 'string' ? JSON.parse(smsListString) : smsListString;
+            if (!Array.isArray(list)) {
+              resolve([]);
+              return;
+            }
+
             const events: DeviceEvent[] = list.map((item: any) => ({
               id: `sms_${item._id || item.date || Math.random().toString(36).substring(7)}`,
               timestamp: Number(item.date) || Date.now(),
@@ -90,7 +105,6 @@ export async function fetchRecentSMS(limit = 10): Promise<DeviceEvent[]> {
 
 /**
  * Fetch recent Call Logs using react-native-call-log.
- * Returns empty array defensively if permission is denied or module unavailable.
  */
 export async function fetchRecentCalls(limit = 10): Promise<DeviceEvent[]> {
   if (Platform.OS !== 'android') {

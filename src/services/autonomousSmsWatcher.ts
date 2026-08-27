@@ -1,4 +1,4 @@
-import { Platform, PermissionsAndroid } from 'react-native';
+import { Platform } from 'react-native';
 import { DeviceEvent, ScamReport } from '../types/scam';
 import { fetchRecentSMS, requestDevicePermissions } from './deviceScanner';
 import { analyzeMultiChannelCampaign } from './gemini';
@@ -9,9 +9,9 @@ class AutonomousSmsWatcher {
   private isWatching = false;
   private intervalTimer: NodeJS.Timeout | null = null;
   private processedSmsIds = new Set<string>();
-  private lastProcessedTimestamp = Date.now() - 1000 * 60 * 60; // default to last 1 hour
   private callback: AutonomousSmsCallback | null = null;
   private geminiApiKey = '';
+  private isAnalyzing = false;
 
   /**
    * Initializes autonomous watcher with runtime permissions and begins real-time inbox monitoring.
@@ -29,25 +29,19 @@ class AutonomousSmsWatcher {
     }
 
     try {
-      const hasPerms = await requestDevicePermissions();
-      if (!hasPerms) {
-        console.warn('[AutonomousSmsWatcher] SMS permissions not granted by user.');
-      }
+      await requestDevicePermissions();
 
-      // Initial populate of existing message IDs to avoid re-triggering historical baseline
-      const existing = await fetchRecentSMS(15);
+      // Populate existing message IDs
+      const existing = await fetchRecentSMS(20);
       if (existing.length > 0) {
         existing.forEach((e) => {
           this.processedSmsIds.add(e.id);
-          if (e.timestamp > this.lastProcessedTimestamp) {
-            this.lastProcessedTimestamp = e.timestamp;
-          }
         });
       }
 
       this.isWatching = true;
       this.scheduleNextCheck();
-      console.log('[AutonomousSmsWatcher] Autonomous zero-touch SMS watcher active with Gemini 3.5.');
+      console.log('[AutonomousSmsWatcher] Autonomous zero-touch SMS sentinel ACTIVE.');
       return true;
     } catch (e) {
       console.error('[AutonomousSmsWatcher] Start error:', e);
@@ -66,28 +60,27 @@ class AutonomousSmsWatcher {
 
     this.intervalTimer = setInterval(() => {
       this.checkLatestInbox();
-    }, 2500); // Check every 2.5 seconds
+    }, 2000); // Check every 2 seconds
   }
 
   /**
    * Autonomous inbox scanner. Checks for fresh SMS and invokes Gemini 3.5 immediately.
    */
   public async checkLatestInbox() {
-    if (!this.isWatching) return;
+    if (!this.isWatching || this.isAnalyzing) return;
 
     try {
       const recent = await fetchRecentSMS(5);
       if (!recent || recent.length === 0) return;
 
       for (const sms of recent) {
-        if (!this.processedSmsIds.has(sms.id) && sms.timestamp > this.lastProcessedTimestamp) {
+        if (!this.processedSmsIds.has(sms.id)) {
           this.processedSmsIds.add(sms.id);
-          this.lastProcessedTimestamp = Math.max(this.lastProcessedTimestamp, sms.timestamp);
 
-          console.log(`[AutonomousSmsWatcher] ⚡ NEW INCOMING SMS DETECTED from ${sms.senderOrNumber}: "${sms.contentOrDuration}"`);
+          console.log(`[AutonomousSmsWatcher] ⚡ NEW INCOMING SMS: from ${sms.senderOrNumber}: "${sms.contentOrDuration}"`);
 
           // Trigger Gemini 3.5 Flash Lite live analysis immediately
-          this.analyzeIncomingSms(sms);
+          await this.analyzeIncomingSms(sms);
         }
       }
     } catch (error) {
@@ -96,8 +89,9 @@ class AutonomousSmsWatcher {
   }
 
   private async analyzeIncomingSms(smsEvent: DeviceEvent) {
+    this.isAnalyzing = true;
     try {
-      console.log(`[AutonomousSmsWatcher] Autonomous Gemini 3.5 analysis triggered for ${smsEvent.senderOrNumber}...`);
+      console.log(`[AutonomousSmsWatcher] Calling Gemini 3.5 Flash Lite for ${smsEvent.senderOrNumber}...`);
       const report = await analyzeMultiChannelCampaign([smsEvent], this.geminiApiKey);
 
       console.log(`[AutonomousSmsWatcher] Gemini 3.5 Verdict: [${report.threat_level}] ${report.scam_type}`);
@@ -107,6 +101,8 @@ class AutonomousSmsWatcher {
       }
     } catch (err) {
       console.error('[AutonomousSmsWatcher] Error during autonomous analysis:', err);
+    } finally {
+      this.isAnalyzing = false;
     }
   }
 
