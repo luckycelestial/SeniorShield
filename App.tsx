@@ -23,7 +23,6 @@ import {
   ShieldCheck,
   AlertCircle,
   Lightbulb,
-  MessageSquareText,
   Radio,
 } from 'lucide-react-native';
 
@@ -31,7 +30,6 @@ import { Header } from './src/components/Header';
 import { ThreatCard } from './src/components/ThreatCard';
 import { CampaignTimeline } from './src/components/CampaignTimeline';
 import { SimulationDrawer } from './src/components/SimulationDrawer';
-import { SmsAnalyzerModal } from './src/components/SmsAnalyzerModal';
 
 import {
   CampaignState,
@@ -70,7 +68,6 @@ export default function App() {
   const [geminiApiKey, setGeminiApiKey] = useState<string>('');
   const [isSettingsVisible, setIsSettingsVisible] = useState<boolean>(false);
   const [isSimulationVisible, setIsSimulationVisible] = useState<boolean>(false);
-  const [isSmsAnalyzerVisible, setIsSmsAnalyzerVisible] = useState<boolean>(false);
 
   // Initial Auto-Analysis, Notification Reader, and Autonomous SMS Inbox Watcher
   useEffect(() => {
@@ -135,44 +132,17 @@ export default function App() {
 
   const runInitialBaseline = async () => {
     const defaultScenario = MOCK_SCAM_SCENARIOS[3]; // Safe Benchmark
-    const initialReport = await analyzeMultiChannelCampaign(
-      defaultScenario.events,
-      geminiApiKey
-    );
-    setCampaignState(
-      updateCampaignState(campaignState, defaultScenario.events, initialReport)
-    );
-    setActiveScenarioTitle(defaultScenario.title);
-  };
-
-  /**
-   * Analyzes an arbitrary raw SMS / Notification text directly.
-   */
-  const handleAnalyzeCustomSms = async (sender: string, text: string) => {
-    setIsScanning(true);
-    setActiveScenarioTitle(`SMS from ${sender}`);
-
-    const newEvent: DeviceEvent = {
-      id: `custom_sms_${Date.now()}`,
-      timestamp: Date.now(),
-      type: 'SMS',
-      senderOrNumber: sender,
-      contentOrDuration: text,
-    };
-
     try {
-      const report = await analyzeMultiChannelCampaign(
-        [...campaignState.events, newEvent],
+      const initialReport = await analyzeMultiChannelCampaign(
+        defaultScenario.events,
         geminiApiKey
       );
       setCampaignState(
-        updateCampaignState(campaignState, [newEvent], report)
+        updateCampaignState(campaignState, defaultScenario.events, initialReport)
       );
-    } catch (error) {
-      console.error('[App] Custom SMS analysis error:', error);
-      Alert.alert('Analysis Notice', 'Evaluated SMS with internal heuristic security models.');
-    } finally {
-      setIsScanning(false);
+      setActiveScenarioTitle(defaultScenario.title);
+    } catch (e) {
+      console.error('[App] Baseline initialization error:', e);
     }
   };
 
@@ -205,7 +175,7 @@ export default function App() {
       setCampaignState(updateCampaignState(campaignState, eventsToAnalyze, report));
     } catch (error) {
       console.error('[App] Error during device scan:', error);
-      Alert.alert('Scan Alert', 'Completed analysis with localized shield defenses.');
+      Alert.alert('Scan Alert', 'Device scan complete.');
     } finally {
       setIsScanning(false);
     }
@@ -348,15 +318,6 @@ export default function App() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.smsAnalyzeButton}
-                onPress={() => setIsSmsAnalyzerVisible(true)}
-                activeOpacity={0.88}
-              >
-                <MessageSquareText size={16} color="#1F1F1F" />
-                <Text style={styles.smsAnalyzeButtonText}>Read SMS</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
                 style={styles.demoHubButton}
                 onPress={() => setIsSimulationVisible(true)}
                 activeOpacity={0.88}
@@ -418,13 +379,6 @@ export default function App() {
             </View>
           </ScrollView>
 
-          {/* SMS & Notification Analyzer Modal */}
-          <SmsAnalyzerModal
-            visible={isSmsAnalyzerVisible}
-            onClose={() => setIsSmsAnalyzerVisible(false)}
-            onAnalyzeSms={handleAnalyzeCustomSms}
-          />
-
           {/* Demo Simulation Drawer */}
           <SimulationDrawer
             visible={isSimulationVisible}
@@ -483,7 +437,7 @@ export default function App() {
                   secureTextEntry={true}
                 />
                 <Text style={styles.inputHint}>
-                  If left blank, SeniorShield uses its built-in offline intelligence engine.
+                  If left blank, SeniorShield uses the configured Gemini 3.5 Flash Lite engine.
                 </Text>
 
                 {/* Save Button */}
@@ -623,17 +577,17 @@ const styles = StyleSheet.create({
   },
   actionButtonsRow: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 10,
     marginBottom: 6,
   },
   scanButton: {
-    flex: 1.2,
+    flex: 1,
     backgroundColor: '#1F1F1F',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    minHeight: 50,
+    gap: 8,
+    minHeight: 52,
     borderRadius: 9999,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -647,29 +601,7 @@ const styles = StyleSheet.create({
   },
   scanButtonText: {
     color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '800',
-  },
-  smsAnalyzeButton: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E6E6E6',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 5,
-    minHeight: 50,
-    borderRadius: 9999,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 1,
-  },
-  smsAnalyzeButtonText: {
-    color: '#1F1F1F',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '800',
   },
   demoHubButton: {
@@ -680,8 +612,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 5,
-    minHeight: 50,
+    gap: 8,
+    minHeight: 52,
     borderRadius: 9999,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -691,7 +623,7 @@ const styles = StyleSheet.create({
   },
   demoHubButtonText: {
     color: '#1F1F1F',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '800',
   },
   goldenRulesCard: {

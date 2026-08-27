@@ -38,6 +38,7 @@ export async function requestDevicePermissions(): Promise<boolean> {
     const hasCallLogPermission =
       granted['android.permission.READ_CALL_LOG'] === PermissionsAndroid.RESULTS.GRANTED;
 
+    console.log('[DeviceScanner] Permissions status -> SMS:', hasSmsPermission, 'CallLog:', hasCallLogPermission);
     return hasSmsPermission && hasCallLogPermission;
   } catch (error) {
     console.warn('[DeviceScanner] Error requesting Android device permissions:', error);
@@ -46,9 +47,9 @@ export async function requestDevicePermissions(): Promise<boolean> {
 }
 
 /**
- * Fetch recent SMS messages from device inbox using native Sms module.
+ * Fetch recent SMS messages from device inbox using native Sms module in DESCENDING order (newest first).
  */
-export async function fetchRecentSMS(limit = 10): Promise<DeviceEvent[]> {
+export async function fetchRecentSMS(limit = 15): Promise<DeviceEvent[]> {
   if (Platform.OS !== 'android') {
     return [];
   }
@@ -61,9 +62,11 @@ export async function fetchRecentSMS(limit = 10): Promise<DeviceEvent[]> {
       return [];
     }
 
+    // sortOrder: 'date DESC' ensures newest SMS are retrieved first
     const filter = {
       box: 'inbox',
       maxCount: limit,
+      sortOrder: 'date DESC',
     };
 
     return new Promise((resolve) => {
@@ -77,9 +80,12 @@ export async function fetchRecentSMS(limit = 10): Promise<DeviceEvent[]> {
           try {
             const list = typeof smsListString === 'string' ? JSON.parse(smsListString) : smsListString;
             if (!Array.isArray(list)) {
+              console.log('[DeviceScanner] SMS list result is not an array:', list);
               resolve([]);
               return;
             }
+
+            console.log(`[DeviceScanner] Retrieved ${list.length} recent messages from device inbox.`);
 
             const events: DeviceEvent[] = list.map((item: any) => ({
               id: `sms_${item._id || item.date || Math.random().toString(36).substring(7)}`,
@@ -155,7 +161,7 @@ export async function fetchRecentCalls(limit = 10): Promise<DeviceEvent[]> {
  * Combined scanner that retrieves and chronologically sorts recent device communications.
  */
 export async function scanDeviceComms(): Promise<DeviceEvent[]> {
-  const [smsEvents, callEvents] = await Promise.all([fetchRecentSMS(10), fetchRecentCalls(10)]);
+  const [smsEvents, callEvents] = await Promise.all([fetchRecentSMS(15), fetchRecentCalls(10)]);
   const combined = [...smsEvents, ...callEvents];
   combined.sort((a, b) => a.timestamp - b.timestamp);
   return combined;
