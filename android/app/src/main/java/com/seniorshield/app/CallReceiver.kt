@@ -15,7 +15,14 @@ class CallReceiver : BroadcastReceiver() {
             if (state == TelephonyManager.EXTRA_STATE_RINGING) {
                 val incomingNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER) ?: "Unknown"
                 Log.d("SeniorShieldCallReceiver", "🚨 Incoming Ringing Detected: $incomingNumber")
+
+                // 1. Emit to React Native UI if open
                 PreCallModule.sendIncomingCallEvent(incomingNumber)
+
+                // 2. Post Heads-Up Emergency Notification if outside of app
+                SentinelForegroundService.handleIncomingCall(context, incomingNumber)
+            } else if (state == TelephonyManager.EXTRA_STATE_IDLE || state == TelephonyManager.EXTRA_STATE_OFFHOOK) {
+                SentinelForegroundService.dismissCallAlert(context)
             }
         }
     }

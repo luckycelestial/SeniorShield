@@ -41,6 +41,7 @@ class SentinelForegroundService : Service() {
         const val CHANNEL_ID = "seniorshield_sentinel_channel"
         const val ALERT_CHANNEL_ID = "seniorshield_emergency_alert_channel"
         const val NOTIFICATION_ID = 1001
+        const val CALL_ALERT_NOTIFICATION_ID = 2002
         private const val TAG = "SeniorShieldSentinel"
 
         fun startService(context: Context) {
@@ -49,6 +50,62 @@ class SentinelForegroundService : Service() {
                 context.startForegroundService(intent)
             } else {
                 context.startService(intent)
+            }
+        }
+
+        fun handleIncomingCall(context: Context, incomingNumber: String) {
+            try {
+                val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+                val cleanNumber = incomingNumber.replace("[^0-9+]".toRegex(), "")
+                val isVoipSpoof = cleanNumber.startsWith("+92") || cleanNumber.startsWith("+880") || cleanNumber.startsWith("+44") || cleanNumber.startsWith("+1")
+                val isMobileNumber = cleanNumber.startsWith("+91") || cleanNumber.length == 10
+
+                val riskTag = if (isVoipSpoof) {
+                    "⚠️ HIGH RISK: International / Spoofed Number"
+                } else if (isMobileNumber) {
+                    "⚠️ CAUTION: Unverified Unknown Mobile"
+                } else {
+                    "⚠️ SCAM CALL WARNING"
+                }
+
+                val directive = "DO NOT ANSWER! Known scam vector attempting extortion or bank fraud. Let the phone ring."
+
+                val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                val pendingIntent = PendingIntent.getActivity(
+                    context,
+                    CALL_ALERT_NOTIFICATION_ID,
+                    launchIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+                val notification = NotificationCompat.Builder(context, ALERT_CHANNEL_ID)
+                    .setContentTitle("🚨 PRE-CALL ALERT: $incomingNumber")
+                    .setContentText(riskTag)
+                    .setStyle(NotificationCompat.BigTextStyle().bigText("$riskTag\n\n👉 $directive"))
+                    .setSmallIcon(android.R.drawable.stat_sys_warning)
+                    .setPriority(NotificationCompat.PRIORITY_MAX)
+                    .setCategory(NotificationCompat.CATEGORY_CALL)
+                    .setVibrate(longArrayOf(0, 500, 200, 500))
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true)
+                    .setFullScreenIntent(pendingIntent, true)
+                    .build()
+
+                manager.notify(CALL_ALERT_NOTIFICATION_ID, notification)
+                Log.d(TAG, "🚨 Heads-Up Pre-Call Notification posted for $incomingNumber")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error posting Pre-Call Alert Notification", e)
+            }
+        }
+
+        fun dismissCallAlert(context: Context) {
+            try {
+                val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                manager.cancel(CALL_ALERT_NOTIFICATION_ID)
+                Log.d(TAG, "Pre-Call notification dismissed.")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error dismissing Pre-Call Notification", e)
             }
         }
     }
