@@ -1,4 +1,4 @@
-import { Platform, PermissionsAndroid } from 'react-native';
+import { Platform, PermissionsAndroid, NativeModules, NativeEventEmitter } from 'react-native';
 import { DeviceEvent } from '../types/scam';
 
 export interface PreCallReputation {
@@ -17,6 +17,7 @@ export type PreCallCallback = (alert: PreCallReputation) => void;
 class PreCallSentinel {
   private isListening = false;
   private preCallCallback: PreCallCallback | null = null;
+  private eventSubscription: any = null;
 
   /**
    * Requests Android Phone State permissions.
@@ -123,12 +124,28 @@ class PreCallSentinel {
   }
 
   /**
-   * Starts pre-call sentinel listener.
+   * Starts native real-time pre-call sentinel listener.
    */
   public async startPreCallMonitoring(callback: PreCallCallback) {
     this.preCallCallback = callback;
     this.isListening = true;
     await this.requestPermissions();
+
+    if (Platform.OS === 'android' && NativeModules.PreCallModule) {
+      try {
+        const emitter = new NativeEventEmitter(NativeModules.PreCallModule);
+        this.eventSubscription = emitter.addListener('onIncomingCall', async (event: any) => {
+          const number = event?.phoneNumber || 'Unknown';
+          console.log('[PreCallSentinel] ⚡ NATIVE INCOMING RINGING DETECTED:', number);
+          const rep = await this.evaluateIncomingCaller(number);
+          this.triggerPreCallAlert(rep);
+        });
+        console.log('[PreCallSentinel] Native PreCallModule emitter connected.');
+      } catch (err) {
+        console.warn('[PreCallSentinel] Emitter hook notice:', err);
+      }
+    }
+
     console.log('[PreCallSentinel] Real-time Pre-Call Sentinel ACTIVE.');
   }
 
@@ -144,6 +161,10 @@ class PreCallSentinel {
   public stopPreCallMonitoring() {
     this.isListening = false;
     this.preCallCallback = null;
+    if (this.eventSubscription) {
+      this.eventSubscription.remove();
+      this.eventSubscription = null;
+    }
   }
 }
 
