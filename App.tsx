@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   Linking,
   Modal,
@@ -14,7 +13,6 @@ import {
 } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import {
-  RefreshCw,
   Sparkles,
   Sliders,
   X,
@@ -44,10 +42,6 @@ import {
 } from './src/services/campaignTracker';
 import { analyzeMultiChannelCampaign } from './src/services/gemini';
 import {
-  requestDevicePermissions,
-  scanDeviceComms,
-} from './src/services/deviceScanner';
-import {
   requestNotificationPermissions,
   setupNotificationListener,
 } from './src/services/notificationReader';
@@ -60,7 +54,6 @@ export default function App() {
   const [campaignState, setCampaignState] = useState<CampaignState>(
     createInitialCampaignState()
   );
-  const [isScanning, setIsScanning] = useState<boolean>(false);
   const [activeScenarioTitle, setActiveScenarioTitle] = useState<string | null>(
     null
   );
@@ -87,7 +80,6 @@ export default function App() {
 
   const startPreCallMonitoring = async () => {
     await preCallSentinel.startPreCallMonitoring((alert: PreCallReputation) => {
-      console.log('[App] 🚨 Pre-Call Incoming Alert Triggered:', alert.callerName);
       setPreCallAlert(alert);
     });
   };
@@ -95,7 +87,6 @@ export default function App() {
   const startAutonomousSmsMonitoring = async () => {
     await autonomousSmsWatcher.startWatching(
       (event: DeviceEvent, report: ScamReport) => {
-        console.log('[App] ⚡ Received Autonomous Gemini 3.5 Verdict for SMS:', event.senderOrNumber);
         setActiveScenarioTitle(`Live SMS: ${event.senderOrNumber}`);
         setCampaignState((prevState) =>
           updateCampaignState(prevState, [event], report)
@@ -118,9 +109,7 @@ export default function App() {
 
     // Subscribe to incoming OS notifications
     const unsubscribe = setupNotificationListener(async (event: DeviceEvent) => {
-      console.log('[App] Live notification captured:', event);
       setActiveScenarioTitle(`Live Notification: ${event.senderOrNumber}`);
-      setIsScanning(true);
 
       try {
         const report = await analyzeMultiChannelCampaign(
@@ -132,8 +121,6 @@ export default function App() {
         );
       } catch (err) {
         console.error('[App] Error analyzing live notification:', err);
-      } finally {
-        setIsScanning(false);
       }
     });
 
@@ -159,45 +146,9 @@ export default function App() {
   };
 
   /**
-   * Triggers live device SMS and Call Log scan.
-   */
-  const handleLiveDeviceScan = async () => {
-    setIsScanning(true);
-    setActiveScenarioTitle('Live Device Communications');
-
-    try {
-      const hasPerms = await requestDevicePermissions();
-      if (!hasPerms) {
-        Alert.alert(
-          'Device Permissions',
-          'SMS and Call Log permissions are needed to scan incoming messages and calls. Running automated intelligence check on available telemetries.'
-        );
-      }
-
-      const events = await scanDeviceComms();
-
-      const eventsToAnalyze =
-        events.length > 0 ? events : MOCK_SCAM_SCENARIOS[0].events;
-
-      if (events.length === 0) {
-        setActiveScenarioTitle('Live Scan (Simulated Inflow Demo)');
-      }
-
-      const report = await analyzeMultiChannelCampaign(eventsToAnalyze, geminiApiKey);
-      setCampaignState(updateCampaignState(campaignState, eventsToAnalyze, report));
-    } catch (error) {
-      console.error('[App] Error during device scan:', error);
-      Alert.alert('Scan Alert', 'Device scan complete.');
-    } finally {
-      setIsScanning(false);
-    }
-  };
-
-  /**
    * Executes a simulated mock scenario for hackathon presentations.
    */
   const handleSelectMockScenario = async (scenario: MockScenario) => {
-    setIsScanning(true);
     setActiveScenarioTitle(scenario.title);
 
     try {
@@ -227,8 +178,6 @@ export default function App() {
       );
     } catch (error) {
       console.error('[App] Simulation error:', error);
-    } finally {
-      setIsScanning(false);
     }
   };
 
@@ -335,36 +284,15 @@ export default function App() {
               )}
             </View>
 
-            {/* Primary Action Buttons */}
-            <View style={styles.actionButtonsRow}>
-              <TouchableOpacity
-                style={[
-                  styles.scanButton,
-                  isScanning && styles.scanButtonDisabled,
-                ]}
-                onPress={handleLiveDeviceScan}
-                disabled={isScanning}
-                activeOpacity={0.88}
-              >
-                {isScanning ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
-                ) : (
-                  <RefreshCw size={18} color="#FFFFFF" />
-                )}
-                <Text style={styles.scanButtonText}>
-                  {isScanning ? 'Analyzing Inflow...' : 'Scan Device'}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.demoHubButton}
-                onPress={() => setIsSimulationVisible(true)}
-                activeOpacity={0.88}
-              >
-                <Sparkles size={16} color="#B45309" />
-                <Text style={styles.demoHubButtonText}>Demo Hub</Text>
-              </TouchableOpacity>
-            </View>
+            {/* Demo Hub Button */}
+            <TouchableOpacity
+              style={styles.demoHubButton}
+              onPress={() => setIsSimulationVisible(true)}
+              activeOpacity={0.88}
+            >
+              <Sparkles size={16} color="#B45309" />
+              <Text style={styles.demoHubButtonText}>Demo Hub (Simulate Attack Vectors)</Text>
+            </TouchableOpacity>
 
             {/* Dynamic Threat Report Card */}
             <ThreatCard
@@ -614,37 +542,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '900',
   },
-  actionButtonsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 6,
-  },
-  scanButton: {
-    flex: 1,
-    backgroundColor: '#1F1F1F',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    minHeight: 52,
-    borderRadius: 9999,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  scanButtonDisabled: {
-    backgroundColor: '#475569',
-    opacity: 0.7,
-  },
-  scanButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '800',
-  },
   demoHubButton: {
-    flex: 1,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E6E6E6',
@@ -652,8 +550,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    minHeight: 52,
+    minHeight: 48,
     borderRadius: 9999,
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,

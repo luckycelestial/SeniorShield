@@ -85,8 +85,6 @@ export async function fetchRecentSMS(limit = 15): Promise<DeviceEvent[]> {
               return;
             }
 
-            console.log(`[DeviceScanner] Retrieved ${list.length} recent messages from device inbox.`);
-
             const events: DeviceEvent[] = list.map((item: any) => ({
               id: `sms_${item._id || item.date || Math.random().toString(36).substring(7)}`,
               timestamp: Number(item.date) || Date.now(),
