@@ -6,6 +6,7 @@ import {
   Modal,
   ScrollView,
   StatusBar,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -151,228 +152,482 @@ export default function App() {
   const isHighRisk = riskScore > 70;
   const isMedRisk = riskScore > 30;
 
+  const scoreTextColor = isHighRisk
+    ? '#F43F5E'
+    : isMedRisk
+    ? '#F59E0B'
+    : '#10B981';
+
+  const scoreBarColor = isHighRisk
+    ? '#F43F5E'
+    : isMedRisk
+    ? '#F59E0B'
+    : '#10B981';
+
   return (
     <SafeAreaProvider>
-      <View style={{ flex: 1, backgroundColor: '#030712' }} className="flex-1 bg-obsidian-950">
-        <SafeAreaView style={{ flex: 1 }} className="flex-1">
+      <View style={styles.rootContainer}>
+        <SafeAreaView style={styles.safeArea}>
           <StatusBar barStyle="light-content" backgroundColor="#030712" />
 
           {/* Header */}
-        <Header
-          threatLevel={currentThreatLevel}
-          onCallHelpline={handleCallHelpline}
-          onOpenSettings={() => setIsSettingsVisible(true)}
-        />
-
-        <ScrollView
-          className="flex-1 bg-obsidian-950 px-4"
-          contentContainerStyle={{ paddingBottom: 40, paddingTop: 10 }}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Cumulative Risk Exposure Gauge Card */}
-          <View className="bg-slate-900/90 border border-slate-800 rounded-3xl p-5 mb-3 shadow-xl">
-            <View className="flex-row items-center justify-between mb-2.5">
-              <View className="flex-row items-center gap-2">
-                <Activity size={18} color="#38BDF8" />
-                <Text className="text-sm font-extrabold text-slate-200 uppercase tracking-wide">
-                  Cumulative Risk Exposure
-                </Text>
-              </View>
-              <Text
-                className={`text-xl font-black ${
-                  isHighRisk
-                    ? 'text-rose-400'
-                    : isMedRisk
-                    ? 'text-amber-400'
-                    : 'text-emerald-400'
-                }`}
-              >
-                {riskScore} <Text className="text-xs font-semibold text-slate-500">/ 100</Text>
-              </Text>
-            </View>
-
-            {/* Progress Track */}
-            <View className="h-2.5 bg-slate-950 rounded-full overflow-hidden mb-3 border border-slate-800/80">
-              <View
-                style={{ width: `${Math.max(6, riskScore)}%` }}
-                className={`h-full rounded-full ${
-                  isHighRisk
-                    ? 'bg-rose-500'
-                    : isMedRisk
-                    ? 'bg-amber-400'
-                    : 'bg-emerald-400'
-                }`}
-              />
-            </View>
-
-            {activeScenarioTitle && (
-              <View className="flex-row items-center gap-1.5 bg-slate-950/80 border border-slate-800/80 px-3 py-1.5 rounded-xl">
-                <ShieldCheck size={14} color="#38BDF8" />
-                <Text className="text-xs font-semibold text-slate-400">
-                  Active Context: <Text className="text-sky-300 font-bold">{activeScenarioTitle}</Text>
-                </Text>
-              </View>
-            )}
-          </View>
-
-          {/* Primary Action Buttons */}
-          <View className="flex-row gap-3 mb-2">
-            <TouchableOpacity
-              className={`flex-[1.4] flex-row items-center justify-center gap-2.5 min-h-[56px] rounded-2xl border shadow-lg ${
-                isScanning
-                  ? 'bg-emerald-800 border-emerald-600/50 opacity-70'
-                  : 'bg-emerald-600 active:bg-emerald-700 border-emerald-400/40 shadow-emerald-950/50'
-              }`}
-              onPress={handleLiveDeviceScan}
-              disabled={isScanning}
-              activeOpacity={0.85}
-            >
-              {isScanning ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
-              ) : (
-                <RefreshCw size={20} color="#FFFFFF" />
-              )}
-              <Text className="text-white text-base font-black tracking-wide">
-                {isScanning ? 'Analyzing Inflow...' : 'Scan Device & Protect'}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="flex-1 bg-slate-900/90 active:bg-slate-800 flex-row items-center justify-center gap-2 min-h-[56px] rounded-2xl border border-amber-500/40 shadow-md shadow-amber-950/30"
-              onPress={() => setIsSimulationVisible(true)}
-              activeOpacity={0.85}
-            >
-              <Sparkles size={18} color="#F59E0B" />
-              <Text className="text-amber-200 text-sm font-extrabold">Demo Hub</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Dynamic Threat Report Card */}
-          <ThreatCard
-            report={campaignState.latestReport}
-            guardianPhone={guardianPhone}
-            onBlockNumber={() => {
-              Alert.alert(
-                'Threat Mitigated',
-                'Number blocked and cyber telemetry logged.'
-              );
-            }}
+          <Header
+            threatLevel={currentThreatLevel}
+            onCallHelpline={handleCallHelpline}
+            onOpenSettings={() => setIsSettingsVisible(true)}
           />
 
-          {/* Multi-Step Attack Chain Timeline */}
-          <CampaignTimeline
-            events={campaignState.events}
-            stage={campaignState.campaignStage}
-          />
-
-          {/* Senior Golden Safety Rules */}
-          <View className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 mt-2">
-            <View className="flex-row items-center gap-2 mb-3">
-              <Lightbulb size={18} color="#F59E0B" />
-              <Text className="text-xs font-black text-amber-400 uppercase tracking-wider">
-                Golden Safety Rules for Seniors
-              </Text>
-            </View>
-
-            <View className="gap-2.5">
-              <View className="flex-row items-start gap-2">
-                <AlertCircle size={15} color="#38BDF8" className="mt-0.5" />
-                <Text className="text-xs font-medium text-slate-300 flex-1 leading-5">
-                  <Text className="font-bold text-white">Electricity Boards</Text> never cut off power at night without paper notices.
-                </Text>
-              </View>
-
-              <View className="flex-row items-start gap-2">
-                <AlertCircle size={15} color="#38BDF8" className="mt-0.5" />
-                <Text className="text-xs font-medium text-slate-300 flex-1 leading-5">
-                  <Text className="font-bold text-white">Police & CBI</Text> never arrest citizens over phone or Skype/WhatsApp video calls.
-                </Text>
-              </View>
-
-              <View className="flex-row items-start gap-2">
-                <AlertCircle size={15} color="#38BDF8" className="mt-0.5" />
-                <Text className="text-xs font-medium text-slate-300 flex-1 leading-5">
-                  <Text className="font-bold text-white">Banks</Text> never send apps (.apk links) or ask for OTPs to update KYC.
-                </Text>
-              </View>
-            </View>
-          </View>
-        </ScrollView>
-
-        {/* Demo Simulation Drawer */}
-        <SimulationDrawer
-          visible={isSimulationVisible}
-          onClose={() => setIsSimulationVisible(false)}
-          onSelectScenario={handleSelectMockScenario}
-        />
-
-        {/* Configuration & Settings Modal */}
-        <Modal
-          visible={isSettingsVisible}
-          animationType="slide"
-          transparent={true}
-          onRequestClose={() => setIsSettingsVisible(false)}
-        >
-          <View className="flex-1 bg-black/85 justify-center p-5">
-            <View className="bg-obsidian-900 rounded-3xl p-6 border border-slate-700/80 shadow-2xl">
-              <View className="flex-row justify-between items-center mb-4">
-                <View className="flex-row items-center gap-2.5">
-                  <Sliders size={20} color="#38BDF8" />
-                  <Text className="text-xl font-black text-white">Shield Setup & Guardian</Text>
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Cumulative Risk Exposure Gauge Card */}
+            <View style={styles.gaugeCard}>
+              <View style={styles.gaugeHeader}>
+                <View style={styles.gaugeHeaderLeft}>
+                  <Activity size={18} color="#38BDF8" />
+                  <Text style={styles.gaugeTitle}>Cumulative Risk Exposure</Text>
                 </View>
-                <TouchableOpacity
-                  onPress={() => setIsSettingsVisible(false)}
-                  className="w-8 h-8 rounded-full bg-slate-800 items-center justify-center"
-                >
-                  <X size={18} color="#94A3B8" />
-                </TouchableOpacity>
+                <Text style={[styles.gaugeScoreText, { color: scoreTextColor }]}>
+                  {riskScore} <Text style={styles.gaugeScoreDenom}>/ 100</Text>
+                </Text>
               </View>
 
-              {/* Guardian Phone Setup */}
-              <Text className="text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wide">
-                Trusted Family Contact (Guardian Phone):
-              </Text>
-              <TextInput
-                className="bg-slate-950 border border-slate-700/80 rounded-xl px-4 py-3 text-white text-base font-semibold mb-1"
-                value={guardianPhone}
-                onChangeText={setGuardianPhone}
-                placeholder="+91 98765 43210"
-                placeholderTextColor="#64748B"
-                keyboardType="phone-pad"
-              />
-              <Text className="text-[11px] text-slate-400 leading-4 mb-4">
-                High-risk scam attempts trigger 1-tap emergency SMS alerts to this contact.
-              </Text>
+              {/* Progress Track */}
+              <View style={styles.progressTrack}>
+                <View
+                  style={[
+                    styles.progressBar,
+                    {
+                      width: `${Math.max(6, riskScore)}%`,
+                      backgroundColor: scoreBarColor,
+                    },
+                  ]}
+                />
+              </View>
 
-              {/* Gemini API Key */}
-              <Text className="text-xs font-bold text-slate-300 mb-1.5 uppercase tracking-wide">
-                Google Gemini API Key (Optional):
-              </Text>
-              <TextInput
-                className="bg-slate-950 border border-slate-700/80 rounded-xl px-4 py-3 text-white text-base font-semibold mb-1"
-                value={geminiApiKey}
-                onChangeText={setGeminiApiKey}
-                placeholder="AIzaSy..."
-                placeholderTextColor="#64748B"
-                secureTextEntry={true}
-              />
-              <Text className="text-[11px] text-slate-400 leading-4 mb-6">
-                If left blank, SeniorShield uses its built-in offline intelligence engine.
-              </Text>
+              {activeScenarioTitle && (
+                <View style={styles.contextBadge}>
+                  <ShieldCheck size={14} color="#38BDF8" />
+                  <Text style={styles.contextText}>
+                    Active Context: <Text style={styles.contextHighlight}>{activeScenarioTitle}</Text>
+                  </Text>
+                </View>
+              )}
+            </View>
 
-              {/* Save Button */}
+            {/* Primary Action Buttons */}
+            <View style={styles.actionButtonsRow}>
               <TouchableOpacity
-                className="bg-blue-600 active:bg-blue-700 flex-row items-center justify-center gap-2 min-h-[50px] rounded-xl shadow-lg"
-                onPress={() => setIsSettingsVisible(false)}
+                style={[
+                  styles.scanButton,
+                  isScanning && styles.scanButtonDisabled,
+                ]}
+                onPress={handleLiveDeviceScan}
+                disabled={isScanning}
+                activeOpacity={0.85}
               >
-                <Check size={18} color="#FFFFFF" />
-                <Text className="text-white text-sm font-extrabold">Save & Return to Shield</Text>
+                {isScanning ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <RefreshCw size={20} color="#FFFFFF" />
+                )}
+                <Text style={styles.scanButtonText}>
+                  {isScanning ? 'Analyzing Inflow...' : 'Scan Device & Protect'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.demoHubButton}
+                onPress={() => setIsSimulationVisible(true)}
+                activeOpacity={0.85}
+              >
+                <Sparkles size={18} color="#F59E0B" />
+                <Text style={styles.demoHubButtonText}>Demo Hub</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        </Modal>
+
+            {/* Dynamic Threat Report Card */}
+            <ThreatCard
+              report={campaignState.latestReport}
+              guardianPhone={guardianPhone}
+              onBlockNumber={() => {
+                Alert.alert(
+                  'Threat Mitigated',
+                  'Number blocked and cyber telemetry logged.'
+                );
+              }}
+            />
+
+            {/* Multi-Step Attack Chain Timeline */}
+            <CampaignTimeline
+              events={campaignState.events}
+              stage={campaignState.campaignStage}
+            />
+
+            {/* Senior Golden Safety Rules */}
+            <View style={styles.goldenRulesCard}>
+              <View style={styles.goldenRulesHeader}>
+                <Lightbulb size={18} color="#F59E0B" />
+                <Text style={styles.goldenRulesTitle}>
+                  Golden Safety Rules for Seniors
+                </Text>
+              </View>
+
+              <View style={styles.rulesList}>
+                <View style={styles.ruleItem}>
+                  <AlertCircle size={15} color="#38BDF8" style={styles.ruleIcon} />
+                  <Text style={styles.ruleText}>
+                    <Text style={styles.ruleHighlight}>Electricity Boards</Text> never cut off power at night without paper notices.
+                  </Text>
+                </View>
+
+                <View style={styles.ruleItem}>
+                  <AlertCircle size={15} color="#38BDF8" style={styles.ruleIcon} />
+                  <Text style={styles.ruleText}>
+                    <Text style={styles.ruleHighlight}>Police & CBI</Text> never arrest citizens over phone or Skype/WhatsApp video calls.
+                  </Text>
+                </View>
+
+                <View style={styles.ruleItem}>
+                  <AlertCircle size={15} color="#38BDF8" style={styles.ruleIcon} />
+                  <Text style={styles.ruleText}>
+                    <Text style={styles.ruleHighlight}>Banks</Text> never send apps (.apk links) or ask for OTPs to update KYC.
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </ScrollView>
+
+          {/* Demo Simulation Drawer */}
+          <SimulationDrawer
+            visible={isSimulationVisible}
+            onClose={() => setIsSimulationVisible(false)}
+            onSelectScenario={handleSelectMockScenario}
+          />
+
+          {/* Configuration & Settings Modal */}
+          <Modal
+            visible={isSettingsVisible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={() => setIsSettingsVisible(false)}
+          >
+            <View style={styles.modalBackdrop}>
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <View style={styles.modalTitleGroup}>
+                    <Sliders size={20} color="#38BDF8" />
+                    <Text style={styles.modalTitle}>Shield Setup & Guardian</Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => setIsSettingsVisible(false)}
+                    style={styles.modalCloseButton}
+                  >
+                    <X size={18} color="#94A3B8" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Guardian Phone Setup */}
+                <Text style={styles.inputLabel}>
+                  TRUSTED FAMILY CONTACT (GUARDIAN PHONE):
+                </Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={guardianPhone}
+                  onChangeText={setGuardianPhone}
+                  placeholder="+91 98765 43210"
+                  placeholderTextColor="#64748B"
+                  keyboardType="phone-pad"
+                />
+                <Text style={styles.inputHint}>
+                  High-risk scam attempts trigger 1-tap emergency SMS alerts to this contact.
+                </Text>
+
+                {/* Gemini API Key */}
+                <Text style={styles.inputLabel}>
+                  GOOGLE GEMINI API KEY (OPTIONAL):
+                </Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={geminiApiKey}
+                  onChangeText={setGeminiApiKey}
+                  placeholder="AIzaSy..."
+                  placeholderTextColor="#64748B"
+                  secureTextEntry={true}
+                />
+                <Text style={styles.inputHint}>
+                  If left blank, SeniorShield uses its built-in offline intelligence engine.
+                </Text>
+
+                {/* Save Button */}
+                <TouchableOpacity
+                  style={styles.saveSettingsButton}
+                  onPress={() => setIsSettingsVisible(false)}
+                  activeOpacity={0.85}
+                >
+                  <Check size={18} color="#FFFFFF" />
+                  <Text style={styles.saveSettingsButtonText}>Save & Return to Shield</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
         </SafeAreaView>
       </View>
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  rootContainer: {
+    flex: 1,
+    backgroundColor: '#030712',
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#030712',
+  },
+  scrollView: {
+    flex: 1,
+    backgroundColor: '#030712',
+    paddingHorizontal: 16,
+  },
+  scrollContent: {
+    paddingBottom: 40,
+    paddingTop: 10,
+  },
+  gaugeCard: {
+    backgroundColor: '#0F172A',
+    borderWidth: 1,
+    borderColor: '#1E293B',
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 12,
+  },
+  gaugeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  gaugeHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  gaugeTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#E2E8F0',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  gaugeScoreText: {
+    fontSize: 20,
+    fontWeight: '900',
+  },
+  gaugeScoreDenom: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  progressTrack: {
+    height: 10,
+    backgroundColor: '#030712',
+    borderRadius: 999,
+    overflow: 'hidden',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#1E293B',
+  },
+  progressBar: {
+    height: '100%',
+    borderRadius: 999,
+  },
+  contextBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#030712',
+    borderWidth: 1,
+    borderColor: '#1E293B',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  contextText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#94A3B8',
+  },
+  contextHighlight: {
+    color: '#38BDF8',
+    fontWeight: '800',
+  },
+  actionButtonsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 8,
+  },
+  scanButton: {
+    flex: 1.4,
+    backgroundColor: '#059669',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    minHeight: 56,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(52, 211, 153, 0.4)',
+    elevation: 4,
+  },
+  scanButtonDisabled: {
+    backgroundColor: '#065F46',
+    opacity: 0.7,
+  },
+  scanButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '900',
+    letterSpacing: 0.3,
+  },
+  demoHubButton: {
+    flex: 1,
+    backgroundColor: '#0F172A',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    minHeight: 56,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.4)',
+  },
+  demoHubButtonText: {
+    color: '#FEF3C7',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  goldenRulesCard: {
+    backgroundColor: '#0F172A',
+    borderWidth: 1,
+    borderColor: '#1E293B',
+    borderRadius: 24,
+    padding: 20,
+    marginTop: 8,
+  },
+  goldenRulesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  goldenRulesTitle: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#F59E0B',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  rulesList: {
+    gap: 10,
+  },
+  ruleItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  ruleIcon: {
+    marginTop: 2,
+  },
+  ruleText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#CBD5E1',
+    flex: 1,
+    lineHeight: 18,
+  },
+  ruleHighlight: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: '#0B0F19',
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  modalCloseButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#1E293B',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inputLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#CBD5E1',
+    marginBottom: 6,
+    letterSpacing: 0.5,
+  },
+  textInput: {
+    backgroundColor: '#030712',
+    borderWidth: 1,
+    borderColor: '#334155',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  inputHint: {
+    fontSize: 11,
+    color: '#94A3B8',
+    lineHeight: 15,
+    marginBottom: 16,
+  },
+  saveSettingsButton: {
+    backgroundColor: '#2563EB',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    minHeight: 50,
+    borderRadius: 14,
+    marginTop: 8,
+  },
+  saveSettingsButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+});
