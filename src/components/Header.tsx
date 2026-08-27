@@ -1,6 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { ShieldCheck, ShieldAlert, PhoneCall } from 'lucide-react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { ShieldCheck, ShieldAlert, PhoneCall, SlidersHorizontal } from 'lucide-react-native';
 import { ThreatLevel } from '../types/scam';
 
 interface HeaderProps {
@@ -17,149 +17,100 @@ export const Header: React.FC<HeaderProps> = ({
   const isCritical = threatLevel === 'CRITICAL';
   const isSuspicious = threatLevel === 'SUSPICIOUS';
 
-  const statusColor = isCritical ? '#DC2626' : isSuspicious ? '#D97706' : '#16A34A';
-  const statusLabel = isCritical
-    ? 'DANGER DETECTED'
-    : isSuspicious
-    ? 'CAUTION ADVISED'
-    : 'SHIELD ACTIVE';
-
   return (
-    <View style={styles.container}>
-      {/* Top Brand & Status Row */}
-      <View style={styles.topRow}>
-        <View style={styles.brandContainer}>
-          {isCritical ? (
-            <ShieldAlert size={36} color="#DC2626" />
-          ) : (
-            <ShieldCheck size={36} color="#16A34A" />
-          )}
-          <View style={styles.titleContainer}>
-            <Text style={styles.appTitle}>SeniorShield</Text>
-            <Text style={styles.appSubtitle}>Autonomous Elder Protection</Text>
+    <View className="bg-obsidian-950/95 pt-4 px-4 pb-3 border-b border-slate-800/80">
+      {/* Top Brand Bar */}
+      <View className="flex-row items-center justify-between mb-3">
+        <View className="flex-row items-center gap-3">
+          <View
+            className={`w-12 h-12 rounded-2xl items-center justify-center border shadow-lg ${
+              isCritical
+                ? 'bg-rose-950/70 border-rose-500/50'
+                : isSuspicious
+                ? 'bg-amber-950/70 border-amber-500/50'
+                : 'bg-emerald-950/70 border-emerald-500/50'
+            }`}
+          >
+            {isCritical ? (
+              <ShieldAlert size={28} color="#F43F5E" />
+            ) : (
+              <ShieldCheck size={28} color="#10B981" />
+            )}
+          </View>
+          <View>
+            <View className="flex-row items-center gap-2">
+              <Text className="text-2xl font-black text-white tracking-tight">SeniorShield</Text>
+              <View className="bg-indigo-950/80 border border-indigo-500/30 px-2 py-0.5 rounded-full">
+                <Text className="text-[10px] font-bold text-indigo-300 tracking-wider">AI 2.5</Text>
+              </View>
+            </View>
+            <Text className="text-xs font-semibold text-slate-400">Autonomous Scam Defense</Text>
           </View>
         </View>
 
+        {/* Settings Pill */}
         <TouchableOpacity
-          style={styles.settingsButton}
+          className="bg-slate-900/90 border border-slate-700/80 flex-row items-center gap-1.5 px-3.5 py-2 rounded-xl active:bg-slate-800"
           onPress={onOpenSettings}
-          accessibilityLabel="Settings and Guardian Config"
+          accessibilityLabel="Setup & Guardian Config"
         >
-          <Text style={styles.settingsButtonText}>⚙️ Setup</Text>
+          <SlidersHorizontal size={16} color="#38BDF8" />
+          <Text className="text-xs font-bold text-slate-200">Setup</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Live Protection Status Bar */}
-      <View style={[styles.statusBar, { borderColor: statusColor, backgroundColor: isCritical ? '#450A0A' : '#0F172A' }]}>
-        <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-        <Text style={[styles.statusText, { color: isCritical ? '#FECACA' : '#E2E8F0' }]}>
-          {statusLabel}
-        </Text>
-        <Text style={styles.defenseModeText}>• Real-Time AI Monitor</Text>
+      {/* Luminous Protection Status Pill */}
+      <View
+        className={`flex-row items-center justify-between py-2 px-3.5 rounded-xl border mb-2.5 ${
+          isCritical
+            ? 'bg-rose-950/40 border-rose-500/40'
+            : isSuspicious
+            ? 'bg-amber-950/40 border-amber-500/40'
+            : 'bg-emerald-950/40 border-emerald-500/40'
+        }`}
+      >
+        <View className="flex-row items-center gap-2.5">
+          <View
+            className={`w-2.5 h-2.5 rounded-full ${
+              isCritical
+                ? 'bg-rose-500 shadow-rose-500'
+                : isSuspicious
+                ? 'bg-amber-400 shadow-amber-400'
+                : 'bg-emerald-400 shadow-emerald-400'
+            }`}
+          />
+          <Text
+            className={`text-sm font-extrabold tracking-wider ${
+              isCritical
+                ? 'text-rose-200'
+                : isSuspicious
+                ? 'text-amber-200'
+                : 'text-emerald-200'
+            }`}
+          >
+            {isCritical
+              ? 'DANGER DETECTED'
+              : isSuspicious
+              ? 'CAUTION ADVISED'
+              : 'SHIELD ACTIVE & MONITORING'}
+          </Text>
+        </View>
+        <Text className="text-[11px] font-semibold text-slate-400">Live Guard</Text>
       </View>
 
-      {/* Emergency Cyber Helpline 1930 Direct Button */}
+      {/* Direct Cyber Helpline (1930) Bar */}
       <TouchableOpacity
-        style={styles.helplineButton}
+        className="bg-gradient-to-r from-red-600 to-rose-700 bg-rose-600 flex-row items-center justify-center gap-2.5 py-2.5 rounded-xl border border-rose-400/40 active:opacity-90 shadow-md shadow-rose-900/50"
         onPress={onCallHelpline}
-        activeOpacity={0.8}
+        activeOpacity={0.85}
         accessibilityRole="button"
         accessibilityLabel="Call Cyber Crime Helpline 1930"
       >
-        <PhoneCall size={24} color="#FFFFFF" />
-        <Text style={styles.helplineButtonText}>Cyber Helpline (1930)</Text>
+        <PhoneCall size={20} color="#FFFFFF" />
+        <Text className="text-white text-sm font-extrabold tracking-wide">
+          Emergency Cyber Helpline (1930)
+        </Text>
       </TouchableOpacity>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#090D16',
-    paddingTop: 16,
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 2,
-    borderBottomColor: '#1E293B',
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  brandContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  titleContainer: {
-    justifyContent: 'center',
-  },
-  appTitle: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#F8FAFC',
-    letterSpacing: 0.5,
-  },
-  appSubtitle: {
-    fontSize: 13,
-    color: '#94A3B8',
-    fontWeight: '600',
-  },
-  settingsButton: {
-    backgroundColor: '#1E293B',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#334155',
-  },
-  settingsButtonText: {
-    color: '#F1F5F9',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  statusBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    borderWidth: 1.5,
-    marginBottom: 10,
-  },
-  statusDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 8,
-  },
-  statusText: {
-    fontSize: 15,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  defenseModeText: {
-    fontSize: 13,
-    color: '#94A3B8',
-    marginLeft: 6,
-    fontWeight: '500',
-  },
-  helplineButton: {
-    backgroundColor: '#991B1B',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    paddingVertical: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#EF4444',
-  },
-  helplineButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '800',
-  },
-});

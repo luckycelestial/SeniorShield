@@ -1,6 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { MessageSquare, PhoneIncoming, Clock, AlertCircle } from 'lucide-react-native';
+import { Text, View } from 'react-native';
+import { MessageSquare, PhoneIncoming, Clock, GitCommit, Flame } from 'lucide-react-native';
 import { CampaignStage, DeviceEvent } from '../types/scam';
 
 interface CampaignTimelineProps {
@@ -11,77 +11,125 @@ interface CampaignTimelineProps {
 export const CampaignTimeline: React.FC<CampaignTimelineProps> = ({ events, stage }) => {
   if (!events || events.length === 0) {
     return (
-      <View style={styles.emptyContainer}>
+      <View className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-6 my-3 items-center justify-center">
         <Clock size={28} color="#64748B" />
-        <Text style={styles.emptyText}>No recent threat events in timeline.</Text>
+        <Text className="text-slate-400 text-sm font-semibold mt-2">
+          No recent threat events in timeline.
+        </Text>
       </View>
     );
   }
 
-  const getStageBadge = (currStage: CampaignStage) => {
+  const getStageInfo = (currStage: CampaignStage) => {
     switch (currStage) {
       case 'EXTRACTION_ATTEMPT':
-        return { label: 'CRITICAL ATTACK STAGE', color: '#DC2626', bg: '#450A0A' };
+        return {
+          label: 'CRITICAL ATTACK STAGE',
+          textClass: 'text-rose-300',
+          bgClass: 'bg-rose-950/60 border-rose-500/50',
+          iconColor: '#F43F5E',
+        };
       case 'URGENCY_ESCALATION':
-        return { label: 'URGENCY ESCALATION STAGE', color: '#D97706', bg: '#451A03' };
+        return {
+          label: 'URGENCY ESCALATION',
+          textClass: 'text-amber-300',
+          bgClass: 'bg-amber-950/60 border-amber-500/50',
+          iconColor: '#F59E0B',
+        };
       case 'RECONNAISSANCE':
-        return { label: 'PROBING / INITIAL CONTACT', color: '#3B82F6', bg: '#172554' };
+        return {
+          label: 'INITIAL PROBING',
+          textClass: 'text-sky-300',
+          bgClass: 'bg-sky-950/60 border-sky-500/50',
+          iconColor: '#38BDF8',
+        };
       default:
-        return { label: 'DORMANT / MONITORING', color: '#16A34A', bg: '#052E16' };
+        return {
+          label: 'DORMANT / SAFE',
+          textClass: 'text-emerald-300',
+          bgClass: 'bg-emerald-950/60 border-emerald-500/50',
+          iconColor: '#10B981',
+        };
     }
   };
 
-  const stageInfo = getStageBadge(stage);
+  const stageInfo = getStageInfo(stage);
 
   return (
-    <View style={styles.container}>
-      {/* Stage Header */}
-      <View style={styles.headerRow}>
-        <Text style={styles.sectionTitle}>Campaign Progression Chain</Text>
-        <View style={[styles.stageBadge, { backgroundColor: stageInfo.bg, borderColor: stageInfo.color }]}>
-          <AlertCircle size={14} color={stageInfo.color} />
-          <Text style={[styles.stageText, { color: stageInfo.color }]}>{stageInfo.label}</Text>
+    <View className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 my-3 shadow-lg">
+      {/* Header Row */}
+      <View className="flex-row items-center justify-between flex-wrap gap-2 mb-1.5">
+        <View className="flex-row items-center gap-2">
+          <GitCommit size={20} color="#38BDF8" />
+          <Text className="text-lg font-black text-white">Campaign Progression Chain</Text>
+        </View>
+
+        <View className={`flex-row items-center gap-1.5 px-3 py-1 rounded-full border ${stageInfo.bgClass}`}>
+          <Flame size={12} color={stageInfo.iconColor} />
+          <Text className={`text-[10px] font-black tracking-wider ${stageInfo.textClass}`}>
+            {stageInfo.label}
+          </Text>
         </View>
       </View>
 
-      <Text style={styles.subtitle}>
-        Scammers unfold multi-step campaigns across calls and messages. Here is how this sequence was correlated:
+      <Text className="text-xs font-medium text-slate-400 mb-4 leading-5">
+        Scammers coordinate across calls and SMS over time. Here is the chronological correlation:
       </Text>
 
-      {/* Sequential Event Nodes */}
-      <View style={styles.timelineList}>
+      {/* Timeline Steps */}
+      <View className="mt-1">
         {events.map((event, index) => {
           const isSMS = event.type === 'SMS';
           const timeAgoMins = Math.max(1, Math.round((Date.now() - event.timestamp) / (1000 * 60)));
 
           return (
-            <View key={event.id || index} style={styles.timelineItem}>
-              {/* Left Step Indicator */}
-              <View style={styles.stepColumn}>
-                <View style={[styles.stepCircle, { backgroundColor: isSMS ? '#3B82F6' : '#EF4444' }]}>
-                  <Text style={styles.stepNumber}>{index + 1}</Text>
+            <View key={event.id || index} className="flex-row mb-3.5">
+              {/* Left Step Node Column */}
+              <View className="items-center mr-3 w-8">
+                <View
+                  className={`w-7 h-7 rounded-full items-center justify-center border ${
+                    isSMS ? 'bg-sky-950 border-sky-500' : 'bg-rose-950 border-rose-500'
+                  }`}
+                >
+                  <Text className={`text-xs font-black ${isSMS ? 'text-sky-300' : 'text-rose-300'}`}>
+                    {index + 1}
+                  </Text>
                 </View>
-                {index < events.length - 1 && <View style={styles.stepLine} />}
+                {index < events.length - 1 && (
+                  <View className="w-0.5 flex-1 bg-slate-800 my-1 rounded-full" />
+                )}
               </View>
 
               {/* Event Content Card */}
-              <View style={styles.eventCard}>
-                <View style={styles.eventHeader}>
-                  <View style={styles.channelTag}>
+              <View className="flex-1 bg-slate-950/80 border border-slate-800/90 rounded-2xl p-3.5">
+                <View className="flex-row justify-between items-center mb-1.5">
+                  <View
+                    className={`flex-row items-center gap-1.5 px-2.5 py-0.5 rounded-md ${
+                      isSMS ? 'bg-sky-950/70 border border-sky-600/30' : 'bg-rose-950/70 border border-rose-600/30'
+                    }`}
+                  >
                     {isSMS ? (
-                      <MessageSquare size={16} color="#93C5FD" />
+                      <MessageSquare size={13} color="#38BDF8" />
                     ) : (
-                      <PhoneIncoming size={16} color="#FCA5A5" />
+                      <PhoneIncoming size={13} color="#F43F5E" />
                     )}
-                    <Text style={[styles.channelText, { color: isSMS ? '#93C5FD' : '#FCA5A5' }]}>
+                    <Text
+                      className={`text-[11px] font-extrabold uppercase ${
+                        isSMS ? 'text-sky-300' : 'text-rose-300'
+                      }`}
+                    >
                       {event.type}
                     </Text>
                   </View>
-                  <Text style={styles.timeAgoText}>{timeAgoMins}m ago</Text>
+                  <Text className="text-[11px] font-semibold text-slate-400">{timeAgoMins}m ago</Text>
                 </View>
 
-                <Text style={styles.senderText}>Sender: {event.senderOrNumber}</Text>
-                <Text style={styles.contentText}>{event.contentOrDuration}</Text>
+                <Text className="text-xs font-bold text-slate-200 mb-1">
+                  Sender: <Text className="text-sky-400">{event.senderOrNumber}</Text>
+                </Text>
+                <Text className="text-sm font-medium text-slate-300 leading-5">
+                  {event.contentOrDuration}
+                </Text>
               </View>
             </View>
           );
@@ -90,128 +138,3 @@ export const CampaignTimeline: React.FC<CampaignTimelineProps> = ({ events, stag
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#0F172A',
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: '#334155',
-    padding: 16,
-    marginVertical: 10,
-  },
-  emptyContainer: {
-    padding: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  emptyText: {
-    color: '#94A3B8',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 6,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#F8FAFC',
-  },
-  stageBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  stageText: {
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#94A3B8',
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  timelineList: {
-    marginTop: 4,
-  },
-  timelineItem: {
-    flexDirection: 'row',
-    marginBottom: 14,
-  },
-  stepColumn: {
-    alignItems: 'center',
-    marginRight: 12,
-    width: 28,
-  },
-  stepCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 2,
-  },
-  stepNumber: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '900',
-  },
-  stepLine: {
-    width: 2,
-    flex: 1,
-    backgroundColor: '#334155',
-    marginVertical: 4,
-  },
-  eventCard: {
-    flex: 1,
-    backgroundColor: '#1E293B',
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#334155',
-  },
-  eventHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  channelTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  channelText: {
-    fontSize: 13,
-    fontWeight: '800',
-  },
-  timeAgoText: {
-    fontSize: 12,
-    color: '#94A3B8',
-    fontWeight: '600',
-  },
-  senderText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#F1F5F9',
-    marginBottom: 4,
-  },
-  contentText: {
-    fontSize: 15,
-    color: '#CBD5E1',
-    lineHeight: 22,
-  },
-});

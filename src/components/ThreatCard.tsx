@@ -2,7 +2,6 @@ import React from 'react';
 import {
   Alert,
   Linking,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -14,6 +13,8 @@ import {
   Shield,
   BellRing,
   Ban,
+  Building2,
+  Lock,
 } from 'lucide-react-native';
 import { ScamReport } from '../types/scam';
 
@@ -30,11 +31,13 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
 }) => {
   if (!report) {
     return (
-      <View style={[styles.card, styles.neutralCard]}>
-        <Shield size={42} color="#94A3B8" />
-        <Text style={styles.neutralTitle}>Ready to Scan</Text>
-        <Text style={styles.neutralBody}>
-          Tap "Scan Device & Protect" below or launch a simulation scenario to analyze recent communications.
+      <View className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 my-3 items-center">
+        <View className="w-16 h-16 rounded-full bg-slate-800/80 items-center justify-center mb-3">
+          <Shield size={34} color="#94A3B8" />
+        </View>
+        <Text className="text-xl font-bold text-slate-100">Ready to Scan</Text>
+        <Text className="text-sm font-medium text-slate-400 text-center mt-2 leading-5 px-3">
+          Tap "Scan Device & Protect" below or launch a simulation from the Demo Hub to analyze recent calls and messages.
         </Text>
       </View>
     );
@@ -43,10 +46,6 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
   const isCritical = report.threat_level === 'CRITICAL';
   const isSuspicious = report.threat_level === 'SUSPICIOUS';
   const isSafe = report.threat_level === 'SAFE';
-
-  const badgeColor = isCritical ? '#DC2626' : isSuspicious ? '#D97706' : '#16A34A';
-  const cardBorderColor = isCritical ? '#EF4444' : isSuspicious ? '#F59E0B' : '#22C55E';
-  const cardBgColor = isCritical ? '#2B0E11' : isSuspicious ? '#261B0B' : '#0B2416';
 
   const handleAlertGuardian = () => {
     const alertMessage =
@@ -66,250 +65,149 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
       onBlockNumber();
     }
     Alert.alert(
-      'Action Completed',
-      'Sender number has been added to the local blocklist and suspicious link access has been restricted.'
+      'Security Action Completed',
+      'The sender number has been added to your local blocklist and suspicious link access has been restricted.'
     );
   };
 
   return (
-    <View style={[styles.card, { borderColor: cardBorderColor, backgroundColor: cardBgColor }]}>
-      {/* Header Threat Level Badge */}
-      <View style={styles.badgeRow}>
-        <View style={[styles.threatBadge, { backgroundColor: badgeColor }]}>
-          {isCritical && <AlertOctagon size={24} color="#FFFFFF" />}
-          {isSuspicious && <AlertTriangle size={24} color="#FFFFFF" />}
-          {isSafe && <CheckCircle size={24} color="#FFFFFF" />}
-          <Text style={styles.threatBadgeText}>{report.threat_level} THREAT</Text>
+    <View
+      className={`rounded-3xl p-5 my-3 border ${
+        isCritical
+          ? 'bg-rose-950/30 border-rose-500/50 shadow-xl shadow-rose-950/40'
+          : isSuspicious
+          ? 'bg-amber-950/30 border-amber-500/50 shadow-xl shadow-amber-950/40'
+          : 'bg-emerald-950/30 border-emerald-500/50 shadow-xl shadow-emerald-950/40'
+      }`}
+    >
+      {/* Top Header: Badge & Confidence */}
+      <View className="flex-row items-center justify-between mb-3.5">
+        <View
+          className={`flex-row items-center gap-2 px-3.5 py-1.5 rounded-full border ${
+            isCritical
+              ? 'bg-rose-500/20 border-rose-500/40'
+              : isSuspicious
+              ? 'bg-amber-500/20 border-amber-500/40'
+              : 'bg-emerald-500/20 border-emerald-500/40'
+          }`}
+        >
+          {isCritical && <AlertOctagon size={20} color="#F43F5E" />}
+          {isSuspicious && <AlertTriangle size={20} color="#F59E0B" />}
+          {isSafe && <CheckCircle size={20} color="#10B981" />}
+          <Text
+            className={`text-xs font-black tracking-wider ${
+              isCritical
+                ? 'text-rose-300'
+                : isSuspicious
+                ? 'text-amber-300'
+                : 'text-emerald-300'
+            }`}
+          >
+            {report.threat_level} THREAT
+          </Text>
         </View>
-        <Text style={styles.confidenceText}>{report.confidence_score}% Confidence</Text>
+
+        <View className="bg-slate-900/90 border border-slate-700/60 px-3 py-1 rounded-full">
+          <Text className="text-xs font-bold text-slate-300">{report.confidence_score}% Confidence</Text>
+        </View>
       </View>
 
       {/* Scam Category Title */}
-      <Text style={styles.scamTypeTitle}>{report.scam_type}</Text>
+      <Text className="text-2xl font-black text-white leading-tight mb-3">
+        {report.scam_type}
+      </Text>
 
       {/* Impersonated Entity Banner */}
       {report.impersonated_entity && report.impersonated_entity !== 'None' && (
-        <View style={styles.impersonationBanner}>
-          <Text style={styles.impersonationLabel}>Impersonating:</Text>
-          <Text style={styles.impersonationValue}>{report.impersonated_entity}</Text>
+        <View className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3 flex-row items-center gap-2.5 mb-3.5">
+          <Building2 size={20} color="#38BDF8" />
+          <View className="flex-1">
+            <Text className="text-[11px] font-bold text-sky-400 uppercase tracking-wide">
+              Impersonated Entity
+            </Text>
+            <Text className="text-sm font-bold text-slate-100">{report.impersonated_entity}</Text>
+          </View>
         </View>
       )}
 
-      {/* Senior Plain Language Explanation */}
-      <View style={styles.explanationBox}>
-        <Text style={styles.sectionHeader}>WHAT THIS MEANS FOR YOU:</Text>
-        <Text style={styles.seniorExplanationText}>{report.senior_explanation}</Text>
+      {/* Senior Plain Language Explanation Box */}
+      <View className="bg-slate-900/95 border border-slate-800/80 rounded-2xl p-4 mb-3.5">
+        <Text className="text-[11px] font-black text-sky-400 tracking-wider uppercase mb-1.5">
+          What this means for you:
+        </Text>
+        <Text className="text-lg font-bold text-slate-100 leading-6">
+          {report.senior_explanation}
+        </Text>
       </View>
 
-      {/* Action Required Banner */}
-      <View style={[styles.actionBox, { borderColor: badgeColor }]}>
-        <Text style={[styles.actionHeader, { color: badgeColor }]}>⚡ WHAT YOU MUST DO NOW:</Text>
-        <Text style={styles.actionBodyText}>{report.action_required}</Text>
+      {/* Action Directive Box */}
+      <View
+        className={`rounded-2xl p-4 border-l-4 mb-3.5 ${
+          isCritical
+            ? 'bg-rose-950/40 border-rose-500'
+            : isSuspicious
+            ? 'bg-amber-950/40 border-amber-500'
+            : 'bg-emerald-950/40 border-emerald-500'
+        }`}
+      >
+        <Text
+          className={`text-xs font-black tracking-wider uppercase mb-1 ${
+            isCritical ? 'text-rose-300' : isSuspicious ? 'text-amber-300' : 'text-emerald-300'
+          }`}
+        >
+          ⚡ What you must do now:
+        </Text>
+        <Text className="text-lg font-extrabold text-white leading-6">
+          {report.action_required}
+        </Text>
       </View>
 
-      {/* Assets at Risk */}
+      {/* Targeted Assets Chips */}
       {report.assets_at_risk && report.assets_at_risk.length > 0 && (
-        <View style={styles.assetsContainer}>
-          <Text style={styles.assetsTitle}>Targeted Assets:</Text>
-          <View style={styles.assetChipContainer}>
+        <View className="mb-4">
+          <View className="flex-row items-center gap-1.5 mb-2">
+            <Lock size={14} color="#CBD5E1" />
+            <Text className="text-xs font-bold text-slate-300">Targeted Assets at Stake:</Text>
+          </View>
+          <View className="flex-row flex-wrap gap-2">
             {report.assets_at_risk.map((asset, idx) => (
-              <View key={idx} style={styles.assetChip}>
-                <Text style={styles.assetChipText}>⚠️ {asset}</Text>
+              <View
+                key={idx}
+                className="bg-slate-800/80 border border-slate-700/80 px-3 py-1.5 rounded-xl flex-row items-center gap-1.5"
+              >
+                <Text className="text-xs font-bold text-amber-200">⚠️ {asset}</Text>
               </View>
             ))}
           </View>
         </View>
       )}
 
-      {/* High Visibility Action Buttons */}
+      {/* Action Buttons */}
       {(isCritical || isSuspicious) && (
-        <View style={styles.buttonGroup}>
+        <View className="gap-2.5 mt-1">
           <TouchableOpacity
-            style={[styles.actionButton, styles.blockButton]}
+            className="bg-rose-600 active:bg-rose-700 flex-row items-center justify-center gap-2.5 min-h-[54px] rounded-2xl border border-rose-400/40 shadow-lg shadow-rose-950/60"
             onPress={handleBlockNumber}
-            activeOpacity={0.8}
+            activeOpacity={0.85}
           >
             <Ban size={22} color="#FFFFFF" />
-            <Text style={styles.buttonText}>Hang Up & Block</Text>
+            <Text className="text-white text-base font-black tracking-wide">
+              Hang Up & Block Sender
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.actionButton, styles.guardianButton]}
+            className="bg-blue-600 active:bg-blue-700 flex-row items-center justify-center gap-2.5 min-h-[54px] rounded-2xl border border-blue-400/40 shadow-lg shadow-blue-950/60"
             onPress={handleAlertGuardian}
-            activeOpacity={0.8}
+            activeOpacity={0.85}
           >
             <BellRing size={22} color="#FFFFFF" />
-            <Text style={styles.buttonText}>Alert Family Guardian</Text>
+            <Text className="text-white text-base font-black tracking-wide">
+              Alert Family Guardian (SMS)
+            </Text>
           </TouchableOpacity>
         </View>
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  card: {
-    borderRadius: 16,
-    borderWidth: 2.5,
-    padding: 18,
-    marginVertical: 10,
-  },
-  neutralCard: {
-    backgroundColor: '#1E293B',
-    borderColor: '#334155',
-    alignItems: 'center',
-    paddingVertical: 32,
-  },
-  neutralTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#F8FAFC',
-    marginTop: 12,
-  },
-  neutralBody: {
-    fontSize: 16,
-    color: '#94A3B8',
-    textAlign: 'center',
-    marginTop: 8,
-    lineHeight: 24,
-    paddingHorizontal: 12,
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  threatBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 24,
-  },
-  threatBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '900',
-    letterSpacing: 0.5,
-  },
-  confidenceText: {
-    color: '#CBD5E1',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  scamTypeTitle: {
-    fontSize: 24,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    marginBottom: 10,
-    lineHeight: 30,
-  },
-  impersonationBanner: {
-    backgroundColor: '#00000060',
-    padding: 10,
-    borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  impersonationLabel: {
-    color: '#FCA5A5',
-    fontSize: 15,
-    fontWeight: '700',
-    marginRight: 6,
-  },
-  impersonationValue: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '800',
-  },
-  explanationBox: {
-    backgroundColor: '#00000070',
-    padding: 14,
-    borderRadius: 12,
-    marginBottom: 14,
-  },
-  sectionHeader: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#93C5FD',
-    letterSpacing: 1,
-    marginBottom: 6,
-  },
-  seniorExplanationText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#F8FAFC',
-    lineHeight: 28,
-  },
-  actionBox: {
-    backgroundColor: '#00000085',
-    padding: 14,
-    borderRadius: 12,
-    borderLeftWidth: 6,
-    marginBottom: 14,
-  },
-  actionHeader: {
-    fontSize: 14,
-    fontWeight: '900',
-    letterSpacing: 0.8,
-    marginBottom: 4,
-  },
-  actionBodyText: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    lineHeight: 28,
-  },
-  assetsContainer: {
-    marginBottom: 16,
-  },
-  assetsTitle: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#CBD5E1',
-    marginBottom: 8,
-  },
-  assetChipContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  assetChip: {
-    backgroundColor: '#374151',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  assetChipText: {
-    color: '#FEF08A',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  buttonGroup: {
-    gap: 12,
-    marginTop: 4,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    minHeight: 56,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-  },
-  blockButton: {
-    backgroundColor: '#DC2626',
-  },
-  guardianButton: {
-    backgroundColor: '#2563EB',
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 19,
-    fontWeight: '900',
-  },
-});

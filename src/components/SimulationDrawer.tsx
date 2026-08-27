@@ -2,12 +2,11 @@ import React from 'react';
 import {
   Modal,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { PlayCircle, X, Sparkles, AlertTriangle, ShieldCheck } from 'lucide-react-native';
+import { PlayCircle, X, Sparkles, AlertTriangle, ShieldCheck, Layers } from 'lucide-react-native';
 import { MOCK_SCAM_SCENARIOS } from '../constants/mockScams';
 import { MockScenario } from '../types/scam';
 
@@ -29,206 +28,106 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({
       transparent={true}
       onRequestClose={onClose}
     >
-      <View style={styles.modalOverlay}>
-        <View style={styles.sheetContainer}>
-          {/* Header */}
-          <View style={styles.header}>
-            <View style={styles.headerTitleRow}>
-              <Sparkles size={24} color="#FBBF24" />
-              <Text style={styles.headerTitle}>Judge Demo & Simulation Hub</Text>
+      <View className="flex-1 bg-black/85 justify-end">
+        <View className="bg-obsidian-900 border-t-2 border-slate-700/80 rounded-t-[32px] max-h-[85%] p-5 shadow-2xl">
+          {/* Drawer Header */}
+          <View className="flex-row items-center justify-between mb-2">
+            <View className="flex-row items-center gap-2.5">
+              <View className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 items-center justify-center">
+                <Sparkles size={20} color="#F59E0B" />
+              </View>
+              <View>
+                <Text className="text-xl font-black text-white">Judge Demo & Simulation Hub</Text>
+                <Text className="text-[11px] font-semibold text-slate-400">Offline Social Engineering Scenarios</Text>
+              </View>
             </View>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <X size={24} color="#94A3B8" />
+            <TouchableOpacity
+              onPress={onClose}
+              className="w-8 h-8 rounded-full bg-slate-800/80 items-center justify-center active:bg-slate-700"
+            >
+              <X size={18} color="#94A3B8" />
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.instructionText}>
-            Select any real-world Indian fraud scenario below to simulate live ingestion, multi-channel correlation, and Gemini 2.5 Flash plain-language reasoning:
+          <Text className="text-xs font-medium text-slate-400 mb-4 leading-5">
+            Select any real-world Indian fraud scenario below to simulate live telemetry ingestion, multi-channel correlation, and Gemini 2.5 Flash reasoning:
           </Text>
 
-          <ScrollView style={styles.scenarioList} contentContainerStyle={styles.scenarioListContent}>
-            {MOCK_SCAM_SCENARIOS.map((scenario) => {
-              const isDanger = scenario.expectedThreatLevel === 'CRITICAL';
+          <ScrollView className="max-h-[500px]" showsVerticalScrollIndicator={false}>
+            <View className="gap-3 pb-6">
+              {MOCK_SCAM_SCENARIOS.map((scenario) => {
+                const isDanger = scenario.expectedThreatLevel === 'CRITICAL';
 
-              return (
-                <TouchableOpacity
-                  key={scenario.id}
-                  style={[
-                    styles.scenarioCard,
-                    { borderColor: isDanger ? '#EF4444' : '#22C55E' },
-                  ]}
-                  activeOpacity={0.8}
-                  onPress={() => {
-                    onSelectScenario(scenario);
-                    onClose();
-                  }}
-                >
-                  <View style={styles.cardHeader}>
-                    <View style={styles.titleTagRow}>
-                      {isDanger ? (
-                        <AlertTriangle size={20} color="#EF4444" />
-                      ) : (
-                        <ShieldCheck size={20} color="#22C55E" />
-                      )}
-                      <Text style={styles.scenarioTitle}>{scenario.title}</Text>
-                    </View>
-                    <View
-                      style={[
-                        styles.badge,
-                        { backgroundColor: isDanger ? '#7F1D1D' : '#14532D' },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.badgeText,
-                          { color: isDanger ? '#FCA5A5' : '#86EFAC' },
-                        ]}
+                return (
+                  <TouchableOpacity
+                    key={scenario.id}
+                    className={`rounded-2xl p-4 border active:scale-[0.99] ${
+                      isDanger
+                        ? 'bg-slate-900/90 border-rose-500/40 shadow-md shadow-rose-950/30'
+                        : 'bg-slate-900/90 border-emerald-500/40 shadow-md shadow-emerald-950/30'
+                    }`}
+                    activeOpacity={0.85}
+                    onPress={() => {
+                      onSelectScenario(scenario);
+                      onClose();
+                    }}
+                  >
+                    {/* Scenario Top Title & Badge */}
+                    <View className="flex-row items-center justify-between mb-2">
+                      <View className="flex-row items-center gap-2 flex-1 pr-2">
+                        {isDanger ? (
+                          <AlertTriangle size={18} color="#F43F5E" />
+                        ) : (
+                          <ShieldCheck size={18} color="#10B981" />
+                        )}
+                        <Text className="text-base font-extrabold text-white flex-1" numberOfLines={1}>
+                          {scenario.title}
+                        </Text>
+                      </View>
+                      <View
+                        className={`px-2.5 py-0.5 rounded-full border ${
+                          isDanger
+                            ? 'bg-rose-950/80 border-rose-500/60'
+                            : 'bg-emerald-950/80 border-emerald-500/60'
+                        }`}
                       >
-                        {scenario.expectedThreatLevel}
-                      </Text>
+                        <Text
+                          className={`text-[10px] font-black tracking-wider ${
+                            isDanger ? 'text-rose-300' : 'text-emerald-300'
+                          }`}
+                        >
+                          {scenario.expectedThreatLevel}
+                        </Text>
+                      </View>
                     </View>
-                  </View>
 
-                  <Text style={styles.categoryLabel}>{scenario.category}</Text>
-                  <Text style={styles.descriptionText}>{scenario.description}</Text>
-
-                  <View style={styles.eventCountRow}>
-                    <Text style={styles.eventCountText}>
-                      📦 Includes {scenario.events.length} Simulated Event(s) (
-                      {scenario.events.map((e) => e.type).join(' + ')})
+                    {/* Category Label */}
+                    <Text className="text-xs font-bold text-sky-400 mb-1.5">{scenario.category}</Text>
+                    <Text className="text-xs font-medium text-slate-300 leading-4 mb-3">
+                      {scenario.description}
                     </Text>
-                    <View style={styles.runButton}>
-                      <PlayCircle size={18} color="#FFFFFF" />
-                      <Text style={styles.runButtonText}>Simulate</Text>
+
+                    {/* Footer Row */}
+                    <View className="flex-row items-center justify-between border-t border-slate-800/80 pt-2.5">
+                      <View className="flex-row items-center gap-1.5">
+                        <Layers size={13} color="#94A3B8" />
+                        <Text className="text-[11px] font-semibold text-slate-400">
+                          {scenario.events.length} Event(s) ({scenario.events.map((e) => e.type).join(' + ')})
+                        </Text>
+                      </View>
+
+                      <View className="bg-blue-600 flex-row items-center gap-1.5 px-3 py-1.5 rounded-xl shadow-sm">
+                        <PlayCircle size={14} color="#FFFFFF" />
+                        <Text className="text-white text-xs font-extrabold">Simulate</Text>
+                      </View>
                     </View>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </ScrollView>
         </View>
       </View>
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'flex-end',
-  },
-  sheetContainer: {
-    backgroundColor: '#0F172A',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    maxHeight: '85%',
-    padding: 20,
-    borderTopWidth: 2,
-    borderColor: '#334155',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  headerTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#F8FAFC',
-  },
-  closeButton: {
-    padding: 4,
-  },
-  instructionText: {
-    fontSize: 14,
-    color: '#94A3B8',
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  scenarioList: {
-    maxHeight: 480,
-  },
-  scenarioListContent: {
-    gap: 12,
-    paddingBottom: 24,
-  },
-  scenarioCard: {
-    backgroundColor: '#1E293B',
-    borderRadius: 14,
-    padding: 16,
-    borderWidth: 1.5,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  titleTagRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flex: 1,
-  },
-  scenarioTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    flex: 1,
-  },
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  categoryLabel: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#38BDF8',
-    marginBottom: 6,
-  },
-  descriptionText: {
-    fontSize: 14,
-    color: '#CBD5E1',
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  eventCountRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderTopWidth: 1,
-    borderTopColor: '#334155',
-    paddingTop: 10,
-  },
-  eventCountText: {
-    fontSize: 13,
-    color: '#94A3B8',
-    fontWeight: '600',
-  },
-  runButton: {
-    backgroundColor: '#2563EB',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  runButtonText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '800',
-  },
-});
