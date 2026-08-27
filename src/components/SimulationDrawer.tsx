@@ -35,7 +35,7 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({
           <View style={styles.headerRow}>
             <View style={styles.headerTitleGroup}>
               <View style={styles.sparkleBox}>
-                <Sparkles size={18} color="#B45309" />
+                <Sparkles size={18} color="#FFFFFF" />
               </View>
               <View>
                 <Text style={styles.drawerTitle}>Judge Demo & Simulation Hub</Text>
@@ -63,19 +63,14 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({
                 return (
                   <TouchableOpacity
                     key={scenario.id}
-                    style={[
-                      styles.scenarioCard,
-                      {
-                        borderColor: isDanger ? '#FECACA' : '#A7F3D0',
-                      },
-                    ]}
+                    style={styles.scenarioCard}
                     activeOpacity={0.88}
                     onPress={() => {
                       onSelectScenario(scenario);
                       onClose();
                     }}
                   >
-                    {/* Scenario Top Title & Badge */}
+                    {/* Scenario Top Title & Solid Badge */}
                     <View style={styles.scenarioHeader}>
                       <View style={styles.scenarioTitleLeft}>
                         {isDanger ? (
@@ -87,21 +82,17 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({
                           {scenario.title}
                         </Text>
                       </View>
+
+                      {/* Solid Threat Tag Pill */}
                       <View
                         style={[
                           styles.threatTag,
                           {
-                            backgroundColor: isDanger ? '#FEF2F2' : '#ECFDF5',
-                            borderColor: isDanger ? '#FECACA' : '#A7F3D0',
+                            backgroundColor: isDanger ? '#FF383C' : '#10B981',
                           },
                         ]}
                       >
-                        <Text
-                          style={[
-                            styles.threatTagText,
-                            { color: isDanger ? '#DC2626' : '#059669' },
-                          ]}
-                        >
+                        <Text style={styles.threatTagText}>
                           {scenario.expectedThreatLevel}
                         </Text>
                       </View>
@@ -122,7 +113,7 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({
                         </Text>
                       </View>
 
-                      {/* Neutral Charcoal for Simulation action */}
+                      {/* Solid Charcoal Simulate Button */}
                       <View style={styles.simulateButton}>
                         <PlayCircle size={14} color="#FFFFFF" />
                         <Text style={styles.simulateButtonText}>Simulate</Text>
@@ -172,9 +163,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 12,
-    backgroundColor: '#FEF3C7',
-    borderWidth: 1,
-    borderColor: '#FDE68A',
+    backgroundColor: '#F59E0B', // Solid Amber
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -218,6 +207,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 15,
     borderWidth: 1,
+    borderColor: '#E6E6E6',
   },
   scenarioHeader: {
     flexDirection: 'row',
@@ -239,14 +229,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   threatTag: {
-    paddingHorizontal: 9,
-    paddingVertical: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: 9999,
-    borderWidth: 1,
   },
   threatTagText: {
     fontSize: 10,
     fontWeight: '900',
+    color: '#FFFFFF',
     letterSpacing: 0.5,
   },
   categoryLabel: {
@@ -281,7 +271,7 @@ const styles = StyleSheet.create({
     color: '#8E8E93',
   },
   simulateButton: {
-    backgroundColor: '#1F1F1F', // Neutral Charcoal Action
+    backgroundColor: '#1F1F1F', // Solid Charcoal Action
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,

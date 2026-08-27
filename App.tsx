@@ -154,10 +154,10 @@ export default function App() {
 
   // Strict semantic colors: Green = Safe, Yellow = Warning, Red = Emergency
   const scoreTextColor = isHighRisk
-    ? '#FF383C' // Red for Emergency / High Risk
+    ? '#FF383C' // Red for Emergency
     : isMedRisk
-    ? '#F59E0B' // Yellow for Warning / Moderate Risk
-    : '#10B981'; // Green for Safe / Low Risk
+    ? '#F59E0B' // Yellow for Warning
+    : '#10B981'; // Green for Safe
 
   const scoreBarColor = isHighRisk
     ? '#FF383C'
@@ -210,9 +210,10 @@ export default function App() {
                 />
               </View>
 
+              {/* Solid Active Context Pill */}
               {activeScenarioTitle && (
                 <View style={styles.contextBadge}>
-                  <ShieldCheck size={14} color="#10B981" />
+                  <ShieldCheck size={14} color="#FFFFFF" />
                   <Text style={styles.contextText}>
                     Active Context: <Text style={styles.contextHighlight}>{activeScenarioTitle}</Text>
                   </Text>
@@ -220,7 +221,7 @@ export default function App() {
               )}
             </View>
 
-            {/* Primary Action Buttons (Neutral Charcoal for Standard Actions) */}
+            {/* Primary Action Buttons (Solid Charcoal for Primary Scan) */}
             <View style={styles.actionButtonsRow}>
               <TouchableOpacity
                 style={[
@@ -269,7 +270,7 @@ export default function App() {
               stage={campaignState.campaignStage}
             />
 
-            {/* Senior Golden Safety Rules (Yellow/Amber for Warning Tips) */}
+            {/* Senior Golden Safety Rules */}
             <View style={styles.goldenRulesCard}>
               <View style={styles.goldenRulesHeader}>
                 <Lightbulb size={18} color="#D97706" />
@@ -364,7 +365,7 @@ export default function App() {
                   If left blank, SeniorShield uses its built-in offline intelligence engine.
                 </Text>
 
-                {/* Save Button (Neutral Action) */}
+                {/* Save Button (Solid Action) */}
                 <TouchableOpacity
                   style={styles.saveSettingsButton}
                   onPress={() => setIsSettingsVisible(false)}
@@ -464,21 +465,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#ECFDF5',
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    backgroundColor: '#10B981', // Solid Green Pill
+    paddingHorizontal: 14,
+    paddingVertical: 7,
     borderRadius: 9999,
   },
   contextText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#065F46',
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   contextHighlight: {
-    color: '#047857',
-    fontWeight: '800',
+    color: '#FFFFFF',
+    fontWeight: '900',
   },
   actionButtonsRow: {
     flexDirection: 'row',
@@ -487,7 +486,7 @@ const styles = StyleSheet.create({
   },
   scanButton: {
     flex: 1.4,
-    backgroundColor: '#1F1F1F', // Neutral Charcoal for Standard Scan
+    backgroundColor: '#1F1F1F', // Solid Charcoal
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -576,7 +575,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   ruleHighlight: {
-    color: '#B45309', // Amber highlight for warning rules
+    color: '#B45309',
     fontWeight: '800',
   },
   modalBackdrop: {
@@ -647,7 +646,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   saveSettingsButton: {
-    backgroundColor: '#1F1F1F', // Neutral Charcoal Action
+    backgroundColor: '#1F1F1F',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

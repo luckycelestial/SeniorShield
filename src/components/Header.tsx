@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { ShieldCheck, ShieldAlert, PhoneCall, SlidersHorizontal } from 'lucide-react-native';
+import { PhoneCall, SlidersHorizontal } from 'lucide-react-native';
 import { ThreatLevel } from '../types/scam';
 
 interface HeaderProps {
@@ -14,65 +14,19 @@ export const Header: React.FC<HeaderProps> = ({
   onCallHelpline,
   onOpenSettings,
 }) => {
-  const isCritical = threatLevel === 'CRITICAL';
-  const isSuspicious = threatLevel === 'SUSPICIOUS';
-
-  // Strict semantic colors: Green = Safe, Yellow = Warning, Red = Emergency
-  const statusBgColor = isCritical
-    ? '#FEF2F2'
-    : isSuspicious
-    ? '#FFFBEB'
-    : '#ECFDF5';
-
-  const statusBorderColor = isCritical
-    ? '#FECACA'
-    : isSuspicious
-    ? '#FDE68A'
-    : '#A7F3D0';
-
-  const statusTextColor = isCritical
-    ? '#DC2626'
-    : isSuspicious
-    ? '#D97706'
-    : '#059669';
-
-  const dotColor = isCritical ? '#FF383C' : isSuspicious ? '#F59E0B' : '#10B981';
-
   return (
     <View style={styles.container}>
-      {/* Top Brand Bar */}
+      {/* Top Brand Bar (Shield icon removed as requested) */}
       <View style={styles.topRow}>
         <View style={styles.brandGroup}>
-          <View
-            style={[
-              styles.shieldIconContainer,
-              {
-                backgroundColor: isCritical
-                  ? '#FEF2F2'
-                  : isSuspicious
-                  ? '#FFFBEB'
-                  : '#ECFDF5',
-                borderColor: statusBorderColor,
-              },
-            ]}
-          >
-            {isCritical ? (
-              <ShieldAlert size={26} color="#FF383C" />
-            ) : (
-              <ShieldCheck size={26} color="#10B981" />
-            )}
-          </View>
-
-          <View>
-            <View style={styles.titleBadgeRow}>
-              <Text style={styles.appTitle}>SeniorShield</Text>
-              {/* Neutral AI Badge */}
-              <View style={styles.aiBadge}>
-                <Text style={styles.aiBadgeText}>AI 2.5</Text>
-              </View>
+          <View style={styles.titleBadgeRow}>
+            <Text style={styles.appTitle}>SeniorShield</Text>
+            {/* Solid AI Badge */}
+            <View style={styles.aiBadge}>
+              <Text style={styles.aiBadgeText}>AI 2.5</Text>
             </View>
-            <Text style={styles.appSubtitle}>Autonomous Scam Defense</Text>
           </View>
+          <Text style={styles.appSubtitle}>Autonomous Scam Defense</Text>
         </View>
 
         {/* Settings Pill */}
@@ -87,27 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
         </TouchableOpacity>
       </View>
 
-      {/* Semantic Protection Status Pill */}
-      <View
-        style={[
-          styles.statusPill,
-          { backgroundColor: statusBgColor, borderColor: statusBorderColor },
-        ]}
-      >
-        <View style={styles.statusLeft}>
-          <View style={[styles.statusDot, { backgroundColor: dotColor }]} />
-          <Text style={[styles.statusText, { color: statusTextColor }]}>
-            {isCritical
-              ? 'DANGER DETECTED'
-              : isSuspicious
-              ? 'CAUTION ADVISED'
-              : 'SHIELD ACTIVE & MONITORING'}
-          </Text>
-        </View>
-        <Text style={styles.statusRightText}>Live Guard</Text>
-      </View>
-
-      {/* Emergency Cyber Helpline (1930) Capsule Button — RED ONLY FOR EMERGENCY */}
+      {/* Emergency Cyber Helpline (1930) Solid Capsule Button */}
       <TouchableOpacity
         style={styles.helplineButton}
         onPress={onCallHelpline}
@@ -140,17 +74,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   brandGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  shieldIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
   },
   titleBadgeRow: {
     flexDirection: 'row',
@@ -158,30 +82,28 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   appTitle: {
-    fontSize: 21,
+    fontSize: 22,
     fontWeight: '900',
     color: '#1F1F1F',
     letterSpacing: -0.5,
   },
   aiBadge: {
-    backgroundColor: '#F1F5F9',
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    backgroundColor: '#1F1F1F', // Solid badge
+    paddingHorizontal: 9,
+    paddingVertical: 3,
     borderRadius: 9999,
   },
   aiBadgeText: {
     fontSize: 10,
-    fontWeight: '800',
-    color: '#475569',
+    fontWeight: '900',
+    color: '#FFFFFF',
     letterSpacing: 0.5,
   },
   appSubtitle: {
     fontSize: 12,
     fontWeight: '600',
     color: '#8E8E93',
-    marginTop: 1,
+    marginTop: 2,
   },
   settingsButton: {
     backgroundColor: '#FFFFFF',
@@ -204,38 +126,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#1F1F1F',
   },
-  statusPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 9,
-    paddingHorizontal: 14,
-    borderRadius: 9999,
-    borderWidth: 1,
-    marginBottom: 10,
-  },
-  statusLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  statusRightText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#8E8E93',
-  },
   helplineButton: {
-    backgroundColor: '#FF383C', // Strictly for Emergency
+    backgroundColor: '#FF383C', // Solid Red Emergency Button
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

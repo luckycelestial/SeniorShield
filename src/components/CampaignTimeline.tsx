@@ -20,39 +20,36 @@ export const CampaignTimeline: React.FC<CampaignTimelineProps> = ({ events, stag
     );
   }
 
+  // Solid semantic stage badge colors
   const getStageInfo = (currStage: CampaignStage) => {
     switch (currStage) {
       case 'EXTRACTION_ATTEMPT':
         return {
           label: 'CRITICAL ATTACK STAGE',
-          textColor: '#DC2626',
-          bgColor: '#FEF2F2',
-          borderColor: '#FECACA',
-          iconColor: '#FF383C',
+          bgColor: '#FF383C', // Solid Red
+          textColor: '#FFFFFF',
+          iconColor: '#FFFFFF',
         };
       case 'URGENCY_ESCALATION':
         return {
           label: 'URGENCY ESCALATION',
-          textColor: '#D97706',
-          bgColor: '#FFFBEB',
-          borderColor: '#FDE68A',
-          iconColor: '#F59E0B',
+          bgColor: '#F59E0B', // Solid Amber
+          textColor: '#FFFFFF',
+          iconColor: '#FFFFFF',
         };
       case 'RECONNAISSANCE':
         return {
           label: 'INITIAL PROBING',
-          textColor: '#0284C7',
-          bgColor: '#F0F9FF',
-          borderColor: '#BAE6FD',
-          iconColor: '#0EA5E9',
+          bgColor: '#0284C7', // Solid Sky Blue
+          textColor: '#FFFFFF',
+          iconColor: '#FFFFFF',
         };
       default:
         return {
           label: 'DORMANT / SAFE',
-          textColor: '#059669',
-          bgColor: '#ECFDF5',
-          borderColor: '#A7F3D0',
-          iconColor: '#10B981',
+          bgColor: '#10B981', // Solid Emerald
+          textColor: '#FFFFFF',
+          iconColor: '#FFFFFF',
         };
     }
   };
@@ -64,17 +61,15 @@ export const CampaignTimeline: React.FC<CampaignTimelineProps> = ({ events, stag
       {/* Header Row */}
       <View style={styles.headerRow}>
         <View style={styles.titleGroup}>
-          <GitCommit size={18} color="#FF383C" />
+          <GitCommit size={18} color="#1F1F1F" />
           <Text style={styles.sectionTitle}>Campaign Progression Chain</Text>
         </View>
 
+        {/* Solid Stage Pill */}
         <View
           style={[
             styles.stageBadge,
-            {
-              backgroundColor: stageInfo.bgColor,
-              borderColor: stageInfo.borderColor,
-            },
+            { backgroundColor: stageInfo.bgColor },
           ]}
         >
           <Flame size={12} color={stageInfo.iconColor} />
@@ -105,19 +100,11 @@ export const CampaignTimeline: React.FC<CampaignTimelineProps> = ({ events, stag
                   style={[
                     styles.nodeCircle,
                     {
-                      backgroundColor: isSMS ? '#F0F9FF' : '#FEF2F2',
-                      borderColor: isSMS ? '#BAE6FD' : '#FECACA',
+                      backgroundColor: isSMS ? '#0284C7' : '#FF383C',
                     },
                   ]}
                 >
-                  <Text
-                    style={[
-                      styles.nodeNumber,
-                      { color: isSMS ? '#0284C7' : '#DC2626' },
-                    ]}
-                  >
-                    {index + 1}
-                  </Text>
+                  <Text style={styles.nodeNumber}>{index + 1}</Text>
                 </View>
                 {index < events.length - 1 && <View style={styles.connectorLine} />}
               </View>
@@ -125,26 +112,21 @@ export const CampaignTimeline: React.FC<CampaignTimelineProps> = ({ events, stag
               {/* Event Content Card */}
               <View style={styles.eventCard}>
                 <View style={styles.eventHeader}>
+                  {/* Solid Event Type Pill */}
                   <View
                     style={[
                       styles.eventTypeBadge,
                       {
-                        backgroundColor: isSMS ? '#F0F9FF' : '#FEF2F2',
-                        borderColor: isSMS ? '#BAE6FD' : '#FECACA',
+                        backgroundColor: isSMS ? '#0284C7' : '#FF383C',
                       },
                     ]}
                   >
                     {isSMS ? (
-                      <MessageSquare size={12} color="#0EA5E9" />
+                      <MessageSquare size={12} color="#FFFFFF" />
                     ) : (
-                      <PhoneIncoming size={12} color="#FF383C" />
+                      <PhoneIncoming size={12} color="#FFFFFF" />
                     )}
-                    <Text
-                      style={[
-                        styles.eventTypeText,
-                        { color: isSMS ? '#0284C7' : '#DC2626' },
-                      ]}
-                    >
+                    <Text style={styles.eventTypeText}>
                       {event.type}
                     </Text>
                   </View>
@@ -223,10 +205,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
     borderRadius: 9999,
-    borderWidth: 1,
   },
   stageBadgeText: {
     fontSize: 10,
@@ -258,11 +239,11 @@ const styles = StyleSheet.create({
     borderRadius: 13,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
   },
   nodeNumber: {
     fontSize: 11,
     fontWeight: '900',
+    color: '#FFFFFF',
   },
   connectorLine: {
     width: 2,
@@ -289,14 +270,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-    borderWidth: 1,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: 9999,
   },
   eventTypeText: {
     fontSize: 10,
     fontWeight: '800',
+    color: '#FFFFFF',
     letterSpacing: 0.5,
   },
   timeAgoText: {
@@ -311,7 +292,7 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
   senderHighlight: {
-    color: '#FF383C',
+    color: '#1F1F1F',
     fontWeight: '800',
   },
   contentDetailsText: {

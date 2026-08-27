@@ -48,24 +48,12 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
   const isSuspicious = report.threat_level === 'SUSPICIOUS';
   const isSafe = report.threat_level === 'SAFE';
 
-  // Strict semantic colors: Green = Safe, Yellow = Warning, Red = Emergency
-  const cardBorderColor = isCritical
-    ? '#FECACA'
+  // Solid semantic badge backgrounds
+  const solidBadgeBg = isCritical
+    ? '#FF383C' // Solid Red
     : isSuspicious
-    ? '#FDE68A'
-    : '#A7F3D0';
-
-  const badgeBg = isCritical
-    ? '#FEF2F2'
-    : isSuspicious
-    ? '#FFFBEB'
-    : '#ECFDF5';
-
-  const badgeTextColor = isCritical
-    ? '#DC2626'
-    : isSuspicious
-    ? '#D97706'
-    : '#059669';
+    ? '#F59E0B' // Solid Amber
+    : '#10B981'; // Solid Emerald
 
   const handleAlertGuardian = () => {
     const alertMessage =
@@ -91,19 +79,19 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
   };
 
   return (
-    <View style={[styles.cardContainer, { borderColor: cardBorderColor }]}>
-      {/* Top Header: Badge & Confidence */}
+    <View style={styles.cardContainer}>
+      {/* Top Header: Solid Threat Badge & Solid Confidence Pill */}
       <View style={styles.headerRow}>
         <View
           style={[
             styles.threatBadge,
-            { backgroundColor: badgeBg, borderColor: cardBorderColor },
+            { backgroundColor: solidBadgeBg },
           ]}
         >
-          {isCritical && <AlertOctagon size={18} color="#FF383C" />}
-          {isSuspicious && <AlertTriangle size={18} color="#F59E0B" />}
-          {isSafe && <CheckCircle size={18} color="#10B981" />}
-          <Text style={[styles.badgeText, { color: badgeTextColor }]}>
+          {isCritical && <AlertOctagon size={16} color="#FFFFFF" />}
+          {isSuspicious && <AlertTriangle size={16} color="#FFFFFF" />}
+          {isSafe && <CheckCircle size={16} color="#FFFFFF" />}
+          <Text style={styles.badgeText}>
             {report.threat_level} THREAT
           </Text>
         </View>
@@ -140,11 +128,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
         style={[
           styles.actionBox,
           {
-            backgroundColor: isCritical
-              ? '#FEF2F2'
-              : isSuspicious
-              ? '#FFFBEB'
-              : '#ECFDF5',
+            backgroundColor: '#F8FAFC',
             borderLeftColor: isCritical
               ? '#FF383C' // Red for Emergency
               : isSuspicious
@@ -170,7 +154,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
         <Text style={styles.actionText}>{report.action_required}</Text>
       </View>
 
-      {/* Targeted Assets Chips */}
+      {/* Targeted Assets Chips (Solid Pills) */}
       {report.assets_at_risk && report.assets_at_risk.length > 0 && (
         <View style={styles.assetsSection}>
           <View style={styles.assetsHeader}>
@@ -200,7 +184,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
             <Text style={styles.blockButtonText}>Hang Up & Block Sender</Text>
           </TouchableOpacity>
 
-          {/* Neutral Charcoal for SMS notification */}
+          {/* Solid Charcoal for SMS notification */}
           <TouchableOpacity
             style={styles.guardianButton}
             onPress={handleAlertGuardian}
@@ -263,6 +247,7 @@ const styles = StyleSheet.create({
     padding: 20,
     marginVertical: 10,
     borderWidth: 1,
+    borderColor: '#E6E6E6',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.05,
@@ -279,28 +264,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
     borderRadius: 9999,
-    borderWidth: 1,
   },
   badgeText: {
     fontSize: 11,
     fontWeight: '900',
+    color: '#FFFFFF', // High contrast white on solid color
     letterSpacing: 0.5,
   },
   confidencePill: {
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E6E6E6',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    backgroundColor: '#1F1F1F', // Solid Dark Pill
+    paddingHorizontal: 12,
+    paddingVertical: 5,
     borderRadius: 9999,
   },
   confidenceText: {
     fontSize: 11,
-    fontWeight: '700',
-    color: '#8E8E93',
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
   scamTitle: {
     fontSize: 21,
@@ -311,9 +294,9 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   entityBanner: {
-    backgroundColor: '#F0F9FF',
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#BAE6FD',
+    borderColor: '#E6E6E6',
     borderRadius: 16,
     padding: 12,
     flexDirection: 'row',
@@ -361,6 +344,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     borderLeftWidth: 4,
+    borderWidth: 1,
+    borderColor: '#E6E6E6',
     marginBottom: 12,
   },
   actionLabel: {
@@ -395,9 +380,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   assetChip: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: '#F1F5F9', // Solid clean pill
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: '#CBD5E1',
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 9999,
@@ -405,14 +390,14 @@ const styles = StyleSheet.create({
   assetChipText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#B45309',
+    color: '#1F1F1F',
   },
   actionButtonsCol: {
     gap: 10,
     marginTop: 4,
   },
   blockButton: {
-    backgroundColor: '#FF383C', // Emergency action
+    backgroundColor: '#FF383C', // Solid Emergency Red
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -431,7 +416,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   guardianButton: {
-    backgroundColor: '#1F1F1F', // Neutral primary action
+    backgroundColor: '#1F1F1F', // Solid Charcoal
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
