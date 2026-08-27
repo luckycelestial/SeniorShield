@@ -42,7 +42,11 @@ class SentinelForegroundService : Service() {
         const val ALERT_CHANNEL_ID = "seniorshield_emergency_alert_channel"
         const val NOTIFICATION_ID = 1001
         const val CALL_ALERT_NOTIFICATION_ID = 2002
+        const val PREDICTIVE_ALERT_NOTIFICATION_ID = 3003
         private const val TAG = "SeniorShieldSentinel"
+
+        // Armed scam caller numbers predicted by AI from recent attack messages
+        private val armedScamNumbers = HashSet<String>()
 
         fun startService(context: Context) {
             val intent = Intent(context, SentinelForegroundService::class.java)
@@ -58,10 +62,15 @@ class SentinelForegroundService : Service() {
                 val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
                 val cleanNumber = incomingNumber.replace("[^0-9+]".toRegex(), "")
+                val isArmedPredictiveMatch = armedScamNumbers.any { armed ->
+                    cleanNumber.contains(armed.replace("[^0-9+]".toRegex(), ""))
+                }
                 val isVoipSpoof = cleanNumber.startsWith("+92") || cleanNumber.startsWith("+880") || cleanNumber.startsWith("+44") || cleanNumber.startsWith("+1")
                 val isMobileNumber = cleanNumber.startsWith("+91") || cleanNumber.length == 10
 
-                val riskTag = if (isVoipSpoof) {
+                val riskTag = if (isArmedPredictiveMatch) {
+                    "🚨 PREDICTED SCAM CALLER: Matches Recent Fraud SMS"
+                } else if (isVoipSpoof) {
                     "⚠️ HIGH RISK: International / Spoofed Number"
                 } else if (isMobileNumber) {
                     "⚠️ CAUTION: Unverified Unknown Mobile"
@@ -69,7 +78,11 @@ class SentinelForegroundService : Service() {
                     "⚠️ SCAM CALL WARNING"
                 }
 
-                val directive = "DO NOT ANSWER! Known scam vector attempting extortion or bank fraud. Let the phone ring."
+                val directive = if (isArmedPredictiveMatch) {
+                    "DO NOT ANSWER! This is the follow-up extortion call from the scam message received earlier. Let it ring."
+                } else {
+                    "DO NOT ANSWER! Known scam vector attempting extortion or bank fraud. Let the phone ring."
+                }
 
                 val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
                 val pendingIntent = PendingIntent.getActivity(
@@ -106,6 +119,13 @@ class SentinelForegroundService : Service() {
                 Log.d(TAG, "Pre-Call notification dismissed.")
             } catch (e: Exception) {
                 Log.e(TAG, "Error dismissing Pre-Call Notification", e)
+            }
+        }
+
+        fun armPredictiveCaller(number: String) {
+            if (number.isNotBlank()) {
+                armedScamNumbers.add(number)
+                Log.d(TAG, "🔮 Armed Predictive Scam Tripwire for caller: $number")
             }
         }
     }
@@ -244,7 +264,9 @@ class SentinelForegroundService : Service() {
                   "threat_level": "SAFE" | "SUSPICIOUS" | "CRITICAL",
                   "scam_type": string,
                   "senior_explanation": string,
-                  "action_required": string
+                  "action_required": string,
+                  "extracted_callback_phone": string or null,
+                  "likely_followup_call": boolean
                 }
             """.trimIndent()
 
@@ -281,11 +303,23 @@ class SentinelForegroundService : Service() {
                 val scamType = verdict.optString("scam_type", "Scam Alert")
                 val explanation = verdict.optString("senior_explanation", "Suspicious activity detected.")
                 val action = verdict.optString("action_required", "Do not click links or share passwords.")
+                val callbackPhone = verdict.optString("extracted_callback_phone", "")
+                val likelyFollowup = verdict.optBoolean("likely_followup_call", false)
 
-                Log.d(TAG, "🛡️ Background Gemini Verdict: [$threatLevel] $scamType (is_scam=$isScam)")
+                Log.d(TAG, "🛡️ Background Gemini Verdict: [$threatLevel] $scamType (is_scam=$isScam, callback=$callbackPhone)")
 
-                if (isScam || threatLevel == "CRITICAL") {
+                if (isScam || threatLevel == "CRITICAL" || likelyFollowup) {
+                    // Arm Predictive Tripwire for future incoming calls
+                    if (callbackPhone.isNotBlank() && callbackPhone != "null") {
+                        armPredictiveCaller(callbackPhone)
+                    }
+                    armPredictiveCaller(sender)
+
+                    // 1. Show Main Scam Alert
                     showEmergencyScamAlert(sender, scamType, explanation, action)
+
+                    // 2. Show Predictive Pre-Call Warning before the call arrives!
+                    showPredictiveCallWarning(sender, callbackPhone, scamType)
                 }
             } else {
                 Log.w(TAG, "Gemini call failed with code: ${conn.responseCode}")
@@ -293,6 +327,34 @@ class SentinelForegroundService : Service() {
         } catch (e: Exception) {
             Log.e(TAG, "Background AI analysis exception", e)
         }
+    }
+
+    private fun showPredictiveCallWarning(sender: String, callbackPhone: String, scamType: String) {
+        val targetPhone = if (callbackPhone.isNotBlank() && callbackPhone != "null") callbackPhone else sender
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            PREDICTIVE_ALERT_NOTIFICATION_ID,
+            launchIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val warningMsg = "A scammer is likely to call your phone shortly regarding '$scamType' from $targetPhone. DO NOT ANSWER when the phone rings!"
+
+        val notification = NotificationCompat.Builder(this, ALERT_CHANNEL_ID)
+            .setContentTitle("🔮 PREDICTIVE CALL WARNING")
+            .setContentText("Incoming scam call expected soon from $targetPhone")
+            .setStyle(NotificationCompat.BigTextStyle().bigText(warningMsg))
+            .setSmallIcon(android.R.drawable.stat_sys_warning)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setVibrate(longArrayOf(0, 300, 200, 300))
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(PREDICTIVE_ALERT_NOTIFICATION_ID, notification)
+        Log.d(TAG, "🔮 Predictive Pre-Call Warning notification posted before call arrives!")
     }
 
     private fun showEmergencyScamAlert(sender: String, scamType: String, explanation: String, action: String) {
