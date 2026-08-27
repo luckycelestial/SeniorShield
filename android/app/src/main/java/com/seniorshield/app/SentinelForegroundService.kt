@@ -108,16 +108,14 @@ class SentinelForegroundService : Service() {
                 manager.notify(CALL_ALERT_NOTIFICATION_ID, notification)
                 Log.d(TAG, "🚨 Heads-Up Pre-Call Notification posted for $incomingNumber")
 
-                // 2. Launch Truecaller-Style Floating Overlay Card
-                val popupIntent = Intent(context, PreCallPopupActivity::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                    putExtra("callerNumber", incomingNumber)
-                    putExtra("callerName", if (isArmedPredictiveMatch) "🚨 PREDICTED SCAM OPERATOR" else "⚠️ Suspected Scam Caller")
-                    putExtra("spamScore", if (isArmedPredictiveMatch) 99 else 95)
-                    putExtra("directive", directive)
-                }
-                context.startActivity(popupIntent)
-                Log.d(TAG, "🎴 Truecaller-Style Floating Pre-Call Card launched!")
+                // 2. Launch Truecaller-Style Floating Overlay Card via WindowManager
+                PreCallOverlayManager.showOverlayCard(
+                    context,
+                    incomingNumber,
+                    if (isArmedPredictiveMatch) "🚨 PREDICTED SCAM OPERATOR" else "⚠️ Suspected Scam Caller",
+                    if (isArmedPredictiveMatch) 99 else 95,
+                    directive
+                )
             } catch (e: Exception) {
                 Log.e(TAG, "Error posting Pre-Call Alert Notification", e)
             }
@@ -127,7 +125,8 @@ class SentinelForegroundService : Service() {
             try {
                 val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 manager.cancel(CALL_ALERT_NOTIFICATION_ID)
-                Log.d(TAG, "Pre-Call notification dismissed.")
+                PreCallOverlayManager.dismissOverlay(context)
+                Log.d(TAG, "Pre-Call notification & overlay dismissed.")
             } catch (e: Exception) {
                 Log.e(TAG, "Error dismissing Pre-Call Notification", e)
             }
