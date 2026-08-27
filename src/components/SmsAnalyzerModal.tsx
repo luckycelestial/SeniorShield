@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   ScrollView,
@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { MessageSquare, X, Sparkles, Send, Bell } from 'lucide-react-native';
+import * as Clipboard from 'expo-clipboard';
+import { MessageSquare, X, Sparkles, Send, Bell, ClipboardPaste } from 'lucide-react-native';
 import { triggerTestSMSNotification } from '../services/notificationReader';
 
 interface SmsAnalyzerModalProps {
@@ -45,8 +46,40 @@ export const SmsAnalyzerModal: React.FC<SmsAnalyzerModalProps> = ({
   onClose,
   onAnalyzeSms,
 }) => {
-  const [sender, setSender] = useState<string>('VM-TNEBPO');
-  const [smsText, setSmsText] = useState<string>(PRESET_SMS_TEMPLATES[0].text);
+  const [sender, setSender] = useState<string>('Incoming SMS');
+  const [smsText, setSmsText] = useState<string>('');
+  const [clipboardText, setClipboardText] = useState<string>('');
+
+  useEffect(() => {
+    if (visible) {
+      checkClipboardContent();
+    }
+  }, [visible]);
+
+  const checkClipboardContent = async () => {
+    try {
+      const text = await Clipboard.getStringAsync();
+      if (text && text.trim().length > 0) {
+        setClipboardText(text.trim());
+      }
+    } catch (e) {
+      console.log('[SmsAnalyzer] Clipboard check skipped:', e);
+    }
+  };
+
+  const handlePasteFromClipboard = () => {
+    if (clipboardText) {
+      setSmsText(clipboardText);
+      setSender('Friend / Copied SMS');
+    }
+  };
+
+  const handlePasteAndAnalyzeInstantly = () => {
+    const textToAnalyze = smsText.trim() || clipboardText.trim();
+    if (!textToAnalyze) return;
+    onAnalyzeSms(sender.trim() || 'Friend / SMS', textToAnalyze);
+    onClose();
+  };
 
   const handleApplyPreset = (preset: typeof PRESET_SMS_TEMPLATES[0]) => {
     setSender(preset.sender);
@@ -55,14 +88,14 @@ export const SmsAnalyzerModal: React.FC<SmsAnalyzerModalProps> = ({
 
   const handleAnalyze = () => {
     if (!smsText.trim()) return;
-    onAnalyzeSms(sender.trim() || 'Unknown Sender', smsText.trim());
+    onAnalyzeSms(sender.trim() || 'Incoming SMS', smsText.trim());
     onClose();
   };
 
   const handleSimulateNotification = async () => {
     if (!smsText.trim()) return;
     await triggerTestSMSNotification(sender.trim() || 'SMS Alert', smsText.trim());
-    onAnalyzeSms(sender.trim() || 'Unknown Sender', smsText.trim());
+    onAnalyzeSms(sender.trim() || 'Incoming SMS', smsText.trim());
     onClose();
   };
 
@@ -83,7 +116,7 @@ export const SmsAnalyzerModal: React.FC<SmsAnalyzerModalProps> = ({
               </View>
               <View>
                 <Text style={styles.modalTitle}>SMS & Notification Analyzer</Text>
-                <Text style={styles.modalSubtitle}>Read & Analyze Raw Inflow Content</Text>
+                <Text style={styles.modalSubtitle}>Analyze Friend Messages & Real SMS</Text>
               </View>
             </View>
             <TouchableOpacity
@@ -96,41 +129,53 @@ export const SmsAnalyzerModal: React.FC<SmsAnalyzerModalProps> = ({
           </View>
 
           <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-            {/* 1-Tap Quick Presets */}
-            <Text style={styles.sectionLabel}>QUICK TEST SCENARIOS</Text>
-            <View style={styles.presetsContainer}>
-              {PRESET_SMS_TEMPLATES.map((preset, idx) => (
+            {/* 1-Tap Clipboard Ingestion Banner */}
+            {clipboardText.length > 0 && (
+              <View style={styles.clipboardCard}>
+                <View style={styles.clipboardHeader}>
+                  <ClipboardPaste size={16} color="#0284C7" />
+                  <Text style={styles.clipboardTitle}>COPIED MESSAGE DETECTED</Text>
+                </View>
+                <Text style={styles.clipboardPreview} numberOfLines={2}>
+                  "{clipboardText}"
+                </Text>
                 <TouchableOpacity
-                  key={idx}
-                  style={styles.presetButton}
-                  onPress={() => handleApplyPreset(preset)}
-                  activeOpacity={0.85}
+                  style={styles.pasteAnalyzeButton}
+                  onPress={handlePasteAndAnalyzeInstantly}
+                  activeOpacity={0.88}
                 >
-                  <Sparkles size={14} color="#1F1F1F" />
-                  <Text style={styles.presetText} numberOfLines={1}>
-                    {preset.label}
+                  <Send size={14} color="#FFFFFF" />
+                  <Text style={styles.pasteAnalyzeText}>
+                    Paste & Analyze Copied SMS Instantly
                   </Text>
                 </TouchableOpacity>
-              ))}
-            </View>
+              </View>
+            )}
 
             {/* Sender / Header Input */}
-            <Text style={styles.inputLabel}>SENDER HEADER / NUMBER</Text>
+            <Text style={styles.inputLabel}>SENDER HEADER / FRIEND'S NUMBER</Text>
             <TextInput
               style={styles.senderInput}
               value={sender}
               onChangeText={setSender}
-              placeholder="e.g. VK-HDFCBK or +919876543210"
+              placeholder="e.g. +91 98765 43210 or VM-TNEB"
               placeholderTextColor="#8E8E93"
             />
 
             {/* Message Body Input */}
-            <Text style={styles.inputLabel}>SMS / NOTIFICATION MESSAGE CONTENT</Text>
+            <View style={styles.labelRow}>
+              <Text style={styles.inputLabel}>SMS MESSAGE TEXT TO ANALYZE</Text>
+              {clipboardText.length > 0 && (
+                <TouchableOpacity onPress={handlePasteFromClipboard}>
+                  <Text style={styles.pasteActionText}>📋 Paste Text</Text>
+                </TouchableOpacity>
+              )}
+            </View>
             <TextInput
               style={styles.bodyInput}
               value={smsText}
               onChangeText={setSmsText}
-              placeholder="Paste SMS content or notification text here..."
+              placeholder="Paste message received from your friend or incoming SMS here..."
               placeholderTextColor="#8E8E93"
               multiline={true}
               numberOfLines={4}
@@ -145,7 +190,7 @@ export const SmsAnalyzerModal: React.FC<SmsAnalyzerModalProps> = ({
                 activeOpacity={0.88}
               >
                 <Send size={16} color="#FFFFFF" />
-                <Text style={styles.analyzeButtonText}>Analyze SMS & Get Verdict</Text>
+                <Text style={styles.analyzeButtonText}>Analyze Message with Gemini 3.5</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -156,6 +201,24 @@ export const SmsAnalyzerModal: React.FC<SmsAnalyzerModalProps> = ({
                 <Bell size={16} color="#1F1F1F" />
                 <Text style={styles.notifyButtonText}>Push Real Notification & Analyze</Text>
               </TouchableOpacity>
+            </View>
+
+            {/* 1-Tap Quick Presets */}
+            <Text style={styles.sectionLabel}>OR SELECT BENCHMARK SCENARIO</Text>
+            <View style={styles.presetsContainer}>
+              {PRESET_SMS_TEMPLATES.map((preset, idx) => (
+                <TouchableOpacity
+                  key={idx}
+                  style={styles.presetButton}
+                  onPress={() => handleApplyPreset(preset)}
+                  activeOpacity={0.85}
+                >
+                  <Sparkles size={14} color="#1F1F1F" />
+                  <Text style={styles.presetText} numberOfLines={1}>
+                    {preset.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </ScrollView>
         </View>
@@ -225,17 +288,69 @@ const styles = StyleSheet.create({
   scrollView: {
     maxHeight: 520,
   },
+  clipboardCard: {
+    backgroundColor: '#F0F9FF',
+    borderWidth: 1,
+    borderColor: '#BAE6FD',
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 14,
+  },
+  clipboardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
+  clipboardTitle: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#0284C7',
+    letterSpacing: 0.5,
+  },
+  clipboardPreview: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#1F1F1F',
+    marginBottom: 10,
+    lineHeight: 16,
+  },
+  pasteAnalyzeButton: {
+    backgroundColor: '#0284C7',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 9999,
+  },
+  pasteAnalyzeText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  pasteActionText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#0284C7',
+  },
   sectionLabel: {
     fontSize: 10,
     fontWeight: '800',
     color: '#8E8E93',
     letterSpacing: 0.5,
     marginBottom: 8,
-    marginTop: 4,
+    marginTop: 12,
   },
   presetsContainer: {
     gap: 6,
-    marginBottom: 14,
+    marginBottom: 24,
   },
   presetButton: {
     backgroundColor: '#F8FAFC',
@@ -283,13 +398,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: '#1F1F1F',
-    minHeight: 90,
+    minHeight: 80,
     lineHeight: 20,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   actionsContainer: {
-    gap: 10,
-    paddingBottom: 24,
+    gap: 8,
+    marginBottom: 6,
   },
   analyzeButton: {
     backgroundColor: '#1F1F1F',
@@ -318,7 +433,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    paddingVertical: 13,
+    paddingVertical: 12,
     borderRadius: 9999,
   },
   notifyButtonText: {
