@@ -48,6 +48,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
   const isSuspicious = report.threat_level === 'SUSPICIOUS';
   const isSafe = report.threat_level === 'SAFE';
 
+  // Strict semantic colors: Green = Safe, Yellow = Warning, Red = Emergency
   const cardBorderColor = isCritical
     ? '#FECACA'
     : isSuspicious
@@ -120,7 +121,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
       {/* Impersonated Entity Banner */}
       {report.impersonated_entity && report.impersonated_entity !== 'None' && (
         <View style={styles.entityBanner}>
-          <Building2 size={18} color="#FF383C" />
+          <Building2 size={18} color="#0284C7" />
           <View style={styles.entityInfo}>
             <Text style={styles.entityLabel}>IMPERSONATED ENTITY</Text>
             <Text style={styles.entityValue}>{report.impersonated_entity}</Text>
@@ -145,10 +146,10 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
               ? '#FFFBEB'
               : '#ECFDF5',
             borderLeftColor: isCritical
-              ? '#FF383C'
+              ? '#FF383C' // Red for Emergency
               : isSuspicious
-              ? '#F59E0B'
-              : '#10B981',
+              ? '#F59E0B' // Yellow for Warning
+              : '#10B981', // Green for Safe
           },
         ]}
       >
@@ -189,6 +190,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
       {/* Action Buttons */}
       {(isCritical || isSuspicious) && (
         <View style={styles.actionButtonsCol}>
+          {/* Red ONLY for emergency block */}
           <TouchableOpacity
             style={styles.blockButton}
             onPress={handleBlockNumber}
@@ -198,12 +200,13 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
             <Text style={styles.blockButtonText}>Hang Up & Block Sender</Text>
           </TouchableOpacity>
 
+          {/* Neutral Charcoal for SMS notification */}
           <TouchableOpacity
             style={styles.guardianButton}
             onPress={handleAlertGuardian}
             activeOpacity={0.88}
           >
-            <BellRing size={20} color="#1F1F1F" />
+            <BellRing size={20} color="#FFFFFF" />
             <Text style={styles.guardianButtonText}>
               Alert Family Guardian (SMS)
             </Text>
@@ -308,9 +311,9 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
   },
   entityBanner: {
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F0F9FF',
     borderWidth: 1,
-    borderColor: '#E6E6E6',
+    borderColor: '#BAE6FD',
     borderRadius: 16,
     padding: 12,
     flexDirection: 'row',
@@ -324,13 +327,13 @@ const styles = StyleSheet.create({
   entityLabel: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#8E8E93',
+    color: '#0284C7',
     letterSpacing: 0.5,
   },
   entityValue: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#1F1F1F',
+    color: '#0369A1',
     marginTop: 2,
   },
   explanationBox: {
@@ -409,7 +412,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   blockButton: {
-    backgroundColor: '#FF383C',
+    backgroundColor: '#FF383C', // Emergency action
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -428,9 +431,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   guardianButton: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E6E6E6',
+    backgroundColor: '#1F1F1F', // Neutral primary action
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -438,13 +439,13 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 9999,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 2,
   },
   guardianButtonText: {
-    color: '#1F1F1F',
+    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '800',
   },

@@ -17,6 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
   const isCritical = threatLevel === 'CRITICAL';
   const isSuspicious = threatLevel === 'SUSPICIOUS';
 
+  // Strict semantic colors: Green = Safe, Yellow = Warning, Red = Emergency
   const statusBgColor = isCritical
     ? '#FEF2F2'
     : isSuspicious
@@ -65,6 +66,7 @@ export const Header: React.FC<HeaderProps> = ({
           <View>
             <View style={styles.titleBadgeRow}>
               <Text style={styles.appTitle}>SeniorShield</Text>
+              {/* Neutral AI Badge */}
               <View style={styles.aiBadge}>
                 <Text style={styles.aiBadgeText}>AI 2.5</Text>
               </View>
@@ -85,7 +87,7 @@ export const Header: React.FC<HeaderProps> = ({
         </TouchableOpacity>
       </View>
 
-      {/* Luminous Protection Status Pill */}
+      {/* Semantic Protection Status Pill */}
       <View
         style={[
           styles.statusPill,
@@ -105,7 +107,7 @@ export const Header: React.FC<HeaderProps> = ({
         <Text style={styles.statusRightText}>Live Guard</Text>
       </View>
 
-      {/* Direct Cyber Helpline (1930) Capsule Button */}
+      {/* Emergency Cyber Helpline (1930) Capsule Button — RED ONLY FOR EMERGENCY */}
       <TouchableOpacity
         style={styles.helplineButton}
         onPress={onCallHelpline}
@@ -162,9 +164,9 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   aiBadge: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: '#F1F5F9',
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: '#CBD5E1',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 9999,
@@ -172,7 +174,7 @@ const styles = StyleSheet.create({
   aiBadgeText: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#FF383C',
+    color: '#475569',
     letterSpacing: 0.5,
   },
   appSubtitle: {
@@ -233,7 +235,7 @@ const styles = StyleSheet.create({
     color: '#8E8E93',
   },
   helplineButton: {
-    backgroundColor: '#FF383C',
+    backgroundColor: '#FF383C', // Strictly for Emergency
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

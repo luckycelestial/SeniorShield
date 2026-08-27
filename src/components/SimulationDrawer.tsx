@@ -122,6 +122,7 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({
                         </Text>
                       </View>
 
+                      {/* Neutral Charcoal for Simulation action */}
                       <View style={styles.simulateButton}>
                         <PlayCircle size={14} color="#FFFFFF" />
                         <Text style={styles.simulateButtonText}>Simulate</Text>
@@ -251,7 +252,7 @@ const styles = StyleSheet.create({
   categoryLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#FF383C',
+    color: '#1F1F1F',
     marginBottom: 4,
   },
   descriptionText: {
@@ -280,7 +281,7 @@ const styles = StyleSheet.create({
     color: '#8E8E93',
   },
   simulateButton: {
-    backgroundColor: '#FF383C',
+    backgroundColor: '#1F1F1F', // Neutral Charcoal Action
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,

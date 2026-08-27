@@ -152,11 +152,12 @@ export default function App() {
   const isHighRisk = riskScore > 70;
   const isMedRisk = riskScore > 30;
 
+  // Strict semantic colors: Green = Safe, Yellow = Warning, Red = Emergency
   const scoreTextColor = isHighRisk
-    ? '#FF383C'
+    ? '#FF383C' // Red for Emergency / High Risk
     : isMedRisk
-    ? '#F59E0B'
-    : '#10B981';
+    ? '#F59E0B' // Yellow for Warning / Moderate Risk
+    : '#10B981'; // Green for Safe / Low Risk
 
   const scoreBarColor = isHighRisk
     ? '#FF383C'
@@ -187,7 +188,7 @@ export default function App() {
               <View style={styles.gaugeHeader}>
                 <View style={styles.gaugeHeaderLeft}>
                   <View style={styles.gaugeIconBox}>
-                    <Activity size={18} color="#FF383C" />
+                    <Activity size={18} color="#0284C7" />
                   </View>
                   <Text style={styles.gaugeTitle}>CUMULATIVE RISK EXPOSURE</Text>
                 </View>
@@ -219,7 +220,7 @@ export default function App() {
               )}
             </View>
 
-            {/* Primary Action Buttons */}
+            {/* Primary Action Buttons (Neutral Charcoal for Standard Actions) */}
             <View style={styles.actionButtonsRow}>
               <TouchableOpacity
                 style={[
@@ -268,7 +269,7 @@ export default function App() {
               stage={campaignState.campaignStage}
             />
 
-            {/* Senior Golden Safety Rules */}
+            {/* Senior Golden Safety Rules (Yellow/Amber for Warning Tips) */}
             <View style={styles.goldenRulesCard}>
               <View style={styles.goldenRulesHeader}>
                 <Lightbulb size={18} color="#D97706" />
@@ -279,21 +280,21 @@ export default function App() {
 
               <View style={styles.rulesList}>
                 <View style={styles.ruleItem}>
-                  <AlertCircle size={15} color="#FF383C" style={styles.ruleIcon} />
+                  <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
                   <Text style={styles.ruleText}>
                     <Text style={styles.ruleHighlight}>Electricity Boards</Text> never cut off power at night without paper notices.
                   </Text>
                 </View>
 
                 <View style={styles.ruleItem}>
-                  <AlertCircle size={15} color="#FF383C" style={styles.ruleIcon} />
+                  <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
                   <Text style={styles.ruleText}>
                     <Text style={styles.ruleHighlight}>Police & CBI</Text> never arrest citizens over phone or Skype/WhatsApp video calls.
                   </Text>
                 </View>
 
                 <View style={styles.ruleItem}>
-                  <AlertCircle size={15} color="#FF383C" style={styles.ruleIcon} />
+                  <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
                   <Text style={styles.ruleText}>
                     <Text style={styles.ruleHighlight}>Banks</Text> never send apps (.apk links) or ask for OTPs to update KYC.
                   </Text>
@@ -320,7 +321,7 @@ export default function App() {
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
                   <View style={styles.modalTitleGroup}>
-                    <Sliders size={20} color="#FF383C" />
+                    <Sliders size={20} color="#1F1F1F" />
                     <Text style={styles.modalTitle}>Shield Setup & Guardian</Text>
                   </View>
                   <TouchableOpacity
@@ -363,7 +364,7 @@ export default function App() {
                   If left blank, SeniorShield uses its built-in offline intelligence engine.
                 </Text>
 
-                {/* Save Button */}
+                {/* Save Button (Neutral Action) */}
                 <TouchableOpacity
                   style={styles.saveSettingsButton}
                   onPress={() => setIsSettingsVisible(false)}
@@ -427,9 +428,9 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 10,
-    backgroundColor: '#FEF2F2',
+    backgroundColor: '#F0F9FF',
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: '#BAE6FD',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -486,21 +487,21 @@ const styles = StyleSheet.create({
   },
   scanButton: {
     flex: 1.4,
-    backgroundColor: '#FF383C',
+    backgroundColor: '#1F1F1F', // Neutral Charcoal for Standard Scan
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
     minHeight: 52,
     borderRadius: 9999,
-    shadowColor: '#FF383C',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 3,
   },
   scanButtonDisabled: {
-    backgroundColor: '#DC143C',
+    backgroundColor: '#475569',
     opacity: 0.7,
   },
   scanButtonText: {
@@ -575,7 +576,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   ruleHighlight: {
-    color: '#FF383C',
+    color: '#B45309', // Amber highlight for warning rules
     fontWeight: '800',
   },
   modalBackdrop: {
@@ -646,7 +647,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   saveSettingsButton: {
-    backgroundColor: '#FF383C',
+    backgroundColor: '#1F1F1F', // Neutral Charcoal Action
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -654,9 +655,9 @@ const styles = StyleSheet.create({
     minHeight: 50,
     borderRadius: 9999,
     marginTop: 6,
-    shadowColor: '#FF383C',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 3,
   },
