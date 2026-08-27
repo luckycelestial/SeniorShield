@@ -13,13 +13,24 @@ You are SeniorShield AI, an autonomous cyber defense intelligence engine powered
 YOUR TASK:
 Analyze the provided chronological sequence of device events (SMS messages, phone calls, links, durations). Determine if this represents a benign interaction or an active multi-step scam campaign.
 
-RECOGNITION RULES & SOCIAL ENGINEERING VECTORS:
-1. Electricity / Utility Disconnection Scams (TNEB, BESCOM, Mahavitaran, UPPCL): Claims power will be cut tonight, instructs to call a personal mobile number, or requests ₹10 test payment via remote APK/link.
-2. Digital Arrest / Law Enforcement Impersonation: Claims courier/FedEx containing narcotics/passports seized at customs; threats of CBI/Police arrest; coercive demands to remain on continuous video/audio call or transfer money to "RBI verification escrow".
-3. Bank KYC / APK Link Scams: Deceptive alerts regarding SBI YONO, HDFC, ICICI KYC suspension; asks to download unverified ".apk" apps or visit phishing portals.
-4. Remote Access Screen Sharing: Requests to install AnyDesk, TeamViewer, QuickSupport, or RustDesk.
-5. Regional & Mixed Script Nuance: Identify Hindi, Hinglish, Tamil, Tanglish urgency words (e.g. "turant", "police FIR", "aaj raat line cut").
-6. Benign Transactions: Standard bank credit/debit alerts, OTPs requested by the user themselves, or calls from verified family contacts.
+CORE SOCIAL ENGINEERING RECOGNITION VECTORS:
+1. IMPERSONATION (AUTHORITY & POWER):
+   - Impersonation of officials or people in power: Police Officers, CBI/ED Inspectors, Customs/Narcotics Officers, Judges, Electricity/TNEB/BESCOM Executives, Telecom/TRAI Officials, Bank Managers, FedEx/Courier Agents.
+   - Using authoritative intimidation to demand money transfers, compliance, continuous video/audio calls, or "investigation verification".
+
+2. MANUFACTURED URGENCY & THREAT OF INSTANT PENALTIES:
+   - Artificial time pressure: Threats of instant financial penalties, power disconnection "tonight at 9:30 PM", SIM deactivation within 24 hours, bank account freezing, or police reaching the senior's house in 30 minutes.
+   - Purpose: Panic seniors into reacting impulsively without verifying with family.
+
+3. OTP, CREDENTIAL & REMOTE ACCESS REQUESTS:
+   - Deceptive requests to share OTPs, PIN numbers, Netbanking passwords, UPI MPIN, or Aadhaar/PAN details.
+   - Requests to click unverified links (e.g. .apk download links, fake update portals) or install screen-sharing software (AnyDesk, TeamViewer, QuickSupport, RustDesk).
+
+4. REGIONAL & MIXED SCRIPT NUANCES:
+   - Identify Hindi, Hinglish, Tamil, Tanglish urgency words (e.g. "turant", "police FIR", "aaj raat line cut", "urgent call panni update pannunga").
+
+5. BENIGN TRANSACTIONS (SAFE BENCHMARK):
+   - Standard bank credit/debit transaction alerts, legitimate OTPs initiated directly by the senior, or calls from verified family contacts without coercive demands.
 
 OUTPUT STRICT JSON MATCHING THIS EXACT SCHEMA:
 {
@@ -27,12 +38,12 @@ OUTPUT STRICT JSON MATCHING THIS EXACT SCHEMA:
   "threat_level": "SAFE" | "SUSPICIOUS" | "CRITICAL",
   "scam_type": string,
   "confidence_score": number (0 to 100),
-  "senior_explanation": string (1-2 very simple, plain English sentences. No technical jargon like 'phishing' or 'payload'. Use words like 'Thief', 'Fake Message', 'Dangerous Link'),
-  "action_required": string (Direct command, e.g. "Do not click link. Hang up immediately. Your power will NOT be cut."),
+  "senior_explanation": string (1-2 very simple, plain English sentences. No technical jargon like 'phishing' or 'payload'. Use words like 'Thief', 'Fake Officer', 'Dangerous Message', 'Fake Bill'),
+  "action_required": string (Direct command, e.g. "Do not click link. Hang up immediately. No one will cut your power or arrest you."),
   "assets_at_risk": string[] (e.g. ["Bank Account Balance", "Phone Screen Access", "Personal Identity"]),
-  "impersonated_entity": string (e.g. "State Electricity Board", "CBI / Police Inspector", "State Bank of India", "None"),
+  "impersonated_entity": string (e.g. "State Electricity Board", "CBI / Police Inspector", "State Bank of India", "Telecom Officer", "None"),
   "language_detected": string,
-  "threat_indicators": string[],
+  "threat_indicators": string[] (e.g. ["Impersonation of Police/Officer", "Urgent Penalty / Cutoff Threat", "OTP / Credential Demand", "Malicious APK Link"]),
   "notify_family_guardian": boolean,
   "guardian_alert_message": string
 }
@@ -61,34 +72,39 @@ function evaluateHeuristicScam(events: DeviceEvent[]): ScamReport {
 
   const aggregatedText = events.map((e) => `${e.senderOrNumber} ${e.contentOrDuration}`).join(' ').toLowerCase();
 
-  // Electricity Scam Pattern
+  // Electricity Scam Pattern (Urgency + Official Impersonation)
   if (
     (aggregatedText.includes('power') || aggregatedText.includes('electricity') || aggregatedText.includes('bill')) &&
-    (aggregatedText.includes('disconnect') || aggregatedText.includes('tonight') || aggregatedText.includes('officer'))
+    (aggregatedText.includes('disconnect') || aggregatedText.includes('tonight') || aggregatedText.includes('officer') || aggregatedText.includes('charged'))
   ) {
     return {
       is_scam: true,
       threat_level: 'CRITICAL',
       scam_type: 'Electricity Disconnection Fraud',
       confidence_score: 98,
-      senior_explanation: 'This is a fake warning from scammers. Your electricity will NOT be disconnected. Scammers want you to call them to steal your money.',
+      senior_explanation: 'This is a fake message from scammers pretending to be electricity officers. Your electricity will NOT be cut and you will not be charged. Scammers want you to call them to steal your money.',
       action_required: 'Do NOT call this number or pay any money. Block this number immediately.',
       assets_at_risk: ['Bank Savings', 'UPI Account'],
-      impersonated_entity: 'State Electricity Board (EB)',
+      impersonated_entity: 'State Electricity Board (EB Officer)',
       language_detected: 'English / Hinglish',
-      threat_indicators: ['Manufactured Urgency (Tonight cutoff)', 'Personal Mobile Number listed as Official', 'Coercive Follow-up Call'],
+      threat_indicators: [
+        'Impersonation of Official / Electricity Officer',
+        'Manufactured Urgency (Tonight cutoff threat / Instant charges)',
+        'Personal Mobile Number listed as Official Helpline',
+      ],
       notify_family_guardian: true,
-      guardian_alert_message: 'ALERT: Senior received a fake Electricity Disconnection scam threat and follow-up call. We advised them not to pay.',
+      guardian_alert_message: 'ALERT: Senior received a fake Electricity Disconnection scam threat. We advised them not to pay.',
     };
   }
 
-  // Digital Arrest / Law Enforcement
+  // Digital Arrest / Law Enforcement (Authority Impersonation + Urgency)
   if (
     aggregatedText.includes('narcotics') ||
     aggregatedText.includes('customs') ||
     aggregatedText.includes('police') ||
     aggregatedText.includes('cbi') ||
     aggregatedText.includes('digital arrest') ||
+    aggregatedText.includes('warrant') ||
     aggregatedText.includes('seized')
   ) {
     return {
@@ -96,35 +112,43 @@ function evaluateHeuristicScam(events: DeviceEvent[]): ScamReport {
       threat_level: 'CRITICAL',
       scam_type: 'Digital Arrest & Police Impersonation',
       confidence_score: 99,
-      senior_explanation: 'This is a dangerous fake police scam. The police and customs NEVER arrest people over phone or video calls. Do not be afraid.',
-      action_required: 'Hang up the call immediately. Do NOT transfer any money or show your face on video call.',
+      senior_explanation: 'This is a dangerous fake police scam. The police and courts NEVER arrest people over phone or WhatsApp calls. Do not be afraid.',
+      action_required: 'Hang up the call immediately. Do NOT transfer any money or join any video calls.',
       assets_at_risk: ['Life Savings', 'Personal Identity', 'Privacy'],
-      impersonated_entity: 'CBI / Mumbai Police / Customs',
+      impersonated_entity: 'CBI / Mumbai Police / Supreme Court',
       language_detected: 'English / Mixed',
-      threat_indicators: ['Fear Tactics & Arrest Threat', 'Demand for Continuous Video Call', 'Fake Escrow Account Transfer'],
+      threat_indicators: [
+        'Impersonation of Police & CBI Officials',
+        'Coercive Urgency & Arrest Threat',
+        'Demand to transfer money or remain on call',
+      ],
       notify_family_guardian: true,
       guardian_alert_message: 'URGENT: Senior is being targeted by a Digital Arrest / Fake Police scam call. Please contact them immediately.',
     };
   }
 
-  // Bank KYC / Malicious APK
+  // Bank KYC / OTP / Malicious APK (Credential & OTP Request)
   if (
-    (aggregatedText.includes('kyc') || aggregatedText.includes('pan') || aggregatedText.includes('blocked') || aggregatedText.includes('suspended')) &&
-    (aggregatedText.includes('.apk') || aggregatedText.includes('http') || aggregatedText.includes('update'))
+    (aggregatedText.includes('kyc') || aggregatedText.includes('pan') || aggregatedText.includes('blocked') || aggregatedText.includes('suspended') || aggregatedText.includes('otp')) &&
+    (aggregatedText.includes('.apk') || aggregatedText.includes('http') || aggregatedText.includes('update') || aggregatedText.includes('share') || aggregatedText.includes('charged'))
   ) {
     return {
       is_scam: true,
       threat_level: 'CRITICAL',
-      scam_type: 'Bank KYC APK Trojan Scam',
+      scam_type: 'Bank KYC & Credential Phishing Scam',
       confidence_score: 97,
-      senior_explanation: 'This is a thief trying to steal your bank password. Real banks NEVER send apps (.apk links) or ask for quick KYC over SMS.',
-      action_required: 'Do NOT click the link and do NOT download any application. Delete this message.',
+      senior_explanation: 'This is a thief trying to steal your bank passwords and OTP. Real banks NEVER ask you to click links, share OTPs, or download app updates over SMS.',
+      action_required: 'Do NOT click the link, do NOT share your OTP, and do NOT download any apps. Delete this message.',
       assets_at_risk: ['Netbanking Credentials', 'OTP Interception', 'Full Phone Screen Control'],
-      impersonated_entity: 'Bank KYC Department',
+      impersonated_entity: 'Bank Manager / KYC Department',
       language_detected: 'English',
-      threat_indicators: ['Unverified .apk download link', 'Urgent Account Suspension Threat'],
+      threat_indicators: [
+        'Impersonation of Bank Official',
+        'Urgent Account Suspension / Instant Charge Threat',
+        'OTP / Credential Request via Malicious Link',
+      ],
       notify_family_guardian: true,
-      guardian_alert_message: 'ALERT: Senior received a fake bank KYC message with a malicious APK download link.',
+      guardian_alert_message: 'ALERT: Senior received a fake bank KYC message with an OTP / APK phishing link.',
     };
   }
 
@@ -190,7 +214,12 @@ export async function analyzeMultiChannelCampaign(
 CHRONOLOGICAL DEVICE EVENT TIMELINE:
 ${JSON.stringify(formattedEvents, null, 2)}
 
-Evaluate whether this timeline represents an active multi-channel fraud campaign targeting a senior citizen in India.
+Evaluate whether this timeline represents an active fraud campaign targeting a senior citizen in India.
+Specifically check for:
+1. Impersonation of officials or someone in power.
+2. Manufactured urgency (threat of instant charges, service cutoff, or arrest).
+3. OTP, credential, password, or remote screen-sharing requests.
+
 Return your assessment strictly according to the required JSON schema.
 `;
 
