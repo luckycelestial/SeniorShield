@@ -1,6 +1,6 @@
 import { DeviceEvent, ScamReport } from '../types/scam';
 
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL = process.env.EXPO_PUBLIC_GEMINI_MODEL || 'gemini-3.5-flash-lite';
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 /**
@@ -8,7 +8,7 @@ const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models
  * multi-channel campaign correlation, and senior-centric plain explanations.
  */
 const SENIOR_SHIELD_SYSTEM_PROMPT = `
-You are SeniorShield AI, an autonomous cyber defense intelligence engine protecting senior citizens in India from digital fraud, coercive social engineering, and scam campaigns.
+You are SeniorShield AI, an autonomous cyber defense intelligence engine powered by Gemini 3.5 Flash Lite protecting senior citizens in India from digital fraud, coercive social engineering, and scam campaigns.
 
 YOUR TASK:
 Analyze the provided chronological sequence of device events (SMS messages, phone calls, links, durations). Determine if this represents a benign interaction or an active multi-step scam campaign.
@@ -162,7 +162,7 @@ function evaluateHeuristicScam(events: DeviceEvent[]): ScamReport {
 }
 
 /**
- * Analyzes multi-channel campaign events using Gemini 2.5 Flash with fallback to local heuristic engine.
+ * Analyzes multi-channel campaign events using Gemini 3.5 Flash Lite with fallback to local heuristic engine.
  */
 export async function analyzeMultiChannelCampaign(
   events: DeviceEvent[],

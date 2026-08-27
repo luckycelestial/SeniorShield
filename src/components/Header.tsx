@@ -16,14 +16,14 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <View style={styles.container}>
-      {/* Top Brand Bar (Shield icon removed as requested) */}
+      {/* Top Brand Bar */}
       <View style={styles.topRow}>
         <View style={styles.brandGroup}>
           <View style={styles.titleBadgeRow}>
             <Text style={styles.appTitle}>SeniorShield</Text>
-            {/* Solid AI Badge */}
+            {/* Solid AI 3.5 Badge */}
             <View style={styles.aiBadge}>
-              <Text style={styles.aiBadgeText}>AI 2.5</Text>
+              <Text style={styles.aiBadgeText}>AI 3.5</Text>
             </View>
           </View>
           <Text style={styles.appSubtitle}>Autonomous Scam Defense</Text>
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   aiBadge: {
-    backgroundColor: '#1F1F1F', // Solid badge
+    backgroundColor: '#1F1F1F',
     paddingHorizontal: 9,
     paddingVertical: 3,
     borderRadius: 9999,
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     color: '#1F1F1F',
   },
   helplineButton: {
-    backgroundColor: '#FF383C', // Solid Red Emergency Button
+    backgroundColor: '#FF383C',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
