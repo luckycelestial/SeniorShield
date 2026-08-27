@@ -20,7 +20,10 @@ object PreCallOverlayManager {
     private var overlayView: View? = null
     private var windowManager: WindowManager? = null
     private val mainHandler = Handler(Looper.getMainLooper())
+    private var showTimestamp: Long = 0
+    private var autoDismissRunnable: Runnable? = null
     private const val TAG = "SeniorShieldOverlay"
+    private const val DISPLAY_DURATION_MS = 25000L // 25 seconds duration
 
     fun showOverlayCard(
         context: Context,
@@ -31,7 +34,16 @@ object PreCallOverlayManager {
     ) {
         mainHandler.post {
             try {
-                dismissOverlay(context)
+                // Cancel any pending auto-dismiss
+                autoDismissRunnable?.let { mainHandler.removeCallbacks(it) }
+
+                // Clean up previous view if present
+                if (overlayView != null && windowManager != null) {
+                    try {
+                        windowManager?.removeView(overlayView)
+                    } catch (_: Exception) {}
+                    overlayView = null
+                }
 
                 // Check overlay permission on Android 6.0+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(context)) {
@@ -44,6 +56,7 @@ object PreCallOverlayManager {
                 val inflater = LayoutInflater.from(context)
                 val view = inflater.inflate(R.layout.activity_precall_popup, null)
                 overlayView = view
+                showTimestamp = System.currentTimeMillis()
 
                 val layoutType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
@@ -83,33 +96,55 @@ object PreCallOverlayManager {
                 tvDirective?.text = directive
 
                 btnDismiss?.setOnClickListener {
-                    dismissOverlay(context)
+                    forceDismissOverlay()
                 }
 
                 btnBlock?.setOnClickListener {
-                    Toast.makeText(context, "Number $callerNumber blocked and reported.", Toast.LENGTH_LONG).show()
-                    dismissOverlay(context)
+                    Toast.makeText(context, "Number $callerNumber blocked & reported.", Toast.LENGTH_LONG).show()
+                    forceDismissOverlay()
                 }
 
                 windowManager?.addView(view, params)
-                Log.d(TAG, "🎴 Truecaller WindowManager Overlay Card ADDED directly to screen!")
+                Log.d(TAG, "🎴 Truecaller WindowManager Overlay Card DISPLAYED (Duration: 25s)!")
+
+                // Auto-dismiss safely after 25 seconds
+                autoDismissRunnable = Runnable {
+                    forceDismissOverlay()
+                }
+                mainHandler.postDelayed(autoDismissRunnable!!, DISPLAY_DURATION_MS)
+
             } catch (e: Exception) {
                 Log.e(TAG, "Error displaying WindowManager overlay card", e)
             }
         }
     }
 
-    fun dismissOverlay(context: Context) {
+    /**
+     * Dismiss requested externally (e.g. from TelephonyManager).
+     * Protected against transient dialer glitches: will NOT vanish if shown less than 15 seconds ago.
+     */
+    fun dismissOverlay(context: Context, force: Boolean = false) {
         mainHandler.post {
-            try {
-                if (overlayView != null && windowManager != null) {
-                    windowManager?.removeView(overlayView)
-                    overlayView = null
-                    Log.d(TAG, "WindowManager overlay card removed.")
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error removing overlay card", e)
+            val elapsed = System.currentTimeMillis() - showTimestamp
+            if (!force && elapsed < 15000L) {
+                Log.d(TAG, "Holding overlay card visible (elapsed: ${elapsed}ms < 15000ms)...")
+                return@post
             }
+            forceDismissOverlay()
+        }
+    }
+
+    private fun forceDismissOverlay() {
+        try {
+            autoDismissRunnable?.let { mainHandler.removeCallbacks(it) }
+            autoDismissRunnable = null
+            if (overlayView != null && windowManager != null) {
+                windowManager?.removeView(overlayView)
+                overlayView = null
+                Log.d(TAG, "WindowManager overlay card dismissed.")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error removing overlay card", e)
         }
     }
 }
