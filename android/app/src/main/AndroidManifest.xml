@@ -40,6 +40,15 @@
       </intent-filter>
     </receiver>
 
+    <!-- Truecaller-style Floating Pre-Call Overlay Card Activity -->
+    <activity
+      android:name=".PreCallPopupActivity"
+      android:theme="@android:style/Theme.Translucent.NoTitleBar"
+      android:excludeFromRecents="true"
+      android:noHistory="true"
+      android:exported="false"
+      android:launchMode="singleTask" />
+
     <!-- 24/7 Background Sentinel Foreground Service -->
     <service
       android:name=".SentinelForegroundService"
