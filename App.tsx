@@ -153,13 +153,13 @@ export default function App() {
   const isMedRisk = riskScore > 30;
 
   const scoreTextColor = isHighRisk
-    ? '#F43F5E'
+    ? '#FF383C'
     : isMedRisk
     ? '#F59E0B'
     : '#10B981';
 
   const scoreBarColor = isHighRisk
-    ? '#F43F5E'
+    ? '#FF383C'
     : isMedRisk
     ? '#F59E0B'
     : '#10B981';
@@ -168,7 +168,7 @@ export default function App() {
     <SafeAreaProvider>
       <View style={styles.rootContainer}>
         <SafeAreaView style={styles.safeArea}>
-          <StatusBar barStyle="light-content" backgroundColor="#030712" />
+          <StatusBar barStyle="dark-content" backgroundColor="#FCFCFC" />
 
           {/* Header */}
           <Header
@@ -182,12 +182,14 @@ export default function App() {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {/* Cumulative Risk Exposure Gauge Card */}
+            {/* Cumulative Risk Exposure StatCard */}
             <View style={styles.gaugeCard}>
               <View style={styles.gaugeHeader}>
                 <View style={styles.gaugeHeaderLeft}>
-                  <Activity size={18} color="#38BDF8" />
-                  <Text style={styles.gaugeTitle}>Cumulative Risk Exposure</Text>
+                  <View style={styles.gaugeIconBox}>
+                    <Activity size={18} color="#FF383C" />
+                  </View>
+                  <Text style={styles.gaugeTitle}>CUMULATIVE RISK EXPOSURE</Text>
                 </View>
                 <Text style={[styles.gaugeScoreText, { color: scoreTextColor }]}>
                   {riskScore} <Text style={styles.gaugeScoreDenom}>/ 100</Text>
@@ -209,7 +211,7 @@ export default function App() {
 
               {activeScenarioTitle && (
                 <View style={styles.contextBadge}>
-                  <ShieldCheck size={14} color="#38BDF8" />
+                  <ShieldCheck size={14} color="#10B981" />
                   <Text style={styles.contextText}>
                     Active Context: <Text style={styles.contextHighlight}>{activeScenarioTitle}</Text>
                   </Text>
@@ -226,12 +228,12 @@ export default function App() {
                 ]}
                 onPress={handleLiveDeviceScan}
                 disabled={isScanning}
-                activeOpacity={0.85}
+                activeOpacity={0.88}
               >
                 {isScanning ? (
                   <ActivityIndicator color="#FFFFFF" size="small" />
                 ) : (
-                  <RefreshCw size={20} color="#FFFFFF" />
+                  <RefreshCw size={18} color="#FFFFFF" />
                 )}
                 <Text style={styles.scanButtonText}>
                   {isScanning ? 'Analyzing Inflow...' : 'Scan Device & Protect'}
@@ -241,9 +243,9 @@ export default function App() {
               <TouchableOpacity
                 style={styles.demoHubButton}
                 onPress={() => setIsSimulationVisible(true)}
-                activeOpacity={0.85}
+                activeOpacity={0.88}
               >
-                <Sparkles size={18} color="#F59E0B" />
+                <Sparkles size={16} color="#B45309" />
                 <Text style={styles.demoHubButtonText}>Demo Hub</Text>
               </TouchableOpacity>
             </View>
@@ -269,7 +271,7 @@ export default function App() {
             {/* Senior Golden Safety Rules */}
             <View style={styles.goldenRulesCard}>
               <View style={styles.goldenRulesHeader}>
-                <Lightbulb size={18} color="#F59E0B" />
+                <Lightbulb size={18} color="#D97706" />
                 <Text style={styles.goldenRulesTitle}>
                   Golden Safety Rules for Seniors
                 </Text>
@@ -277,21 +279,21 @@ export default function App() {
 
               <View style={styles.rulesList}>
                 <View style={styles.ruleItem}>
-                  <AlertCircle size={15} color="#38BDF8" style={styles.ruleIcon} />
+                  <AlertCircle size={15} color="#FF383C" style={styles.ruleIcon} />
                   <Text style={styles.ruleText}>
                     <Text style={styles.ruleHighlight}>Electricity Boards</Text> never cut off power at night without paper notices.
                   </Text>
                 </View>
 
                 <View style={styles.ruleItem}>
-                  <AlertCircle size={15} color="#38BDF8" style={styles.ruleIcon} />
+                  <AlertCircle size={15} color="#FF383C" style={styles.ruleIcon} />
                   <Text style={styles.ruleText}>
                     <Text style={styles.ruleHighlight}>Police & CBI</Text> never arrest citizens over phone or Skype/WhatsApp video calls.
                   </Text>
                 </View>
 
                 <View style={styles.ruleItem}>
-                  <AlertCircle size={15} color="#38BDF8" style={styles.ruleIcon} />
+                  <AlertCircle size={15} color="#FF383C" style={styles.ruleIcon} />
                   <Text style={styles.ruleText}>
                     <Text style={styles.ruleHighlight}>Banks</Text> never send apps (.apk links) or ask for OTPs to update KYC.
                   </Text>
@@ -318,27 +320,27 @@ export default function App() {
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
                   <View style={styles.modalTitleGroup}>
-                    <Sliders size={20} color="#38BDF8" />
+                    <Sliders size={20} color="#FF383C" />
                     <Text style={styles.modalTitle}>Shield Setup & Guardian</Text>
                   </View>
                   <TouchableOpacity
                     onPress={() => setIsSettingsVisible(false)}
                     style={styles.modalCloseButton}
                   >
-                    <X size={18} color="#94A3B8" />
+                    <X size={18} color="#8E8E93" />
                   </TouchableOpacity>
                 </View>
 
                 {/* Guardian Phone Setup */}
                 <Text style={styles.inputLabel}>
-                  TRUSTED FAMILY CONTACT (GUARDIAN PHONE):
+                  TRUSTED FAMILY CONTACT (GUARDIAN PHONE)
                 </Text>
                 <TextInput
                   style={styles.textInput}
                   value={guardianPhone}
                   onChangeText={setGuardianPhone}
                   placeholder="+91 98765 43210"
-                  placeholderTextColor="#64748B"
+                  placeholderTextColor="#8E8E93"
                   keyboardType="phone-pad"
                 />
                 <Text style={styles.inputHint}>
@@ -347,14 +349,14 @@ export default function App() {
 
                 {/* Gemini API Key */}
                 <Text style={styles.inputLabel}>
-                  GOOGLE GEMINI API KEY (OPTIONAL):
+                  GOOGLE GEMINI API KEY (OPTIONAL)
                 </Text>
                 <TextInput
                   style={styles.textInput}
                   value={geminiApiKey}
                   onChangeText={setGeminiApiKey}
                   placeholder="AIzaSy..."
-                  placeholderTextColor="#64748B"
+                  placeholderTextColor="#8E8E93"
                   secureTextEntry={true}
                 />
                 <Text style={styles.inputHint}>
@@ -365,7 +367,7 @@ export default function App() {
                 <TouchableOpacity
                   style={styles.saveSettingsButton}
                   onPress={() => setIsSettingsVisible(false)}
-                  activeOpacity={0.85}
+                  activeOpacity={0.88}
                 >
                   <Check size={18} color="#FFFFFF" />
                   <Text style={styles.saveSettingsButtonText}>Save & Return to Shield</Text>
@@ -382,28 +384,33 @@ export default function App() {
 const styles = StyleSheet.create({
   rootContainer: {
     flex: 1,
-    backgroundColor: '#030712',
+    backgroundColor: '#FCFCFC',
   },
   safeArea: {
     flex: 1,
-    backgroundColor: '#030712',
+    backgroundColor: '#FCFCFC',
   },
   scrollView: {
     flex: 1,
-    backgroundColor: '#030712',
+    backgroundColor: '#FCFCFC',
     paddingHorizontal: 16,
   },
   scrollContent: {
     paddingBottom: 40,
-    paddingTop: 10,
+    paddingTop: 8,
   },
   gaugeCard: {
-    backgroundColor: '#0F172A',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#E6E6E6',
     borderRadius: 24,
     padding: 20,
     marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
   },
   gaugeHeader: {
     flexDirection: 'row',
@@ -416,11 +423,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  gaugeIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   gaugeTitle: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '800',
-    color: '#E2E8F0',
-    textTransform: 'uppercase',
+    color: '#8E8E93',
     letterSpacing: 0.5,
   },
   gaugeScoreText: {
@@ -430,93 +446,103 @@ const styles = StyleSheet.create({
   gaugeScoreDenom: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#64748B',
+    color: '#8E8E93',
   },
   progressTrack: {
-    height: 10,
-    backgroundColor: '#030712',
-    borderRadius: 999,
+    height: 8,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 9999,
     overflow: 'hidden',
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#1E293B',
   },
   progressBar: {
     height: '100%',
-    borderRadius: 999,
+    borderRadius: 9999,
   },
   contextBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#030712',
+    backgroundColor: '#ECFDF5',
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#A7F3D0',
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 12,
+    borderRadius: 9999,
   },
   contextText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#94A3B8',
+    color: '#065F46',
   },
   contextHighlight: {
-    color: '#38BDF8',
+    color: '#047857',
     fontWeight: '800',
   },
   actionButtonsRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 8,
+    gap: 10,
+    marginBottom: 6,
   },
   scanButton: {
     flex: 1.4,
-    backgroundColor: '#059669',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    minHeight: 56,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(52, 211, 153, 0.4)',
-    elevation: 4,
-  },
-  scanButtonDisabled: {
-    backgroundColor: '#065F46',
-    opacity: 0.7,
-  },
-  scanButtonText: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '900',
-    letterSpacing: 0.3,
-  },
-  demoHubButton: {
-    flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#FF383C',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    minHeight: 56,
-    borderRadius: 16,
+    minHeight: 52,
+    borderRadius: 9999,
+    shadowColor: '#FF383C',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  scanButtonDisabled: {
+    backgroundColor: '#DC143C',
+    opacity: 0.7,
+  },
+  scanButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
+  demoHubButton: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.4)',
+    borderColor: '#E6E6E6',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    minHeight: 52,
+    borderRadius: 9999,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
   },
   demoHubButtonText: {
-    color: '#FEF3C7',
+    color: '#1F1F1F',
     fontSize: 14,
     fontWeight: '800',
   },
   goldenRulesCard: {
-    backgroundColor: '#0F172A',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#E6E6E6',
     borderRadius: 24,
     padding: 20,
-    marginTop: 8,
+    marginTop: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
   },
   goldenRulesHeader: {
     flexDirection: 'row',
@@ -525,11 +551,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   goldenRulesTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '900',
-    color: '#F59E0B',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    color: '#1F1F1F',
+    letterSpacing: -0.2,
   },
   rulesList: {
     gap: 10,
@@ -545,26 +570,29 @@ const styles = StyleSheet.create({
   ruleText: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#CBD5E1',
+    color: '#1F1F1F',
     flex: 1,
     lineHeight: 18,
   },
   ruleHighlight: {
-    color: '#FFFFFF',
+    color: '#FF383C',
     fontWeight: '800',
   },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     padding: 20,
   },
   modalContent: {
-    backgroundColor: '#0B0F19',
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 24,
-    borderWidth: 1,
-    borderColor: '#334155',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    elevation: 8,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -580,50 +608,57 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: '#1F1F1F',
   },
   modalCloseButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#1E293B',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E6E6E6',
     alignItems: 'center',
     justifyContent: 'center',
   },
   inputLabel: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '800',
-    color: '#CBD5E1',
+    color: '#8E8E93',
     marginBottom: 6,
     letterSpacing: 0.5,
   },
   textInput: {
-    backgroundColor: '#030712',
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#334155',
-    borderRadius: 12,
+    borderColor: '#E6E6E6',
+    borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    color: '#FFFFFF',
+    color: '#1F1F1F',
     fontSize: 15,
     fontWeight: '600',
     marginBottom: 4,
   },
   inputHint: {
     fontSize: 11,
-    color: '#94A3B8',
+    color: '#8E8E93',
     lineHeight: 15,
     marginBottom: 16,
   },
   saveSettingsButton: {
-    backgroundColor: '#2563EB',
+    backgroundColor: '#FF383C',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
     minHeight: 50,
-    borderRadius: 14,
-    marginTop: 8,
+    borderRadius: 9999,
+    marginTop: 6,
+    shadowColor: '#FF383C',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
   },
   saveSettingsButtonText: {
     color: '#FFFFFF',

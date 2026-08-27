@@ -35,7 +35,7 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({
           <View style={styles.headerRow}>
             <View style={styles.headerTitleGroup}>
               <View style={styles.sparkleBox}>
-                <Sparkles size={20} color="#F59E0B" />
+                <Sparkles size={18} color="#B45309" />
               </View>
               <View>
                 <Text style={styles.drawerTitle}>Judge Demo & Simulation Hub</Text>
@@ -47,7 +47,7 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({
               style={styles.closeButton}
               activeOpacity={0.8}
             >
-              <X size={18} color="#94A3B8" />
+              <X size={18} color="#8E8E93" />
             </TouchableOpacity>
           </View>
 
@@ -66,12 +66,10 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({
                     style={[
                       styles.scenarioCard,
                       {
-                        borderColor: isDanger
-                          ? 'rgba(244, 63, 94, 0.4)'
-                          : 'rgba(16, 185, 129, 0.4)',
+                        borderColor: isDanger ? '#FECACA' : '#A7F3D0',
                       },
                     ]}
-                    activeOpacity={0.85}
+                    activeOpacity={0.88}
                     onPress={() => {
                       onSelectScenario(scenario);
                       onClose();
@@ -81,7 +79,7 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({
                     <View style={styles.scenarioHeader}>
                       <View style={styles.scenarioTitleLeft}>
                         {isDanger ? (
-                          <AlertTriangle size={18} color="#F43F5E" />
+                          <AlertTriangle size={18} color="#FF383C" />
                         ) : (
                           <ShieldCheck size={18} color="#10B981" />
                         )}
@@ -93,19 +91,15 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({
                         style={[
                           styles.threatTag,
                           {
-                            backgroundColor: isDanger
-                              ? 'rgba(136, 19, 55, 0.8)'
-                              : 'rgba(6, 78, 59, 0.8)',
-                            borderColor: isDanger
-                              ? 'rgba(244, 63, 94, 0.6)'
-                              : 'rgba(16, 185, 129, 0.6)',
+                            backgroundColor: isDanger ? '#FEF2F2' : '#ECFDF5',
+                            borderColor: isDanger ? '#FECACA' : '#A7F3D0',
                           },
                         ]}
                       >
                         <Text
                           style={[
                             styles.threatTagText,
-                            { color: isDanger ? '#FDA4AF' : '#A7F3D0' },
+                            { color: isDanger ? '#DC2626' : '#059669' },
                           ]}
                         >
                           {scenario.expectedThreatLevel}
@@ -122,7 +116,7 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({
                     {/* Footer Row */}
                     <View style={styles.cardFooter}>
                       <View style={styles.eventsCountGroup}>
-                        <Layers size={13} color="#94A3B8" />
+                        <Layers size={13} color="#8E8E93" />
                         <Text style={styles.eventsCountText}>
                           {scenario.events.length} Event(s) ({scenario.events.map((e) => e.type).join(' + ')})
                         </Text>
@@ -147,17 +141,20 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
   drawerContent: {
-    backgroundColor: '#0B0F19',
-    borderTopWidth: 2,
-    borderTopColor: '#334155',
+    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     maxHeight: '85%',
     padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 8,
   },
   headerRow: {
     flexDirection: 'row',
@@ -174,56 +171,58 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 12,
-    backgroundColor: 'rgba(245, 158, 11, 0.2)',
+    backgroundColor: '#FEF3C7',
     borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.4)',
+    borderColor: '#FDE68A',
     alignItems: 'center',
     justifyContent: 'center',
   },
   drawerTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: '#1F1F1F',
   },
   drawerSubtitle: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#94A3B8',
-    marginTop: 2,
+    color: '#8E8E93',
+    marginTop: 1,
   },
   closeButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(30, 41, 59, 0.8)',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E6E6E6',
     alignItems: 'center',
     justifyContent: 'center',
   },
   instructionsText: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#94A3B8',
-    marginBottom: 16,
+    color: '#8E8E93',
+    marginBottom: 14,
     lineHeight: 18,
   },
   scrollView: {
-    maxHeight: 500,
+    maxHeight: 480,
   },
   scenariosList: {
-    gap: 12,
+    gap: 10,
     paddingBottom: 24,
   },
   scenarioCard: {
-    backgroundColor: '#0F172A',
+    backgroundColor: '#FCFCFC',
     borderRadius: 18,
-    padding: 16,
+    padding: 15,
     borderWidth: 1,
   },
   scenarioHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   scenarioTitleLeft: {
     flexDirection: 'row',
@@ -233,15 +232,15 @@ const styles = StyleSheet.create({
     paddingRight: 8,
   },
   scenarioTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: '#1F1F1F',
     flex: 1,
   },
   threatTag: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 9,
     paddingVertical: 3,
-    borderRadius: 999,
+    borderRadius: 9999,
     borderWidth: 1,
   },
   threatTagText: {
@@ -250,44 +249,44 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   categoryLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
-    color: '#38BDF8',
-    marginBottom: 6,
+    color: '#FF383C',
+    marginBottom: 4,
   },
   descriptionText: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#CBD5E1',
+    color: '#1F1F1F',
     lineHeight: 16,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   cardFooter: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderTopWidth: 1,
-    borderTopColor: '#1E293B',
-    paddingTop: 10,
+    borderTopColor: '#E6E6E6',
+    paddingTop: 8,
   },
   eventsCountGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
   },
   eventsCountText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#94A3B8',
+    color: '#8E8E93',
   },
   simulateButton: {
-    backgroundColor: '#2563EB',
+    backgroundColor: '#FF383C',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    paddingVertical: 5,
+    borderRadius: 9999,
   },
   simulateButtonText: {
     color: '#FFFFFF',

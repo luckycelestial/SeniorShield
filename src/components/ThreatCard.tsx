@@ -34,7 +34,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
     return (
       <View style={styles.emptyCard}>
         <View style={styles.emptyIconCircle}>
-          <Shield size={34} color="#94A3B8" />
+          <Shield size={32} color="#8E8E93" />
         </View>
         <Text style={styles.emptyTitle}>Ready to Scan</Text>
         <Text style={styles.emptySubtitle}>
@@ -48,29 +48,23 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
   const isSuspicious = report.threat_level === 'SUSPICIOUS';
   const isSafe = report.threat_level === 'SAFE';
 
-  const cardBgColor = isCritical
-    ? 'rgba(76, 5, 25, 0.35)'
-    : isSuspicious
-    ? 'rgba(69, 36, 6, 0.35)'
-    : 'rgba(6, 78, 59, 0.35)';
-
   const cardBorderColor = isCritical
-    ? 'rgba(244, 63, 94, 0.5)'
-    : isSuspicious
-    ? 'rgba(245, 158, 11, 0.5)'
-    : 'rgba(16, 185, 129, 0.5)';
-
-  const badgeBg = isCritical
-    ? 'rgba(244, 63, 94, 0.2)'
-    : isSuspicious
-    ? 'rgba(245, 158, 11, 0.2)'
-    : 'rgba(16, 185, 129, 0.2)';
-
-  const badgeTextColor = isCritical
-    ? '#FDA4AF'
+    ? '#FECACA'
     : isSuspicious
     ? '#FDE68A'
     : '#A7F3D0';
+
+  const badgeBg = isCritical
+    ? '#FEF2F2'
+    : isSuspicious
+    ? '#FFFBEB'
+    : '#ECFDF5';
+
+  const badgeTextColor = isCritical
+    ? '#DC2626'
+    : isSuspicious
+    ? '#D97706'
+    : '#059669';
 
   const handleAlertGuardian = () => {
     const alertMessage =
@@ -96,12 +90,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
   };
 
   return (
-    <View
-      style={[
-        styles.cardContainer,
-        { backgroundColor: cardBgColor, borderColor: cardBorderColor },
-      ]}
-    >
+    <View style={[styles.cardContainer, { borderColor: cardBorderColor }]}>
       {/* Top Header: Badge & Confidence */}
       <View style={styles.headerRow}>
         <View
@@ -110,9 +99,9 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
             { backgroundColor: badgeBg, borderColor: cardBorderColor },
           ]}
         >
-          {isCritical && <AlertOctagon size={20} color="#F43F5E" />}
-          {isSuspicious && <AlertTriangle size={20} color="#F59E0B" />}
-          {isSafe && <CheckCircle size={20} color="#10B981" />}
+          {isCritical && <AlertOctagon size={18} color="#FF383C" />}
+          {isSuspicious && <AlertTriangle size={18} color="#F59E0B" />}
+          {isSafe && <CheckCircle size={18} color="#10B981" />}
           <Text style={[styles.badgeText, { color: badgeTextColor }]}>
             {report.threat_level} THREAT
           </Text>
@@ -131,7 +120,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
       {/* Impersonated Entity Banner */}
       {report.impersonated_entity && report.impersonated_entity !== 'None' && (
         <View style={styles.entityBanner}>
-          <Building2 size={20} color="#38BDF8" />
+          <Building2 size={18} color="#FF383C" />
           <View style={styles.entityInfo}>
             <Text style={styles.entityLabel}>IMPERSONATED ENTITY</Text>
             <Text style={styles.entityValue}>{report.impersonated_entity}</Text>
@@ -141,7 +130,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
 
       {/* Senior Plain Language Explanation Box */}
       <View style={styles.explanationBox}>
-        <Text style={styles.explanationLabel}>WHAT THIS MEANS FOR YOU:</Text>
+        <Text style={styles.explanationLabel}>WHAT THIS MEANS FOR YOU</Text>
         <Text style={styles.explanationText}>{report.senior_explanation}</Text>
       </View>
 
@@ -151,12 +140,12 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
           styles.actionBox,
           {
             backgroundColor: isCritical
-              ? 'rgba(136, 19, 55, 0.4)'
+              ? '#FEF2F2'
               : isSuspicious
-              ? 'rgba(120, 53, 15, 0.4)'
-              : 'rgba(6, 78, 59, 0.4)',
+              ? '#FFFBEB'
+              : '#ECFDF5',
             borderLeftColor: isCritical
-              ? '#F43F5E'
+              ? '#FF383C'
               : isSuspicious
               ? '#F59E0B'
               : '#10B981',
@@ -168,10 +157,10 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
             styles.actionLabel,
             {
               color: isCritical
-                ? '#FDA4AF'
+                ? '#DC2626'
                 : isSuspicious
-                ? '#FDE68A'
-                : '#A7F3D0',
+                ? '#D97706'
+                : '#059669',
             },
           ]}
         >
@@ -184,7 +173,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
       {report.assets_at_risk && report.assets_at_risk.length > 0 && (
         <View style={styles.assetsSection}>
           <View style={styles.assetsHeader}>
-            <Lock size={14} color="#CBD5E1" />
+            <Lock size={14} color="#8E8E93" />
             <Text style={styles.assetsTitle}>Targeted Assets at Stake:</Text>
           </View>
           <View style={styles.chipsRow}>
@@ -203,18 +192,18 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
           <TouchableOpacity
             style={styles.blockButton}
             onPress={handleBlockNumber}
-            activeOpacity={0.85}
+            activeOpacity={0.88}
           >
-            <Ban size={22} color="#FFFFFF" />
+            <Ban size={20} color="#FFFFFF" />
             <Text style={styles.blockButtonText}>Hang Up & Block Sender</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.guardianButton}
             onPress={handleAlertGuardian}
-            activeOpacity={0.85}
+            activeOpacity={0.88}
           >
-            <BellRing size={22} color="#FFFFFF" />
+            <BellRing size={20} color="#1F1F1F" />
             <Text style={styles.guardianButtonText}>
               Alert Family Guardian (SMS)
             </Text>
@@ -227,150 +216,164 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
 
 const styles = StyleSheet.create({
   emptyCard: {
-    backgroundColor: '#0F172A',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#E6E6E6',
     borderRadius: 24,
     padding: 24,
-    marginVertical: 12,
+    marginVertical: 10,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
   },
   emptyIconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(30, 41, 59, 0.8)',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E6E6E6',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#F8FAFC',
+    fontSize: 19,
+    fontWeight: '900',
+    color: '#1F1F1F',
   },
   emptySubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '500',
-    color: '#94A3B8',
+    color: '#8E8E93',
     textAlign: 'center',
-    marginTop: 8,
-    lineHeight: 20,
-    paddingHorizontal: 12,
+    marginTop: 6,
+    lineHeight: 19,
+    paddingHorizontal: 10,
   },
   cardContainer: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 20,
-    marginVertical: 12,
+    marginVertical: 10,
     borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.05,
+    shadowRadius: 16,
+    elevation: 3,
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 14,
+    marginBottom: 12,
   },
   threatBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 999,
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 9999,
     borderWidth: 1,
   },
   badgeText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '900',
     letterSpacing: 0.5,
   },
   confidencePill: {
-    backgroundColor: '#0F172A',
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#334155',
-    paddingHorizontal: 12,
+    borderColor: '#E6E6E6',
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 999,
+    borderRadius: 9999,
   },
   confidenceText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
-    color: '#CBD5E1',
+    color: '#8E8E93',
   },
   scamTitle: {
-    fontSize: 22,
+    fontSize: 21,
     fontWeight: '900',
-    color: '#FFFFFF',
-    lineHeight: 28,
-    marginBottom: 14,
+    color: '#1F1F1F',
+    lineHeight: 27,
+    marginBottom: 12,
+    letterSpacing: -0.3,
   },
   entityBanner: {
-    backgroundColor: '#0F172A',
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#E6E6E6',
     borderRadius: 16,
     padding: 12,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginBottom: 14,
+    marginBottom: 12,
   },
   entityInfo: {
     flex: 1,
   },
   entityLabel: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '800',
-    color: '#38BDF8',
+    color: '#8E8E93',
     letterSpacing: 0.5,
   },
   entityValue: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#F1F5F9',
+    color: '#1F1F1F',
     marginTop: 2,
   },
   explanationBox: {
-    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#E6E6E6',
     borderRadius: 16,
     padding: 16,
-    marginBottom: 14,
+    marginBottom: 12,
   },
   explanationLabel: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '900',
-    color: '#38BDF8',
-    letterSpacing: 0.5,
+    color: '#8E8E93',
+    letterSpacing: 0.6,
     marginBottom: 6,
   },
   explanationText: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#F8FAFC',
-    lineHeight: 24,
+    color: '#1F1F1F',
+    lineHeight: 23,
   },
   actionBox: {
     borderRadius: 16,
     padding: 16,
     borderLeftWidth: 4,
-    marginBottom: 14,
+    marginBottom: 12,
   },
   actionLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '900',
     letterSpacing: 0.5,
     marginBottom: 4,
   },
   actionText: {
-    fontSize: 17,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    lineHeight: 24,
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#1F1F1F',
+    lineHeight: 23,
   },
   assetsSection: {
-    marginBottom: 16,
+    marginBottom: 14,
   },
   assetsHeader: {
     flexDirection: 'row',
@@ -381,7 +384,7 @@ const styles = StyleSheet.create({
   assetsTitle: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#CBD5E1',
+    color: '#8E8E93',
   },
   chipsRow: {
     flexDirection: 'row',
@@ -389,56 +392,60 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   assetChip: {
-    backgroundColor: '#1E293B',
+    backgroundColor: '#FFFBEB',
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#FDE68A',
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    paddingVertical: 5,
+    borderRadius: 9999,
   },
   assetChipText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#FEF08A',
+    color: '#B45309',
   },
   actionButtonsCol: {
     gap: 10,
     marginTop: 4,
   },
   blockButton: {
-    backgroundColor: '#E11D48',
+    backgroundColor: '#FF383C',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
-    minHeight: 54,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(251, 113, 133, 0.4)',
-    elevation: 4,
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 9999,
+    shadowColor: '#FF383C',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
   },
   blockButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '900',
-    letterSpacing: 0.3,
+    fontSize: 15,
+    fontWeight: '800',
   },
   guardianButton: {
-    backgroundColor: '#2563EB',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E6E6E6',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
-    minHeight: 54,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(96, 165, 250, 0.4)',
-    elevation: 4,
+    gap: 8,
+    paddingVertical: 14,
+    borderRadius: 9999,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
   },
   guardianButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '900',
-    letterSpacing: 0.3,
+    color: '#1F1F1F',
+    fontSize: 15,
+    fontWeight: '800',
   },
 });

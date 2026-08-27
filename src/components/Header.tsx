@@ -18,24 +18,24 @@ export const Header: React.FC<HeaderProps> = ({
   const isSuspicious = threatLevel === 'SUSPICIOUS';
 
   const statusBgColor = isCritical
-    ? 'rgba(76, 5, 25, 0.45)'
+    ? '#FEF2F2'
     : isSuspicious
-    ? 'rgba(69, 36, 6, 0.45)'
-    : 'rgba(6, 78, 59, 0.45)';
+    ? '#FFFBEB'
+    : '#ECFDF5';
 
   const statusBorderColor = isCritical
-    ? 'rgba(244, 63, 94, 0.5)'
+    ? '#FECACA'
     : isSuspicious
-    ? 'rgba(245, 158, 11, 0.5)'
-    : 'rgba(16, 185, 129, 0.5)';
+    ? '#FDE68A'
+    : '#A7F3D0';
 
   const statusTextColor = isCritical
-    ? '#FECDD3'
+    ? '#DC2626'
     : isSuspicious
-    ? '#FEF3C7'
-    : '#D1FAE5';
+    ? '#D97706'
+    : '#059669';
 
-  const dotColor = isCritical ? '#F43F5E' : isSuspicious ? '#F59E0B' : '#10B981';
+  const dotColor = isCritical ? '#FF383C' : isSuspicious ? '#F59E0B' : '#10B981';
 
   return (
     <View style={styles.container}>
@@ -47,18 +47,18 @@ export const Header: React.FC<HeaderProps> = ({
               styles.shieldIconContainer,
               {
                 backgroundColor: isCritical
-                  ? 'rgba(136, 19, 55, 0.4)'
+                  ? '#FEF2F2'
                   : isSuspicious
-                  ? 'rgba(120, 53, 15, 0.4)'
-                  : 'rgba(6, 78, 59, 0.4)',
+                  ? '#FFFBEB'
+                  : '#ECFDF5',
                 borderColor: statusBorderColor,
               },
             ]}
           >
             {isCritical ? (
-              <ShieldAlert size={28} color="#F43F5E" />
+              <ShieldAlert size={26} color="#FF383C" />
             ) : (
-              <ShieldCheck size={28} color="#10B981" />
+              <ShieldCheck size={26} color="#10B981" />
             )}
           </View>
 
@@ -80,7 +80,7 @@ export const Header: React.FC<HeaderProps> = ({
           activeOpacity={0.8}
           accessibilityLabel="Setup & Guardian Config"
         >
-          <SlidersHorizontal size={16} color="#38BDF8" />
+          <SlidersHorizontal size={15} color="#1F1F1F" />
           <Text style={styles.settingsText}>Setup</Text>
         </TouchableOpacity>
       </View>
@@ -105,15 +105,15 @@ export const Header: React.FC<HeaderProps> = ({
         <Text style={styles.statusRightText}>Live Guard</Text>
       </View>
 
-      {/* Direct Cyber Helpline (1930) Bar */}
+      {/* Direct Cyber Helpline (1930) Capsule Button */}
       <TouchableOpacity
         style={styles.helplineButton}
         onPress={onCallHelpline}
-        activeOpacity={0.85}
+        activeOpacity={0.88}
         accessibilityRole="button"
         accessibilityLabel="Call Cyber Crime Helpline 1930"
       >
-        <PhoneCall size={20} color="#FFFFFF" />
+        <PhoneCall size={18} color="#FFFFFF" />
         <Text style={styles.helplineText}>
           Emergency Cyber Helpline (1930)
         </Text>
@@ -124,12 +124,12 @@ export const Header: React.FC<HeaderProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#030712',
+    backgroundColor: '#FCFCFC',
     paddingTop: 12,
     paddingHorizontal: 16,
-    paddingBottom: 12,
+    paddingBottom: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: '#E6E6E6',
   },
   topRow: {
     flexDirection: 'row',
@@ -143,9 +143,9 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   shieldIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -156,88 +156,95 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   appTitle: {
-    fontSize: 22,
+    fontSize: 21,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: '#1F1F1F',
     letterSpacing: -0.5,
   },
   aiBadge: {
-    backgroundColor: 'rgba(49, 46, 129, 0.8)',
+    backgroundColor: '#FEF2F2',
     borderWidth: 1,
-    borderColor: 'rgba(99, 102, 241, 0.4)',
+    borderColor: '#FECACA',
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 12,
+    borderRadius: 9999,
   },
   aiBadgeText: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#A5B4FC',
+    color: '#FF383C',
     letterSpacing: 0.5,
   },
   appSubtitle: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#94A3B8',
-    marginTop: 2,
+    color: '#8E8E93',
+    marginTop: 1,
   },
   settingsButton: {
-    backgroundColor: '#0F172A',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#E6E6E6',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 12,
+    paddingVertical: 7,
+    borderRadius: 9999,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
   },
   settingsText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#E2E8F0',
+    color: '#1F1F1F',
   },
   statusPill: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 10,
+    paddingVertical: 9,
     paddingHorizontal: 14,
-    borderRadius: 14,
+    borderRadius: 9999,
     borderWidth: 1,
     marginBottom: 10,
   },
   statusLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
   statusDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   statusText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '800',
     letterSpacing: 0.5,
   },
   statusRightText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#94A3B8',
+    color: '#8E8E93',
   },
   helplineButton: {
-    backgroundColor: '#E11D48',
+    backgroundColor: '#FF383C',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
-    paddingVertical: 12,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(251, 113, 133, 0.4)',
-    elevation: 4,
+    gap: 8,
+    paddingVertical: 13,
+    borderRadius: 9999,
+    shadowColor: '#FF383C',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 3,
   },
   helplineText: {
     color: '#FFFFFF',

@@ -12,7 +12,7 @@ export const CampaignTimeline: React.FC<CampaignTimelineProps> = ({ events, stag
   if (!events || events.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <Clock size={28} color="#64748B" />
+        <Clock size={26} color="#8E8E93" />
         <Text style={styles.emptyText}>
           No recent threat events in timeline.
         </Text>
@@ -25,33 +25,33 @@ export const CampaignTimeline: React.FC<CampaignTimelineProps> = ({ events, stag
       case 'EXTRACTION_ATTEMPT':
         return {
           label: 'CRITICAL ATTACK STAGE',
-          textColor: '#FDA4AF',
-          bgColor: 'rgba(76, 5, 25, 0.6)',
-          borderColor: 'rgba(244, 63, 94, 0.5)',
-          iconColor: '#F43F5E',
+          textColor: '#DC2626',
+          bgColor: '#FEF2F2',
+          borderColor: '#FECACA',
+          iconColor: '#FF383C',
         };
       case 'URGENCY_ESCALATION':
         return {
           label: 'URGENCY ESCALATION',
-          textColor: '#FDE68A',
-          bgColor: 'rgba(69, 36, 6, 0.6)',
-          borderColor: 'rgba(245, 158, 11, 0.5)',
+          textColor: '#D97706',
+          bgColor: '#FFFBEB',
+          borderColor: '#FDE68A',
           iconColor: '#F59E0B',
         };
       case 'RECONNAISSANCE':
         return {
           label: 'INITIAL PROBING',
-          textColor: '#BAE6FD',
-          bgColor: 'rgba(12, 74, 110, 0.6)',
-          borderColor: 'rgba(56, 189, 248, 0.5)',
-          iconColor: '#38BDF8',
+          textColor: '#0284C7',
+          bgColor: '#F0F9FF',
+          borderColor: '#BAE6FD',
+          iconColor: '#0EA5E9',
         };
       default:
         return {
           label: 'DORMANT / SAFE',
-          textColor: '#A7F3D0',
-          bgColor: 'rgba(6, 78, 59, 0.6)',
-          borderColor: 'rgba(16, 185, 129, 0.5)',
+          textColor: '#059669',
+          bgColor: '#ECFDF5',
+          borderColor: '#A7F3D0',
           iconColor: '#10B981',
         };
     }
@@ -64,7 +64,7 @@ export const CampaignTimeline: React.FC<CampaignTimelineProps> = ({ events, stag
       {/* Header Row */}
       <View style={styles.headerRow}>
         <View style={styles.titleGroup}>
-          <GitCommit size={20} color="#38BDF8" />
+          <GitCommit size={18} color="#FF383C" />
           <Text style={styles.sectionTitle}>Campaign Progression Chain</Text>
         </View>
 
@@ -105,15 +105,15 @@ export const CampaignTimeline: React.FC<CampaignTimelineProps> = ({ events, stag
                   style={[
                     styles.nodeCircle,
                     {
-                      backgroundColor: isSMS ? '#082F49' : '#4C0519',
-                      borderColor: isSMS ? '#0EA5E9' : '#F43F5E',
+                      backgroundColor: isSMS ? '#F0F9FF' : '#FEF2F2',
+                      borderColor: isSMS ? '#BAE6FD' : '#FECACA',
                     },
                   ]}
                 >
                   <Text
                     style={[
                       styles.nodeNumber,
-                      { color: isSMS ? '#7DD3FC' : '#FDA4AF' },
+                      { color: isSMS ? '#0284C7' : '#DC2626' },
                     ]}
                   >
                     {index + 1}
@@ -129,24 +129,20 @@ export const CampaignTimeline: React.FC<CampaignTimelineProps> = ({ events, stag
                     style={[
                       styles.eventTypeBadge,
                       {
-                        backgroundColor: isSMS
-                          ? 'rgba(8, 47, 73, 0.7)'
-                          : 'rgba(76, 5, 25, 0.7)',
-                        borderColor: isSMS
-                          ? 'rgba(14, 165, 233, 0.3)'
-                          : 'rgba(244, 63, 94, 0.3)',
+                        backgroundColor: isSMS ? '#F0F9FF' : '#FEF2F2',
+                        borderColor: isSMS ? '#BAE6FD' : '#FECACA',
                       },
                     ]}
                   >
                     {isSMS ? (
-                      <MessageSquare size={13} color="#38BDF8" />
+                      <MessageSquare size={12} color="#0EA5E9" />
                     ) : (
-                      <PhoneIncoming size={13} color="#F43F5E" />
+                      <PhoneIncoming size={12} color="#FF383C" />
                     )}
                     <Text
                       style={[
                         styles.eventTypeText,
-                        { color: isSMS ? '#7DD3FC' : '#FDA4AF' },
+                        { color: isSMS ? '#0284C7' : '#DC2626' },
                       ]}
                     >
                       {event.type}
@@ -172,28 +168,38 @@ export const CampaignTimeline: React.FC<CampaignTimelineProps> = ({ events, stag
 
 const styles = StyleSheet.create({
   emptyContainer: {
-    backgroundColor: '#0F172A',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#E6E6E6',
     borderRadius: 24,
     padding: 24,
-    marginVertical: 12,
+    marginVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
   },
   emptyText: {
-    color: '#94A3B8',
-    fontSize: 14,
+    color: '#8E8E93',
+    fontSize: 13,
     fontWeight: '600',
-    marginTop: 8,
+    marginTop: 6,
   },
   container: {
-    backgroundColor: '#0F172A',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#E6E6E6',
     borderRadius: 24,
     padding: 20,
-    marginVertical: 12,
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
   },
   headerRow: {
     flexDirection: 'row',
@@ -201,7 +207,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexWrap: 'wrap',
     gap: 8,
-    marginBottom: 6,
+    marginBottom: 4,
   },
   titleGroup: {
     flexDirection: 'row',
@@ -209,17 +215,17 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: '#1F1F1F',
   },
   stageBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 999,
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 9999,
     borderWidth: 1,
   },
   stageBadgeText: {
@@ -230,88 +236,88 @@ const styles = StyleSheet.create({
   sectionSubtitle: {
     fontSize: 12,
     fontWeight: '500',
-    color: '#94A3B8',
-    marginBottom: 16,
-    lineHeight: 18,
+    color: '#8E8E93',
+    marginBottom: 14,
+    lineHeight: 17,
   },
   timelineList: {
-    marginTop: 4,
+    marginTop: 2,
   },
   timelineItem: {
     flexDirection: 'row',
-    marginBottom: 14,
+    marginBottom: 12,
   },
   nodeColumn: {
     alignItems: 'center',
-    marginRight: 12,
-    width: 32,
+    marginRight: 10,
+    width: 28,
   },
   nodeCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
   },
   nodeNumber: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '900',
   },
   connectorLine: {
     width: 2,
     flex: 1,
-    backgroundColor: '#1E293B',
-    marginVertical: 4,
+    backgroundColor: '#E6E6E6',
+    marginVertical: 3,
     borderRadius: 1,
   },
   eventCard: {
     flex: 1,
-    backgroundColor: '#030712',
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#E6E6E6',
     borderRadius: 16,
-    padding: 14,
+    padding: 12,
   },
   eventHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   eventTypeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 8,
+    gap: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
     borderWidth: 1,
   },
   eventTypeText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.5,
   },
   timeAgoText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#94A3B8',
+    color: '#8E8E93',
   },
   senderText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#E2E8F0',
-    marginBottom: 4,
+    color: '#1F1F1F',
+    marginBottom: 3,
   },
   senderHighlight: {
-    color: '#38BDF8',
+    color: '#FF383C',
     fontWeight: '800',
   },
   contentDetailsText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '500',
-    color: '#CBD5E1',
-    lineHeight: 20,
+    color: '#1F1F1F',
+    lineHeight: 18,
   },
 });
