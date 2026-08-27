@@ -187,18 +187,16 @@ npx expo start --tunnel
 
 ## 6. API Keys & AI Engine Configuration
 
-SeniorShield connects directly to **Google Gemini 2.5 Flash** for deep threat reasoning.
+SeniorShield connects directly to **Google Gemini 3.5 Flash Lite** for autonomous deep threat reasoning.
 
 ### Setting Up a Gemini API Key:
-1. Get a free API key from [Google AI Studio](https://aistudio.google.com/).
+1. Get an API key from [Google AI Studio](https://aistudio.google.com/).
 2. Create a `.env` file in the project root:
    ```env
    EXPO_PUBLIC_GEMINI_API_KEY=AIzaSyYourActualKeyHere
+   EXPO_PUBLIC_GEMINI_MODEL=gemini-3.5-flash-lite
    ```
 3. Alternatively, you can paste the API key directly into the app's in-app **⚙️ Setup Modal**.
-
-> [!NOTE]
-> **Zero Key / Offline Fallback:** If no API key is provided, SeniorShield automatically falls back to its built-in local heuristic engine. The app remains 100% operational for offline testing and judge presentations.
 
 ---
 
@@ -240,8 +238,9 @@ When contributing code, please follow these project rules:
     ├── constants/
     │   └── mockScams.ts         # 4 realistic Indian scam vectors (EB, Digital Arrest, KYC, Safe Bank)
     ├── services/
-    │   ├── gemini.ts            # Gemini 2.5 Flash client + offline heuristic fallback
+    │   ├── gemini.ts            # Pure Gemini 3.5 Flash Lite inference engine
     │   ├── deviceScanner.ts     # Native SMS & Call Log reader
+    │   ├── autonomousSmsWatcher.ts # Real-time SMS inbox poller
     │   └── campaignTracker.ts   # Multi-channel correlation & cumulative risk score
     └── types/
         └── scam.ts              # TypeScript interfaces
