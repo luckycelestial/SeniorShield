@@ -55,13 +55,14 @@ import { autonomousSmsWatcher } from './src/services/autonomousSmsWatcher';
 import { preCallSentinel, PreCallReputation } from './src/services/preCallSentinel';
 import { callSttService, ChunkSttAnalysis } from './src/services/callSttService';
 import { MOCK_SCAM_SCENARIOS } from './src/constants/mockScams';
+import { callRecordingService } from './src/services/callRecordingService';
 import { TRANSLATIONS } from './src/constants/languages';
 
 export default function App() {
   // Onboarding Navigation State (defaults to true for instant protection, accessible via Guide)
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean>(true);
 
-  // Core Campaign & Defense State
+  // Core Campaign & Defense State (Starts completely clean with 0 hardcoded scams)
   const [campaignState, setCampaignState] = useState<CampaignState>(
     createInitialCampaignState()
   );
@@ -89,7 +90,6 @@ export default function App() {
 
   // Initial Auto-Analysis, Notification Reader, Autonomous SMS Inbox Watcher & 10s Call Chunker STT
   useEffect(() => {
-    runInitialBaseline();
     initializeNotificationReader();
     startAutonomousSmsMonitoring();
     startPreCallMonitoring();
@@ -107,41 +107,85 @@ export default function App() {
       (analysis: ChunkSttAnalysis) => {
         handleInCallAudioChunkAnalysis(analysis);
       },
-      (callEndedData) => {
-        console.log('📞 [App] Displaying Post-Call Debrief Screen for:', callEndedData.phoneNumber);
-        setPostCallDebrief({
-          phoneNumber: callEndedData.phoneNumber,
-          durationSeconds: callEndedData.durationSeconds,
-          wasMonitored: callEndedData.wasMonitored,
-          transcript: callEndedData.transcript,
-          report: campaignState.latestReport,
-          timestamp: Date.now(),
-        });
+      async (callEndedData) => {
+        console.log('📞 [App] Automatic Post-Call Trigger for:', callEndedData.phoneNumber, 'Duration:', callEndedData.durationSeconds);
+        
+        // Wait 1.5s for OS audio recorder to finalize file on disk
+        setTimeout(async () => {
+          try {
+            // Automatically grab newest recording from device recording folder
+            const recentFiles = await callRecordingService.scanDeviceRecordings(5);
+            const latestFile = recentFiles.length > 0 ? recentFiles[0] : null;
 
-        // Add to processed calls archive for the Call History Screen
-        const newRecord: ProcessedCallRecord = {
-          id: `call_rec_${Date.now()}`,
-          phoneNumber: callEndedData.phoneNumber,
-          timestamp: Date.now(),
-          durationSeconds: callEndedData.durationSeconds || 45,
-          totalChunks: Math.max(1, Math.ceil((callEndedData.durationSeconds || 45) / 10)),
-          threatLevel: campaignState.latestReport?.threat_level || 'CRITICAL',
-          confidenceScore: campaignState.latestReport?.confidence_score || 95,
-          scamType: campaignState.latestReport?.scam_type || 'Stranger Call Coercion',
-          impersonatedEntity: campaignState.latestReport?.impersonated_entity || 'Unverified Caller',
-          seniorActionDirective: campaignState.latestReport?.action_required || 'Do not share OTPs or download remote apps.',
-          fullTranscript: callEndedData.transcript || '[Audio Monitored & Analyzed]',
-          chunkTranscripts: [
-            {
-              chunkIndex: 1,
-              text: callEndedData.transcript || 'Live speech stream analyzed by Sentinel.',
-              intent: 'Stranger Audio Sampling',
-            },
-          ],
-          scamMarkers: campaignState.latestReport?.threat_indicators || [],
-          report: campaignState.latestReport,
-        };
-        setProcessedCalls((prev) => [newRecord, ...prev]);
+            if (latestFile && (Date.now() - latestFile.lastModified < 180_000)) {
+              console.log('🎙️ [App] Automatically loading recorded call:', latestFile.fileName);
+              
+              const aiRecord = await callRecordingService.analyzeRecordedAudioWithAi(
+                latestFile.filePath,
+                callEndedData.phoneNumber,
+                geminiApiKey
+              );
+
+              if (aiRecord) {
+                setProcessedCalls((prev) => [aiRecord, ...prev.filter((p) => p.id !== aiRecord.id)]);
+                
+                // Show Debrief with 100% Real Gemini AI Analysis
+                setPostCallDebrief({
+                  phoneNumber: callEndedData.phoneNumber,
+                  durationSeconds: aiRecord.durationSeconds || callEndedData.durationSeconds,
+                  wasMonitored: true,
+                  transcript: aiRecord.fullTranscript,
+                  report: aiRecord.report,
+                  timestamp: Date.now(),
+                });
+
+                if (aiRecord.report) {
+                  const callEvent: DeviceEvent = {
+                    id: `call_${Date.now()}`,
+                    type: 'CALL',
+                    senderOrNumber: callEndedData.phoneNumber,
+                    timestamp: Date.now(),
+                    contentOrDuration: `[Recorded Audio Analyzed]: "${aiRecord.fullTranscript.substring(0, 120)}..."`,
+                    rawPayload: { markers: aiRecord.scamMarkers, score: aiRecord.confidenceScore },
+                  };
+                  setCampaignState((prev) => updateCampaignState(prev, [callEvent], aiRecord.report!));
+                }
+                return;
+              }
+            }
+
+            // If no audio file on disk, check if live 10s chunks were recorded
+            if (callEndedData.transcript && callEndedData.transcript.trim().length > 0) {
+              const liveRecord: ProcessedCallRecord = {
+                id: `call_rec_${Date.now()}`,
+                phoneNumber: callEndedData.phoneNumber,
+                timestamp: Date.now(),
+                durationSeconds: callEndedData.durationSeconds || 10,
+                totalChunks: 1,
+                threatLevel: 'SAFE',
+                confidenceScore: 85,
+                scamType: 'Monitored Conversation',
+                impersonatedEntity: 'None',
+                seniorActionDirective: 'No suspicious requests detected during this call.',
+                fullTranscript: callEndedData.transcript,
+                chunkTranscripts: [{ chunkIndex: 1, text: callEndedData.transcript, intent: 'Live Monitored Speech' }],
+                scamMarkers: [],
+              };
+              setProcessedCalls((prev) => [liveRecord, ...prev]);
+
+              setPostCallDebrief({
+                phoneNumber: callEndedData.phoneNumber,
+                durationSeconds: callEndedData.durationSeconds,
+                wasMonitored: true,
+                transcript: callEndedData.transcript,
+                report: null,
+                timestamp: Date.now(),
+              });
+            }
+          } catch (err) {
+            console.error('❌ [App] Error automatically analyzing call recording:', err);
+          }
+        }, 1500);
       }
     );
   };

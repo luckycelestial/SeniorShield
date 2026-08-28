@@ -54,20 +54,30 @@ class CallReceiver : BroadcastReceiver() {
                 }
 
                 TelephonyManager.EXTRA_STATE_IDLE -> {
-                    val durationSeconds = if (callStartTimeMs > 0L) {
+                    val wasPickedUp = callStartTimeMs > 0L
+                    val durationSeconds = if (wasPickedUp) {
                         ((System.currentTimeMillis() - callStartTimeMs) / 1000).toInt()
                     } else 0
 
-                    Log.d("SeniorShieldCallReceiver", "⏹️ Call Ended (IDLE). Duration: ${durationSeconds}s. Monitored: $wasCallMonitored. Stopping Audio Chunker.")
+                    Log.d("SeniorShieldCallReceiver", "⏹️ Call Ended (IDLE). PickedUp: $wasPickedUp, Duration: ${durationSeconds}s, Monitored: $wasCallMonitored.")
                     InCallAudioChunker.stopRecording()
                     SentinelForegroundService.dismissCallAlert(context)
 
-                    // Emit onCallEnded to open Post-Call Debrief Screen in UI
-                    PreCallModule.sendCallEndedEvent(
-                        phoneNumber = lastIncomingNumber,
-                        durationSeconds = durationSeconds,
-                        wasMonitored = wasCallMonitored
-                    )
+                    // Only emit call ended event if call was actually answered and monitored
+                    if (wasPickedUp && wasCallMonitored && durationSeconds >= 2) {
+                        Log.i("SeniorShieldCallReceiver", "🎙️ Emitting onCallEnded for stranger call: $lastIncomingNumber (${durationSeconds}s)")
+                        PreCallModule.sendCallEndedEvent(
+                            phoneNumber = lastIncomingNumber,
+                            durationSeconds = durationSeconds,
+                            wasMonitored = true
+                        )
+                    } else {
+                        Log.d("SeniorShieldCallReceiver", "ℹ️ Call was missed, rejected, or whitelisted. No debrief needed.")
+                    }
+
+                    // Reset session flags
+                    callStartTimeMs = 0L
+                    wasCallMonitored = false
                 }
             }
         }

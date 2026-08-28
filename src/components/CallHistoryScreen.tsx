@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
   Modal,
   ScrollView,
   StyleSheet,
@@ -23,12 +21,8 @@ import {
   ChevronRight,
   Info,
   CheckCircle,
-  RefreshCw,
-  FolderOpen,
-  Sparkles,
 } from 'lucide-react-native';
 import { ProcessedCallRecord } from '../types/callLog';
-import { callRecordingService, DeviceRecordingFile } from '../services/callRecordingService';
 import { TRANSLATIONS } from '../constants/languages';
 
 interface CallHistoryScreenProps {
@@ -48,59 +42,13 @@ export const CallHistoryScreen: React.FC<CallHistoryScreenProps> = ({
   onClose,
   onBlockNumber,
   onAlertGuardian,
-  onAddProcessedRecord,
 }) => {
-  const [filter, setFilter] = useState<'ALL' | 'THREATS' | 'SAFE' | 'RAW_FILES'>('ALL');
+  const [filter, setFilter] = useState<'ALL' | 'THREATS' | 'SAFE'>('ALL');
   const [selectedCall, setSelectedCall] = useState<ProcessedCallRecord | null>(null);
-  const [deviceFiles, setDeviceFiles] = useState<DeviceRecordingFile[]>([]);
-  const [isScanning, setIsScanning] = useState(false);
-  const [analyzingFilePath, setAnalyzingFilePath] = useState<string | null>(null);
-
-  const t = TRANSLATIONS[selectedLanguage] || TRANSLATIONS.en;
-
-  useEffect(() => {
-    if (visible) {
-      scanRecordings();
-    }
-  }, [visible]);
-
-  const scanRecordings = async () => {
-    setIsScanning(true);
-    try {
-      const files = await callRecordingService.scanDeviceRecordings(20);
-      setDeviceFiles(files);
-    } catch (e) {
-      console.error('Error scanning device recordings:', e);
-    } finally {
-      setIsScanning(false);
-    }
-  };
-
-  const handleAnalyzeFile = async (file: DeviceRecordingFile) => {
-    setAnalyzingFilePath(file.filePath);
-    try {
-      const record = await callRecordingService.analyzeRecordedAudioWithAi(
-        file.filePath,
-        file.callerOrContact
-      );
-
-      if (record) {
-        if (onAddProcessedRecord) {
-          onAddProcessedRecord(record);
-        }
-        setSelectedCall(record);
-      }
-    } catch (e: any) {
-      Alert.alert(
-        'Analysis Failed',
-        e?.message || 'Could not analyze this audio file with Gemini AI.'
-      );
-    } finally {
-      setAnalyzingFilePath(null);
-    }
-  };
 
   if (!visible) return null;
+
+  const t = TRANSLATIONS[selectedLanguage] || TRANSLATIONS.en;
 
   const filteredCalls = calls.filter((c) => {
     if (filter === 'THREATS') return c.threatLevel === 'CRITICAL' || c.threatLevel === 'SUSPICIOUS';
@@ -135,20 +83,8 @@ export const CallHistoryScreen: React.FC<CallHistoryScreenProps> = ({
           </TouchableOpacity>
           <View style={styles.headerTitleGroup}>
             <Text style={styles.headerTitle}>In-Call Audio Shield Logs</Text>
-            <Text style={styles.headerSubtitle}>Real Audio Recordings Processed by Gemini AI</Text>
+            <Text style={styles.headerSubtitle}>Every Call Processed by Autonomous Gemini AI</Text>
           </View>
-          <TouchableOpacity
-            style={styles.refreshButton}
-            onPress={scanRecordings}
-            disabled={isScanning}
-            activeOpacity={0.7}
-          >
-            {isScanning ? (
-              <ActivityIndicator size="small" color="#0284C7" />
-            ) : (
-              <RefreshCw size={18} color="#0284C7" />
-            )}
-          </TouchableOpacity>
         </View>
 
         {/* Filter Pills */}
@@ -159,17 +95,7 @@ export const CallHistoryScreen: React.FC<CallHistoryScreenProps> = ({
             activeOpacity={0.8}
           >
             <Text style={[styles.filterPillText, filter === 'ALL' && styles.filterPillTextActive]}>
-              Processed ({calls.length})
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.filterPill, filter === 'RAW_FILES' && styles.filterPillActiveBlue]}
-            onPress={() => setFilter('RAW_FILES')}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.filterPillText, filter === 'RAW_FILES' && styles.filterPillTextActiveBlue]}>
-              📁 Device Files ({deviceFiles.length})
+              All Processed ({calls.length})
             </Text>
           </TouchableOpacity>
 
@@ -198,156 +124,87 @@ export const CallHistoryScreen: React.FC<CallHistoryScreenProps> = ({
         <View style={styles.ruleBanner}>
           <Info size={16} color="#0284C7" />
           <Text style={styles.ruleBannerText}>
-            <Text style={styles.ruleBannerBold}>Real Audio Pipeline: </Text>
-            Audio recordings are loaded directly from device storage (`/sdcard/Recordings/Record/Call`), transcribed by Gemini 2.5 Flash Lite, and evaluated dynamically.
+            <Text style={styles.ruleBannerBold}>Automatic Processing Active: </Text>
+            Calls are automatically loaded from your phone's call recording folder immediately after ending, transcribed by Gemini 2.5 Flash Lite, and evaluated dynamically.
           </Text>
         </View>
 
-        {/* Content List */}
+        {/* Calls List */}
         <ScrollView style={styles.callsList} showsVerticalScrollIndicator={false}>
-          {filter === 'RAW_FILES' ? (
-            /* Device Recordings File Browser */
-            <View>
-              <Text style={styles.sectionHeader}>
-                CALL RECORDING FILES DETECTED ON DEVICE ({deviceFiles.length})
+          {filteredCalls.length === 0 ? (
+            <View style={styles.emptyBox}>
+              <CheckCircle size={36} color="#10B981" />
+              <Text style={styles.emptyTitle}>No Processed Calls Yet</Text>
+              <Text style={styles.emptySubtitle}>
+                SeniorShield is standing guard. When an incoming phone call ends, its audio recording will automatically be analyzed with Gemini AI and logged here.
               </Text>
-              {deviceFiles.length === 0 ? (
-                <View style={styles.emptyBox}>
-                  <FolderOpen size={36} color="#64748B" />
-                  <Text style={styles.emptyTitle}>No Audio Recordings Found</Text>
-                  <Text style={styles.emptySubtitle}>
-                    Enable call recording in your phone dialer or record a call to see it here.
-                  </Text>
-                </View>
-              ) : (
-                deviceFiles.map((file) => {
-                  const isProcessing = analyzingFilePath === file.filePath;
-
-                  return (
-                    <View key={file.filePath} style={styles.fileCard}>
-                      <View style={styles.fileHeader}>
-                        <View style={styles.fileInfo}>
-                          <Text style={styles.fileNameText}>{file.callerOrContact}</Text>
-                          <Text style={styles.filePathText} numberOfLines={1}>
-                            {file.fileName}
-                          </Text>
-                          <View style={styles.fileMetaRow}>
-                            <Text style={styles.fileMetaText}>
-                              {(file.fileSizeBytes / 1024).toFixed(0)} KB • {formatDuration(file.durationSeconds)}
-                            </Text>
-                            <Text style={styles.fileMetaDot}>•</Text>
-                            <Text style={styles.fileMetaText}>{formatTimeAgo(file.lastModified)}</Text>
-                          </View>
-                        </View>
-
-                        <TouchableOpacity
-                          style={[styles.aiAnalyzeBtn, isProcessing && styles.aiAnalyzeBtnLoading]}
-                          onPress={() => handleAnalyzeFile(file)}
-                          disabled={isProcessing}
-                          activeOpacity={0.85}
-                        >
-                          {isProcessing ? (
-                            <ActivityIndicator size="small" color="#FFFFFF" />
-                          ) : (
-                            <>
-                              <Sparkles size={14} color="#FFFFFF" />
-                              <Text style={styles.aiAnalyzeBtnText}>Analyze AI</Text>
-                            </>
-                          )}
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  );
-                })
-              )}
             </View>
           ) : (
-            /* Processed Calls List */
-            <View>
-              {filteredCalls.length === 0 ? (
-                <View style={styles.emptyBox}>
-                  <CheckCircle size={36} color="#10B981" />
-                  <Text style={styles.emptyTitle}>No Processed Calls Yet</Text>
-                  <Text style={styles.emptySubtitle}>
-                    Tap "Device Files" above to run Gemini AI on your existing call recordings, or receive a live phone call to analyze automatically.
-                  </Text>
-                  <TouchableOpacity
-                    style={styles.scanFilesBtn}
-                    onPress={() => setFilter('RAW_FILES')}
-                    activeOpacity={0.85}
-                  >
-                    <FolderOpen size={16} color="#FFFFFF" />
-                    <Text style={styles.scanFilesBtnText}>Browse Device Audio Recordings</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                filteredCalls.map((call) => {
-                  const isThreat = call.threatLevel === 'CRITICAL' || call.threatLevel === 'SUSPICIOUS';
+            filteredCalls.map((call) => {
+              const isThreat = call.threatLevel === 'CRITICAL' || call.threatLevel === 'SUSPICIOUS';
 
-                  return (
-                    <TouchableOpacity
-                      key={call.id}
-                      style={[styles.callCard, isThreat ? styles.callCardRed : styles.callCardGreen]}
-                      onPress={() => setSelectedCall(call)}
-                      activeOpacity={0.85}
-                    >
-                      <View style={styles.callCardHeader}>
-                        <View style={styles.callerInfo}>
-                          <Text style={styles.callerNumber}>{call.phoneNumber}</Text>
-                          <View style={styles.callerBadgeRow}>
-                            <View style={styles.strangerBadge}>
-                              <UserX size={11} color="#E11D48" />
-                              <Text style={styles.strangerBadgeText}>Real Call Recording</Text>
-                            </View>
-                            <View style={styles.durationBadge}>
-                              <Clock size={11} color="#64748B" />
-                              <Text style={styles.durationBadgeText}>{formatDuration(call.durationSeconds)}</Text>
-                            </View>
-                          </View>
+              return (
+                <TouchableOpacity
+                  key={call.id}
+                  style={[styles.callCard, isThreat ? styles.callCardRed : styles.callCardGreen]}
+                  onPress={() => setSelectedCall(call)}
+                  activeOpacity={0.85}
+                >
+                  <View style={styles.callCardHeader}>
+                    <View style={styles.callerInfo}>
+                      <Text style={styles.callerNumber}>{call.phoneNumber}</Text>
+                      <View style={styles.callerBadgeRow}>
+                        <View style={styles.strangerBadge}>
+                          <UserX size={11} color="#E11D48" />
+                          <Text style={styles.strangerBadgeText}>Real Call Recording</Text>
                         </View>
-
-                        <View style={styles.cardHeaderRight}>
-                          <View style={[styles.threatPill, isThreat ? styles.threatPillRed : styles.threatPillGreen]}>
-                            {isThreat ? <ShieldAlert size={12} color="#FFFFFF" /> : <ShieldCheck size={12} color="#FFFFFF" />}
-                            <Text style={styles.threatPillText}>
-                              {isThreat ? `${call.threatLevel} (${call.confidenceScore}%)` : 'SAFE'}
-                            </Text>
-                          </View>
-                          <Text style={styles.timeAgoText}>{formatTimeAgo(call.timestamp)}</Text>
+                        <View style={styles.durationBadge}>
+                          <Clock size={11} color="#64748B" />
+                          <Text style={styles.durationBadgeText}>{formatDuration(call.durationSeconds)}</Text>
                         </View>
                       </View>
+                    </View>
 
-                      {/* Impersonation & Scam Type */}
-                      <View style={styles.scamTypeBox}>
-                        <Text style={styles.scamTypeTitle}>{call.scamType}</Text>
-                        {call.impersonatedEntity && call.impersonatedEntity !== 'None' && (
-                          <View style={styles.entityTagRow}>
-                            <Building size={13} color="#0284C7" />
-                            <Text style={styles.entityTagText}>
-                              {call.impersonatedEntity}
-                            </Text>
-                          </View>
-                        )}
-                      </View>
-
-                      {/* Speech Transcript Snippet */}
-                      <View style={styles.snippetBox}>
-                        <FileAudio size={14} color="#64748B" />
-                        <Text style={styles.snippetText} numberOfLines={2}>
-                          {call.chunkTranscripts?.[0]?.text || call.fullTranscript || 'Transcript generated by Gemini AI'}
+                    <View style={styles.cardHeaderRight}>
+                      <View style={[styles.threatPill, isThreat ? styles.threatPillRed : styles.threatPillGreen]}>
+                        {isThreat ? <ShieldAlert size={12} color="#FFFFFF" /> : <ShieldCheck size={12} color="#FFFFFF" />}
+                        <Text style={styles.threatPillText}>
+                          {isThreat ? `${call.threatLevel} (${call.confidenceScore}%)` : 'SAFE'}
                         </Text>
                       </View>
+                      <Text style={styles.timeAgoText}>{formatTimeAgo(call.timestamp)}</Text>
+                    </View>
+                  </View>
 
-                      {/* Drilldown Arrow Action */}
-                      <View style={styles.cardFooter}>
-                        <Text style={styles.cardFooterText}>View Full Gemini Speech Debrief & Chunks</Text>
-                        <ChevronRight size={16} color="#E11D48" />
+                  {/* Impersonation & Scam Type */}
+                  <View style={styles.scamTypeBox}>
+                    <Text style={styles.scamTypeTitle}>{call.scamType}</Text>
+                    {call.impersonatedEntity && call.impersonatedEntity !== 'None' && (
+                      <View style={styles.entityTagRow}>
+                        <Building size={13} color="#0284C7" />
+                        <Text style={styles.entityTagText}>
+                          {call.impersonatedEntity}
+                        </Text>
                       </View>
-                    </TouchableOpacity>
-                  );
-                })
-              )}
-            </View>
+                    )}
+                  </View>
+
+                  {/* Speech Transcript Snippet */}
+                  <View style={styles.snippetBox}>
+                    <FileAudio size={14} color="#64748B" />
+                    <Text style={styles.snippetText} numberOfLines={2}>
+                      {call.chunkTranscripts?.[0]?.text || call.fullTranscript || 'Transcript generated by Gemini AI'}
+                    </Text>
+                  </View>
+
+                  {/* Drilldown Arrow Action */}
+                  <View style={styles.cardFooter}>
+                    <Text style={styles.cardFooterText}>View Full Gemini Speech Debrief & Chunks</Text>
+                    <ChevronRight size={16} color="#E11D48" />
+                  </View>
+                </TouchableOpacity>
+              );
+            })
           )}
           <View style={{ height: 50 }} />
         </ScrollView>
@@ -547,14 +404,6 @@ const styles = StyleSheet.create({
     color: '#64748B',
     marginTop: 2,
   },
-  refreshButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#F0F9FF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   filterRow: {
     flexDirection: 'row',
     paddingHorizontal: 16,
@@ -565,16 +414,13 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F1F5F9',
   },
   filterPill: {
-    paddingHorizontal: 11,
+    paddingHorizontal: 13,
     paddingVertical: 6,
     borderRadius: 9999,
     backgroundColor: '#F1F5F9',
   },
   filterPillActive: {
     backgroundColor: '#0F172A',
-  },
-  filterPillActiveBlue: {
-    backgroundColor: '#0284C7',
   },
   filterPillActiveRed: {
     backgroundColor: '#E11D48',
@@ -588,9 +434,6 @@ const styles = StyleSheet.create({
     color: '#475569',
   },
   filterPillTextActive: {
-    color: '#FFFFFF',
-  },
-  filterPillTextActiveBlue: {
     color: '#FFFFFF',
   },
   filterPillTextActiveRed: {
@@ -622,14 +465,6 @@ const styles = StyleSheet.create({
   ruleBannerBold: {
     fontWeight: '800',
   },
-  sectionHeader: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#94A3B8',
-    letterSpacing: 0.5,
-    marginTop: 12,
-    marginBottom: 8,
-  },
   callsList: {
     flex: 1,
     paddingHorizontal: 20,
@@ -657,80 +492,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 4,
     lineHeight: 18,
-  },
-  scanFilesBtn: {
-    backgroundColor: '#0284C7',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 9999,
-    marginTop: 16,
-  },
-  scanFilesBtnText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '800',
-  },
-  fileCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  fileHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  fileInfo: {
-    flex: 1,
-    marginRight: 10,
-  },
-  fileNameText: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#0F172A',
-  },
-  filePathText: {
-    fontSize: 11,
-    color: '#94A3B8',
-    marginTop: 2,
-  },
-  fileMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 4,
-  },
-  fileMetaText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#64748B',
-  },
-  fileMetaDot: {
-    fontSize: 11,
-    color: '#CBD5E1',
-  },
-  aiAnalyzeBtn: {
-    backgroundColor: '#0F172A',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-  },
-  aiAnalyzeBtnLoading: {
-    backgroundColor: '#64748B',
-  },
-  aiAnalyzeBtnText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '800',
   },
   callCard: {
     backgroundColor: '#FFFFFF',

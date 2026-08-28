@@ -38,11 +38,11 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
     return (
       <View style={styles.emptyCard}>
         <View style={styles.emptyIconCircle}>
-          <Shield size={32} color="#8E8E93" />
+          <Shield size={32} color="#10B981" />
         </View>
-        <Text style={styles.emptyTitle}>Ready to Scan</Text>
+        <Text style={styles.emptyTitle}>Autonomous Shield Active</Text>
         <Text style={styles.emptySubtitle}>
-          Tap "Scan Device & Protect" below or launch a simulation from the Demo Hub to analyze recent calls and messages.
+          Standing guard 24/7. Incoming calls from unverified numbers will automatically be analyzed with Gemini AI for coercion & fraud.
         </Text>
       </View>
     );
