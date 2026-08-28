@@ -7,7 +7,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import { PhoneCall, Globe, ChevronDown, Check } from 'lucide-react-native';
+import { PhoneCall, Globe, ChevronDown, Check, Mic } from 'lucide-react-native';
 import { ThreatLevel } from '../types/scam';
 import { SUPPORTED_LANGUAGES, LanguageOption, TRANSLATIONS } from '../constants/languages';
 
@@ -17,6 +17,8 @@ interface HeaderProps {
   onSelectLanguage: (langCode: string) => void;
   onCallHelpline: () => void;
   onOpenOnboarding?: () => void;
+  onOpenCallLogs?: () => void;
+  callLogsCount?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -25,6 +27,8 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectLanguage,
   onCallHelpline,
   onOpenOnboarding,
+  onOpenCallLogs,
+  callLogsCount = 0,
 }) => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
@@ -55,6 +59,23 @@ export const Header: React.FC<HeaderProps> = ({
         </View>
 
         <View style={styles.headerRightActions}>
+          {onOpenCallLogs && (
+            <TouchableOpacity
+              style={styles.callLogsHeaderButton}
+              onPress={onOpenCallLogs}
+              activeOpacity={0.7}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            >
+              <Mic size={13} color="#E11D48" />
+              <Text style={styles.callLogsHeaderText}>Logs</Text>
+              {callLogsCount > 0 && (
+                <View style={styles.callLogsBadge}>
+                  <Text style={styles.callLogsBadgeText}>{callLogsCount}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          )}
+
           {onOpenOnboarding && (
             <TouchableOpacity
               style={styles.onboardingHeaderButton}
@@ -208,6 +229,33 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '800',
     color: '#15803D',
+  },
+  callLogsHeaderButton: {
+    backgroundColor: '#FFF1F2',
+    borderWidth: 1,
+    borderColor: '#FECDD3',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+    borderRadius: 9999,
+  },
+  callLogsHeaderText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#E11D48',
+  },
+  callLogsBadge: {
+    backgroundColor: '#E11D48',
+    borderRadius: 9999,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+  },
+  callLogsBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '900',
   },
   languageButton: {
     backgroundColor: '#FFFFFF',

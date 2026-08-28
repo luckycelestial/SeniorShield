@@ -1,14 +1,15 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { MessageSquare, PhoneIncoming, Clock, GitCommit, Flame } from 'lucide-react-native';
 import { CampaignStage, DeviceEvent } from '../types/scam';
 
 interface CampaignTimelineProps {
   events: DeviceEvent[];
   stage: CampaignStage;
+  onSelectCallEvent?: (event: DeviceEvent) => void;
 }
 
-export const CampaignTimeline: React.FC<CampaignTimelineProps> = ({ events, stage }) => {
+export const CampaignTimeline: React.FC<CampaignTimelineProps> = ({ events, stage, onSelectCallEvent }) => {
   if (!events || events.length === 0) {
     return (
       <View style={styles.emptyContainer}>
@@ -139,6 +140,16 @@ export const CampaignTimeline: React.FC<CampaignTimelineProps> = ({ events, stag
                 <Text style={styles.contentDetailsText}>
                   {event.contentOrDuration}
                 </Text>
+
+                {!isSMS && onSelectCallEvent && (
+                  <TouchableOpacity
+                    style={styles.debriefButton}
+                    onPress={() => onSelectCallEvent(event)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.debriefButtonText}>View Post-Call Debrief & Transcript →</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
           );
@@ -300,5 +311,20 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#1F1F1F',
     lineHeight: 18,
+  },
+  debriefButton: {
+    marginTop: 8,
+    backgroundColor: '#FFF1F2',
+    borderWidth: 1,
+    borderColor: '#FECDD3',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  debriefButtonText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#E11D48',
   },
 });

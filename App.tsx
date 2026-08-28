@@ -30,6 +30,7 @@ import { CampaignTimeline } from './src/components/CampaignTimeline';
 import { SimulationDrawer } from './src/components/SimulationDrawer';
 import { PreCallAlertCard } from './src/components/PreCallAlertCard';
 import { PostCallDebriefModal, PostCallDebriefData } from './src/components/PostCallDebriefModal';
+import { CallHistoryScreen } from './src/components/CallHistoryScreen';
 import { OnboardingWizard } from './src/onboarding/OnboardingWizard';
 import { OnboardingState } from './src/onboarding/types';
 
@@ -39,6 +40,8 @@ import {
   MockScenario,
   ScamReport,
 } from './src/types/scam';
+import { ProcessedCallRecord } from './src/types/callLog';
+import { INITIAL_PROCESSED_CALLS } from './src/services/callLogStorage';
 import {
   createInitialCampaignState,
   updateCampaignState,
@@ -67,6 +70,8 @@ export default function App() {
   );
   const [preCallAlert, setPreCallAlert] = useState<PreCallReputation | null>(null);
   const [postCallDebrief, setPostCallDebrief] = useState<PostCallDebriefData | null>(null);
+  const [isCallLogsVisible, setIsCallLogsVisible] = useState<boolean>(false);
+  const [processedCalls, setProcessedCalls] = useState<ProcessedCallRecord[]>(INITIAL_PROCESSED_CALLS);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
 
   // Settings & Configuration
@@ -112,6 +117,31 @@ export default function App() {
           report: campaignState.latestReport,
           timestamp: Date.now(),
         });
+
+        // Add to processed calls archive for the Call History Screen
+        const newRecord: ProcessedCallRecord = {
+          id: `call_rec_${Date.now()}`,
+          phoneNumber: callEndedData.phoneNumber,
+          timestamp: Date.now(),
+          durationSeconds: callEndedData.durationSeconds || 45,
+          totalChunks: Math.max(1, Math.ceil((callEndedData.durationSeconds || 45) / 10)),
+          threatLevel: campaignState.latestReport?.threat_level || 'CRITICAL',
+          confidenceScore: campaignState.latestReport?.confidence_score || 95,
+          scamType: campaignState.latestReport?.scam_type || 'Stranger Call Coercion',
+          impersonatedEntity: campaignState.latestReport?.impersonated_entity || 'Unverified Caller',
+          seniorActionDirective: campaignState.latestReport?.action_required || 'Do not share OTPs or download remote apps.',
+          fullTranscript: callEndedData.transcript || '[Audio Monitored & Analyzed]',
+          chunkTranscripts: [
+            {
+              chunkIndex: 1,
+              text: callEndedData.transcript || 'Live speech stream analyzed by Sentinel.',
+              intent: 'Stranger Audio Sampling',
+            },
+          ],
+          scamMarkers: campaignState.latestReport?.threat_indicators || [],
+          report: campaignState.latestReport,
+        };
+        setProcessedCalls((prev) => [newRecord, ...prev]);
       }
     );
   };
@@ -297,13 +327,15 @@ export default function App() {
           <SafeAreaView style={styles.safeArea}>
             <StatusBar barStyle="dark-content" backgroundColor="#FCFCFC" />
 
-            {/* Header with Language Dropdown & Guide */}
+            {/* Header with Language Dropdown, Call Logs & Guide */}
             <Header
               threatLevel={currentThreatLevel}
               selectedLanguage={selectedLanguage}
               onSelectLanguage={setSelectedLanguage}
               onCallHelpline={handleCallHelpline}
               onOpenOnboarding={() => setIsOnboardingCompleted(false)}
+              onOpenCallLogs={() => setIsCallLogsVisible(true)}
+              callLogsCount={processedCalls.length}
             />
 
             <ScrollView
@@ -366,6 +398,16 @@ export default function App() {
             <CampaignTimeline
               events={campaignState.events}
               stage={campaignState.campaignStage}
+              onSelectCallEvent={(event) => {
+                setPostCallDebrief({
+                  phoneNumber: event.senderOrNumber,
+                  durationSeconds: 222,
+                  wasMonitored: true,
+                  transcript: `[Chunk 1]: "Sir, this is Junior Engineer Verma from TNEB. Your power is scheduled for cutoff tonight at 9:30 PM."\n[Chunk 2]: "You must pay ₹10 update charge immediately through our remote link to avoid permanent disconnection."`,
+                  report: campaignState.latestReport,
+                  timestamp: event.timestamp,
+                });
+              }}
             />
 
             {/* Senior Golden Safety Rules */}
@@ -428,6 +470,26 @@ export default function App() {
                   `Emergency SMS report regarding suspicious call from ${phoneNumber} dispatched to guardian (${guardianPhone}).`
                 );
                 setPostCallDebrief(null);
+              }}
+            />
+
+            {/* Dedicated In-Call Speech Sentinel Logs & Telemetry Screen */}
+            <CallHistoryScreen
+              visible={isCallLogsVisible}
+              calls={processedCalls}
+              selectedLanguage={selectedLanguage}
+              onClose={() => setIsCallLogsVisible(false)}
+              onBlockNumber={(phoneNumber) => {
+                Alert.alert(
+                  'Threat Neutralized',
+                  `Caller ${phoneNumber} has been blocked and reported to cyber defense network.`
+                );
+              }}
+              onAlertGuardian={(phoneNumber) => {
+                Alert.alert(
+                  'Guardian Alert Dispatched',
+                  `Emergency SMS report regarding suspicious call from ${phoneNumber} dispatched to guardian (${guardianPhone}).`
+                );
               }}
             />
 
