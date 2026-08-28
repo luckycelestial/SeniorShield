@@ -29,6 +29,8 @@ import { ThreatCard } from './src/components/ThreatCard';
 import { CampaignTimeline } from './src/components/CampaignTimeline';
 import { SimulationDrawer } from './src/components/SimulationDrawer';
 import { PreCallAlertCard } from './src/components/PreCallAlertCard';
+import { OnboardingWizard } from './src/onboarding/OnboardingWizard';
+import { OnboardingState } from './src/onboarding/types';
 
 import {
   CampaignState,
@@ -50,6 +52,9 @@ import { preCallSentinel, PreCallReputation } from './src/services/preCallSentin
 import { MOCK_SCAM_SCENARIOS } from './src/constants/mockScams';
 
 export default function App() {
+  // Onboarding Navigation State
+  const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean>(false);
+
   // Core Campaign & Defense State
   const [campaignState, setCampaignState] = useState<CampaignState>(
     createInitialCampaignState()
@@ -64,6 +69,13 @@ export default function App() {
   const [geminiApiKey, setGeminiApiKey] = useState<string>('');
   const [isSettingsVisible, setIsSettingsVisible] = useState<boolean>(false);
   const [isSimulationVisible, setIsSimulationVisible] = useState<boolean>(false);
+
+  const handleOnboardingComplete = (data: OnboardingState) => {
+    setIsOnboardingCompleted(true);
+    if (data.emergencyContacts.length > 0) {
+      setGuardianPhone(data.emergencyContacts[0].phone);
+    }
+  };
 
   // Initial Auto-Analysis, Notification Reader, and Autonomous SMS Inbox Watcher
   useEffect(() => {
@@ -213,187 +225,192 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <View style={styles.rootContainer}>
-        <SafeAreaView style={styles.safeArea}>
-          <StatusBar barStyle="dark-content" backgroundColor="#FCFCFC" />
+      {!isOnboardingCompleted ? (
+        <OnboardingWizard onComplete={handleOnboardingComplete} />
+      ) : (
+        <View style={styles.rootContainer}>
+          <SafeAreaView style={styles.safeArea}>
+            <StatusBar barStyle="dark-content" backgroundColor="#FCFCFC" />
 
-          {/* Header */}
-          <Header
-            threatLevel={currentThreatLevel}
-            onCallHelpline={handleCallHelpline}
-            onOpenSettings={() => setIsSettingsVisible(true)}
-          />
-
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Pre-Call Incoming Scammer Alert Banner */}
-            <PreCallAlertCard
-              alert={preCallAlert}
-              onDismiss={() => setPreCallAlert(null)}
-              onBlockCaller={(number) => {
-                setPreCallAlert(null);
-                Alert.alert('Number Blocked', `${number} has been blocked and flagged in community database.`);
-              }}
+            {/* Header */}
+            <Header
+              threatLevel={currentThreatLevel}
+              onCallHelpline={handleCallHelpline}
+              onOpenSettings={() => setIsSettingsVisible(true)}
+              onOpenOnboarding={() => setIsOnboardingCompleted(false)}
             />
 
-            {/* Cumulative Risk Exposure StatCard */}
-            <View style={styles.gaugeCard}>
-              <View style={styles.gaugeHeader}>
-                <View style={styles.gaugeHeaderLeft}>
-                  <View style={styles.gaugeIconBox}>
-                    <Activity size={18} color="#0284C7" />
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {/* Pre-Call Incoming Scammer Alert Banner */}
+              <PreCallAlertCard
+                alert={preCallAlert}
+                onDismiss={() => setPreCallAlert(null)}
+                onBlockCaller={(number) => {
+                  setPreCallAlert(null);
+                  Alert.alert('Number Blocked', `${number} has been blocked and flagged in community database.`);
+                }}
+              />
+
+              {/* Cumulative Risk Exposure StatCard */}
+              <View style={styles.gaugeCard}>
+                <View style={styles.gaugeHeader}>
+                  <View style={styles.gaugeHeaderLeft}>
+                    <View style={styles.gaugeIconBox}>
+                      <Activity size={18} color="#0284C7" />
+                    </View>
+                    <Text style={styles.gaugeTitle}>CUMULATIVE RISK EXPOSURE</Text>
                   </View>
-                  <Text style={styles.gaugeTitle}>CUMULATIVE RISK EXPOSURE</Text>
-                </View>
-                <Text style={[styles.gaugeScoreText, { color: scoreTextColor }]}>
-                  {riskScore} <Text style={styles.gaugeScoreDenom}>/ 100</Text>
-                </Text>
-              </View>
-
-              {/* Progress Track */}
-              <View style={styles.progressTrack}>
-                <View
-                  style={[
-                    styles.progressBar,
-                    {
-                      width: `${Math.max(6, riskScore)}%`,
-                      backgroundColor: scoreBarColor,
-                    },
-                  ]}
-                />
-              </View>
-            </View>
-
-            {/* Dynamic Threat Report Card */}
-            <ThreatCard
-              report={campaignState.latestReport}
-              guardianPhone={guardianPhone}
-              onBlockNumber={() => {
-                Alert.alert(
-                  'Threat Mitigated',
-                  'Number blocked and cyber telemetry logged.'
-                );
-              }}
-            />
-
-            {/* Multi-Step Attack Chain Timeline */}
-            <CampaignTimeline
-              events={campaignState.events}
-              stage={campaignState.campaignStage}
-            />
-
-            {/* Senior Golden Safety Rules */}
-            <View style={styles.goldenRulesCard}>
-              <View style={styles.goldenRulesHeader}>
-                <Lightbulb size={18} color="#D97706" />
-                <Text style={styles.goldenRulesTitle}>
-                  Golden Safety Rules for Seniors
-                </Text>
-              </View>
-
-              <View style={styles.rulesList}>
-                <View style={styles.ruleItem}>
-                  <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
-                  <Text style={styles.ruleText}>
-                    <Text style={styles.ruleHighlight}>Electricity Boards</Text> never cut off power at night without paper notices.
+                  <Text style={[styles.gaugeScoreText, { color: scoreTextColor }]}>
+                    {riskScore} <Text style={styles.gaugeScoreDenom}>/ 100</Text>
                   </Text>
                 </View>
 
-                <View style={styles.ruleItem}>
-                  <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
-                  <Text style={styles.ruleText}>
-                    <Text style={styles.ruleHighlight}>Police & CBI</Text> never arrest citizens over phone or Skype/WhatsApp video calls.
-                  </Text>
-                </View>
-
-                <View style={styles.ruleItem}>
-                  <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
-                  <Text style={styles.ruleText}>
-                    <Text style={styles.ruleHighlight}>Banks</Text> never send apps (.apk links) or ask for OTPs to update KYC.
-                  </Text>
+                {/* Progress Track */}
+                <View style={styles.progressTrack}>
+                  <View
+                    style={[
+                      styles.progressBar,
+                      {
+                        width: `${Math.max(6, riskScore)}%`,
+                        backgroundColor: scoreBarColor,
+                      },
+                    ]}
+                  />
                 </View>
               </View>
-            </View>
-          </ScrollView>
 
-          {/* Demo Simulation Drawer */}
-          <SimulationDrawer
-            visible={isSimulationVisible}
-            onClose={() => setIsSimulationVisible(false)}
-            onSelectScenario={handleSelectMockScenario}
-          />
+              {/* Dynamic Threat Report Card */}
+              <ThreatCard
+                report={campaignState.latestReport}
+                guardianPhone={guardianPhone}
+                onBlockNumber={() => {
+                  Alert.alert(
+                    'Threat Mitigated',
+                    'Number blocked and cyber telemetry logged.'
+                  );
+                }}
+              />
 
-          {/* Configuration & Settings Modal */}
-          <Modal
-            visible={isSettingsVisible}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={() => setIsSettingsVisible(false)}
-          >
-            <View style={styles.modalBackdrop}>
-              <View style={styles.modalContent}>
-                <View style={styles.modalHeader}>
-                  <View style={styles.modalTitleGroup}>
-                    <Sliders size={20} color="#1F1F1F" />
-                    <Text style={styles.modalTitle}>Shield Setup & Guardian</Text>
+              {/* Multi-Step Attack Chain Timeline */}
+              <CampaignTimeline
+                events={campaignState.events}
+                stage={campaignState.campaignStage}
+              />
+
+              {/* Senior Golden Safety Rules */}
+              <View style={styles.goldenRulesCard}>
+                <View style={styles.goldenRulesHeader}>
+                  <Lightbulb size={18} color="#D97706" />
+                  <Text style={styles.goldenRulesTitle}>
+                    Golden Safety Rules for Seniors
+                  </Text>
+                </View>
+
+                <View style={styles.rulesList}>
+                  <View style={styles.ruleItem}>
+                    <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
+                    <Text style={styles.ruleText}>
+                      <Text style={styles.ruleHighlight}>Electricity Boards</Text> never cut off power at night without paper notices.
+                    </Text>
                   </View>
+
+                  <View style={styles.ruleItem}>
+                    <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
+                    <Text style={styles.ruleText}>
+                      <Text style={styles.ruleHighlight}>Police & CBI</Text> never arrest citizens over phone or Skype/WhatsApp video calls.
+                    </Text>
+                  </View>
+
+                  <View style={styles.ruleItem}>
+                    <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
+                    <Text style={styles.ruleText}>
+                      <Text style={styles.ruleHighlight}>Banks</Text> never send apps (.apk links) or ask for OTPs to update KYC.
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </ScrollView>
+
+            {/* Demo Simulation Drawer */}
+            <SimulationDrawer
+              visible={isSimulationVisible}
+              onClose={() => setIsSimulationVisible(false)}
+              onSelectScenario={handleSelectMockScenario}
+            />
+
+            {/* Configuration & Settings Modal */}
+            <Modal
+              visible={isSettingsVisible}
+              animationType="slide"
+              transparent={true}
+              onRequestClose={() => setIsSettingsVisible(false)}
+            >
+              <View style={styles.modalBackdrop}>
+                <View style={styles.modalContent}>
+                  <View style={styles.modalHeader}>
+                    <View style={styles.modalTitleGroup}>
+                      <Sliders size={20} color="#1F1F1F" />
+                      <Text style={styles.modalTitle}>Shield Setup & Guardian</Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => setIsSettingsVisible(false)}
+                      style={styles.modalCloseButton}
+                    >
+                      <X size={18} color="#8E8E93" />
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Guardian Phone Setup */}
+                  <Text style={styles.inputLabel}>
+                    TRUSTED FAMILY CONTACT (GUARDIAN PHONE)
+                  </Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={guardianPhone}
+                    onChangeText={setGuardianPhone}
+                    placeholder="+91 98765 43210"
+                    placeholderTextColor="#8E8E93"
+                    keyboardType="phone-pad"
+                  />
+                  <Text style={styles.inputHint}>
+                    High-risk scam attempts trigger 1-tap emergency SMS alerts to this contact.
+                  </Text>
+
+                  {/* Gemini API Key */}
+                  <Text style={styles.inputLabel}>
+                    GOOGLE GEMINI API KEY (OPTIONAL)
+                  </Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={geminiApiKey}
+                    onChangeText={setGeminiApiKey}
+                    placeholder="AIzaSy..."
+                    placeholderTextColor="#8E8E93"
+                    secureTextEntry={true}
+                  />
+                  <Text style={styles.inputHint}>
+                    If left blank, SeniorShield uses the configured Gemini 3.5 Flash Lite engine.
+                  </Text>
+
+                  {/* Save Button */}
                   <TouchableOpacity
+                    style={styles.saveSettingsButton}
                     onPress={() => setIsSettingsVisible(false)}
-                    style={styles.modalCloseButton}
+                    activeOpacity={0.88}
                   >
-                    <X size={18} color="#8E8E93" />
+                    <Check size={18} color="#FFFFFF" />
+                    <Text style={styles.saveSettingsButtonText}>Save & Return to Shield</Text>
                   </TouchableOpacity>
                 </View>
-
-                {/* Guardian Phone Setup */}
-                <Text style={styles.inputLabel}>
-                  TRUSTED FAMILY CONTACT (GUARDIAN PHONE)
-                </Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={guardianPhone}
-                  onChangeText={setGuardianPhone}
-                  placeholder="+91 98765 43210"
-                  placeholderTextColor="#8E8E93"
-                  keyboardType="phone-pad"
-                />
-                <Text style={styles.inputHint}>
-                  High-risk scam attempts trigger 1-tap emergency SMS alerts to this contact.
-                </Text>
-
-                {/* Gemini API Key */}
-                <Text style={styles.inputLabel}>
-                  GOOGLE GEMINI API KEY (OPTIONAL)
-                </Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={geminiApiKey}
-                  onChangeText={setGeminiApiKey}
-                  placeholder="AIzaSy..."
-                  placeholderTextColor="#8E8E93"
-                  secureTextEntry={true}
-                />
-                <Text style={styles.inputHint}>
-                  If left blank, SeniorShield uses the configured Gemini 3.5 Flash Lite engine.
-                </Text>
-
-                {/* Save Button */}
-                <TouchableOpacity
-                  style={styles.saveSettingsButton}
-                  onPress={() => setIsSettingsVisible(false)}
-                  activeOpacity={0.88}
-                >
-                  <Check size={18} color="#FFFFFF" />
-                  <Text style={styles.saveSettingsButtonText}>Save & Return to Shield</Text>
-                </TouchableOpacity>
               </View>
-            </View>
-          </Modal>
-        </SafeAreaView>
-      </View>
+            </Modal>
+          </SafeAreaView>
+        </View>
+      )}
     </SafeAreaProvider>
   );
 }
