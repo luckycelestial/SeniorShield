@@ -27,7 +27,7 @@ from api.events import router as events_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Load the classifier ONCE into memory before accepting requests."""
-    print("[Startup] Loading DistilBERT classifier...")
+    print("[Startup] Loading bert-tiny scam classifier...")
     from ai.classifier.model_loader import load_classifier
     load_classifier()
     print("[Startup] Classifier ready. Server accepting requests.")

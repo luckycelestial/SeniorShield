@@ -1,15 +1,22 @@
-# ai/classifier/__init__.py
-# =========================
-# RESERVED — Scam classification model module.
-#
-# Planned implementation:
-#   - Lightweight ML classifier (scikit-learn / ONNX) to categorise threat events.
-#   - Scam categories: ELECTRICITY_DISCONNECTION, DIGITAL_ARREST_POLICE,
-#     BANK_KYC_EXPIRY, LOTTERY_REWARD, REMOTE_ACCESS_APK,
-#     COURIER_CUSTOMS, GENUINE_COMMUNICATION, OTHER.
-#   - Designed for fast, offline-capable inference.
-#
-# Dependencies to add when implementing:
-#   scikit-learn  OR  onnxruntime
-#
-# Do NOT add any logic until this step is authorised.
+"""
+ai/classifier/__init__.py
+=========================
+Production transformer classifier & XAI explainability for SeniorShield.
+"""
+
+from ai.classifier.base import BaseClassifier, ClassificationResult, LatencyBreakdown
+from ai.classifier.distilbert_classifier import DistilBertClassifier
+from ai.classifier.model_loader import load_classifier, get_classifier
+from ai.classifier.attributor import DistilBertAttributor, AttributionResult, TokenAttribution
+
+__all__ = [
+    "BaseClassifier",
+    "ClassificationResult",
+    "LatencyBreakdown",
+    "DistilBertClassifier",
+    "load_classifier",
+    "get_classifier",
+    "DistilBertAttributor",
+    "AttributionResult",
+    "TokenAttribution",
+]
