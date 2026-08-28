@@ -1,0 +1,1 @@
+fine-tuned on SeniorShield-SMS-v1 (bert-tiny)

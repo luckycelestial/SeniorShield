@@ -1,15 +1,15 @@
 """
 SeniorShield Backend - main.py
 ==============================
-Clean, production-style FastAPI AI analysis service.
+Clean, minimal AI fraud analysis service for SeniorShield.
 
 Endpoints:
-    GET  /health       -> Service health check
-    POST /api/analyze  -> Unified AI fraud analysis pipeline
-    POST /api/events   -> Event distribution to Neo4j graph database
+    GET  /health       -> Service health check (returns {"status": "ok"})
+    POST /api/analyze  -> Unified AI fraud analysis pipeline (bert-tiny-scam-v1 + XAI + Rules + TI + Groq)
 """
 
 import os
+import threading
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,29 +21,30 @@ load_dotenv(dotenv_path=env_path)
 
 from api.health import router as health_router
 from api.analysis import router as analysis_router
-from api.events import router as events_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Load the classifier ONCE into memory before accepting requests."""
-    print("[Startup] Loading DistilBERT classifier...")
+    """
+    FastAPI lifespan startup.
+    Yields immediately so Uvicorn binds to 0.0.0.0:$PORT without any delay.
+    Starts background warmup thread for the ML classifier.
+    """
+    print("[Startup] SeniorShield API starting. Initiating background model warmup...")
     from ai.classifier.model_loader import load_classifier
-    load_classifier()
-    print("[Startup] Classifier ready. Server accepting requests.")
+
+    # Start background model loading so Uvicorn opens port immediately
+    warmup_thread = threading.Thread(target=load_classifier, daemon=True)
+    warmup_thread.start()
+
     yield
-    print("[Shutdown] Server shutting down.")
-    # Close Neo4j driver cleanly if connected
-    try:
-        from neo4j import get_event_repository
-        get_event_repository().client.close()
-    except Exception:
-        pass
+
+    print("[Shutdown] Server shutting down cleanly.")
 
 
 app = FastAPI(
     title="SeniorShield AI Backend",
-    description="Clean, modular fraud analysis and threat intelligence service for SeniorShield.",
+    description="Clean, minimal fraud analysis and threat intelligence service for SeniorShield.",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -57,7 +58,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Root-level health check for zero-dependency liveness probes
+@app.get("/health", tags=["Health"])
+async def health_check():
+    """Liveness probe: returns status 200 OK immediately without external dependencies."""
+    return {"status": "ok"}
+
+
+@app.get("/", tags=["Health"])
+async def root_check():
+    """Root probe: returns status 200 OK."""
+    return {"status": "ok"}
+
+
 # Primary Endpoints
 app.include_router(health_router)
 app.include_router(analysis_router)
-app.include_router(events_router)

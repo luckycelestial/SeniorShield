@@ -3,13 +3,15 @@ api/analysis.py
 ================
 POST /api/analyze — SeniorShield Primary Unified AI Analysis Endpoint.
 
-Receives normalized text + metadata and produces a structured, evidence-grounded
-fraud analysis report (DistilBERT + XAI + Rules + Threat Intel + Groq).
+Pipeline:
+  Normalized Text -> Preprocessing -> bert-tiny-scam-v1 -> Attribution (XAI)
+  -> Rule Engine -> Threat Intelligence -> EvidenceObject -> Risk Determination
+  -> Groq LLM (Grounded) -> Senior/Caretaker Explanation -> Structured JSON Output
 """
 
 import time
 import uuid
-from typing import Optional, Dict, Any, List, Tuple
+from typing import Optional, Dict, Any, List, Tuple, Union
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -87,6 +89,7 @@ class ClassificationResultSchema(BaseModel):
 class ModelMetadataSchema(BaseModel):
     name: str
     version: str
+    status: Optional[str] = None
 
 
 class AnalysisInferenceSchema(BaseModel):
@@ -97,7 +100,8 @@ class AnalysisInferenceSchema(BaseModel):
 
 class LatencyBreakdownSchema(BaseModel):
     preprocessing: float
-    distilbert: float
+    distilbert: float  # Maintained for backward compatibility
+    ml_inference: Optional[float] = None
     explainability: float
     rules: float
     threat_intelligence: float
@@ -128,14 +132,34 @@ class ExplanationContainerSchema(BaseModel):
     caretaker: CaretakerExplanationSchema
 
 
+class RuleSummarySchema(BaseModel):
+    matched_rules: List[str] = Field(default_factory=list)
+    categories: List[str] = Field(default_factory=list)
+    details: List[Dict[str, Any]] = Field(default_factory=list)
+
+
 class AnalyzeResponse(BaseModel):
+    # Top-level direct fields
+    event_id: str
+    prediction: str
+    confidence: float
+    probabilities: Dict[str, float]
+    fraud_type: str
+    intent: Union[str, List[str]]
+    risk_score: int
+    risk_level: str
+
+    model: ModelMetadataSchema
+    rules: RuleSummarySchema
+    evidence: Dict[str, Any]
+    explanation: ExplanationContainerSchema
+    latency: LatencyBreakdownSchema
+
+    # Nested namespaces for backward-compatibility
     event: EventMetadata
     input: InputPayload
     classification: ClassificationResultSchema
-    model: ModelMetadataSchema
     analysis: AnalysisInferenceSchema
-    evidence: Dict[str, Any]
-    explanation: ExplanationContainerSchema
     latency_ms: LatencyBreakdownSchema
     status: StatusSchema
 
@@ -179,63 +203,54 @@ def derive_analysis_fields(
     # Derive Fraud Type
     if "KYC_CONTEXT" in matched_rule_ids or "kyc" in text_lower or "aadhaar" in text_lower or "pan" in text_lower:
         fraud_type = "BANK_KYC"
-    elif "REMOTE_ACCESS_SIGNAL" in matched_rule_ids or "anydesk" in text_lower or "apk" in text_lower or "teamviewer" in text_lower:
+    elif "REMOTE_ACCESS_SIGNAL" in matched_rule_ids or "quicksupport" in text_lower or "anydesk" in text_lower:
         fraud_type = "REMOTE_ACCESS"
-    elif "AUTHORITY_REFERENCE" in matched_rule_ids or "police" in text_lower or "arrest" in text_lower or "cbi" in text_lower:
+    elif "AUTHORITY_REFERENCE" in matched_rule_ids or "police" in text_lower or "cbi" in text_lower or "customs" in text_lower:
         fraud_type = "DIGITAL_ARREST"
-    elif "electricity" in text_lower or "bill" in text_lower or "power" in text_lower:
+    elif "ELECTRICITY_DISCONNECTION" in matched_rule_ids or "electricity" in text_lower or "power bill" in text_lower:
         fraud_type = "UTILITY_BILL"
+    elif "LOTTERY_REWARD" in matched_rule_ids or "winner" in text_lower or "prize" in text_lower:
+        fraud_type = "LOTTERY_PRIZE"
     elif label == "SCAM":
-        fraud_type = "GENERAL_PHISHING"
-    elif label == "SAFE":
-        fraud_type = "NONE"
+        fraud_type = "PHISHING_SCAM"
     else:
-        fraud_type = "UNKNOWN"
+        fraud_type = "LEGITIMATE_COMMUNICATION"
 
-    return fraud_type, intents, assets
+    return fraud_type, intents or ["GENERAL_INQUIRY"], assets or ["NONE"]
 
 
-# ── Primary Analysis Endpoint ──
 @router.post(
     "/analyze",
     response_model=AnalyzeResponse,
     responses={
-        400: {"model": ErrorResponse},
-        503: {"model": ErrorResponse},
+        400: {"model": ErrorResponse, "description": "Invalid input"},
+        422: {"model": ErrorResponse, "description": "Validation error"},
+        500: {"model": ErrorResponse, "description": "Internal processing failure"},
     },
-    summary="Primary AI Analysis Endpoint: Classify, explain, extract signals, and generate grounded explanations",
+    summary="Unified AI Fraud Analysis Pipeline (bert-tiny-scam-v1 + Rules + Threat Intel + Groq)",
 )
-def analyze_text(
+def analyze_content(
     req: AnalyzeRequest,
     classifier: BaseClassifier = Depends(get_classifier),
-):
+) -> AnalyzeResponse:
     """
-    Unified AI & Security Pipeline:
-      1. Preprocessing & Input Validation
-      2. DistilBERT Classifier Inference (Authoritative ML Decision)
-      3. Integrated Gradients XAI Feature Attribution (Model Evidence)
-      4. Deterministic Rule-Based Signal Engine (Rule Evidence)
-      5. Entity Extraction & Threat Intelligence (External Verification)
-      6. Consolidate into canonical EvidenceObject
-      7. Grounded Groq LLM Generation for Senior & Caretaker Audiences
+    Primary analysis endpoint for SeniorShield.
+    Receives normalized text, processes through all AI layers, and returns structured analysis.
     """
     request_start = time.perf_counter()
+
+    # Step 1: Preprocessing & Validation
+    err = validate_input(req.text)
+    if err:
+        raise HTTPException(status_code=400, detail=err)
+
     event_id = f"evt_{uuid.uuid4().hex[:12]}"
-    event_ts = req.timestamp or (datetime.utcnow().isoformat() + "Z")
+    event_ts = req.timestamp or datetime.utcnow().isoformat() + "Z"
 
-    # Step 1: Input Validation
-    validation_error = validate_input(req.text)
-    if validation_error:
-        raise HTTPException(status_code=400, detail=validation_error)
-
-    # Step 2: DistilBERT Inference (Authoritative ML Decision)
-    try:
-        result = classifier.predict(req.text)
-    except Exception as exc:
-        raise HTTPException(
-            status_code=503,
-            detail=f"Model inference failed: {type(exc).__name__}",
-        )
+    # Step 2: Sequence Classification (bert-tiny-scam-v1)
+    result = classifier.predict(req.text)
+    preprocessing_ms = result.latency.preprocessing_ms
+    distilbert_ms = result.latency.inference_ms
 
     # Step 3: Explainability / Token Feature Attribution (XAI)
     explainability_ms = 0.0
@@ -253,12 +268,25 @@ def analyze_text(
     rules_ms = 0.0
     rule_evidences = []
     matched_rule_ids = []
+    rule_categories = []
+    rule_details = []
     if req.include_rules:
         try:
             rule_res = rule_engine.evaluate(req.text, channel=req.channel or "SMS")
             rule_evidences = rule_res.rule_evidence
             matched_rule_ids = rule_res.matched_rule_ids
             rules_ms = rule_res.rules_ms
+            rule_categories = list({r.category for r in rule_evidences})
+            rule_details = [
+                {
+                    "rule_id": r.rule_id,
+                    "category": r.category,
+                    "severity": r.severity,
+                    "description": r.description,
+                    "matched_text": r.matched_text
+                }
+                for r in rule_evidences
+            ]
         except Exception as e:
             print(f"[RuleEngine] Warning: rule evaluation failed: {e}")
 
@@ -300,9 +328,76 @@ def analyze_text(
         text=req.text
     )
 
+    # Calculate Risk Score & Level
+    if result.prediction == "SCAM":
+        base_score = int(round(result.probability * 100))
+        if any(r.get("severity") in ["HIGH", "CRITICAL"] for r in rule_details):
+            risk_score = max(base_score, 85)
+        else:
+            risk_score = max(base_score, 60)
+        risk_level = "HIGH" if risk_score >= 70 else "MEDIUM"
+    else:
+        risk_score = int(round((1.0 - result.probability) * 100))
+        risk_level = "LOW" if risk_score < 40 else "MEDIUM"
+
     total_request_ms = (time.perf_counter() - request_start) * 1000.0
 
+    latency_breakdown = LatencyBreakdownSchema(
+        preprocessing=round(preprocessing_ms, 3),
+        distilbert=round(distilbert_ms, 3),
+        ml_inference=round(distilbert_ms, 3),
+        explainability=round(explainability_ms, 3),
+        rules=round(rules_ms, 3),
+        threat_intelligence=round(threat_intel_ms, 3),
+        groq=round(llm_ms, 3),
+        total=round(total_request_ms, 3),
+    )
+
+    senior_exp = SeniorExplanationSchema(
+        headline=two_audience_output.senior.headline,
+        message=two_audience_output.senior.message,
+        action=two_audience_output.senior.action,
+    )
+
+    caretaker_exp = CaretakerExplanationSchema(
+        headline=two_audience_output.caretaker.headline,
+        summary=two_audience_output.caretaker.summary,
+        why_flagged=two_audience_output.caretaker.why_flagged,
+        recommended_action=two_audience_output.caretaker.recommended_action,
+    )
+
+    explanation_container = ExplanationContainerSchema(
+        senior=senior_exp,
+        caretaker=caretaker_exp,
+    )
+
+    rules_container = RuleSummarySchema(
+        matched_rules=matched_rule_ids,
+        categories=rule_categories,
+        details=rule_details,
+    )
+
+    model_container = ModelMetadataSchema(
+        name="bert-tiny-scam-v1",
+        version="bert-tiny-scam-v1",
+        status=result.model_status,
+    )
+
     return AnalyzeResponse(
+        event_id=event_id,
+        prediction=result.prediction,
+        confidence=round(result.probability, 4),
+        probabilities=result.probabilities,
+        fraud_type=fraud_type,
+        intent=intent_list,
+        risk_score=risk_score,
+        risk_level=risk_level,
+        model=model_container,
+        rules=rules_container,
+        evidence=evidence_dict,
+        explanation=explanation_container,
+        latency=latency_breakdown,
+        # Legacy namespaces
         event=EventMetadata(
             event_id=event_id,
             user_id=req.user_id,
@@ -315,38 +410,12 @@ def analyze_text(
             label=result.prediction,
             confidence=round(result.probability, 4),
         ),
-        model=ModelMetadataSchema(
-            name=result.model,
-            version=result.model_version,
-        ),
         analysis=AnalysisInferenceSchema(
             fraud_type=fraud_type,
             intent=intent_list,
             asset_at_risk=asset_list,
         ),
-        evidence=evidence_dict,
-        explanation=ExplanationContainerSchema(
-            senior=SeniorExplanationSchema(
-                headline=two_audience_output.senior.headline,
-                message=two_audience_output.senior.message,
-                action=two_audience_output.senior.action,
-            ),
-            caretaker=CaretakerExplanationSchema(
-                headline=two_audience_output.caretaker.headline,
-                summary=two_audience_output.caretaker.summary,
-                why_flagged=two_audience_output.caretaker.why_flagged,
-                recommended_action=two_audience_output.caretaker.recommended_action,
-            ),
-        ),
-        latency_ms=LatencyBreakdownSchema(
-            preprocessing=round(result.latency.preprocessing_ms, 3),
-            distilbert=round(result.latency.inference_ms, 3),
-            explainability=round(explainability_ms, 3),
-            rules=round(rules_ms, 3),
-            threat_intelligence=round(threat_intel_ms, 3),
-            groq=round(llm_ms, 3),
-            total=round(total_request_ms, 3),
-        ),
+        latency_ms=latency_breakdown,
         status=StatusSchema(
             analysis="complete",
             grounding=llm_status.grounding_status,

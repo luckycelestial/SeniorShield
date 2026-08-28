@@ -24,8 +24,15 @@ CRITICAL CONSTRAINTS:
 import os
 import json
 import time
-import requests
-from typing import Dict, Any, Tuple, Optional, List
+import urllib.request
+import urllib.error
+
+try:
+    import requests
+except ImportError:
+    requests = None
+
+from typing import Dict, Any, Tuple, Optional, List, Union
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 

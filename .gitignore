@@ -58,11 +58,12 @@ backend/.env
 backend/.env.local
 
 # ML Models & Heavy Weights (>100MB)
-*.safetensors
+backend/models/distilbert-scam/**/*.safetensors
+backend/models/distilbert-scam-v1/**/*.safetensors
+backend/models/distilbert-scam*/*.safetensors
 *.bin
 *.pt
 *.pth
 *.onnx
-backend/models/**/*.safetensors
-backend/models/**/*.bin
+
 
