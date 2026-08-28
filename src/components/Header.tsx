@@ -69,7 +69,8 @@ export const Header: React.FC<HeaderProps> = ({
           <TouchableOpacity
             style={styles.languageButton}
             onPress={() => setIsDropdownVisible(true)}
-            activeOpacity={0.8}
+            activeOpacity={0.7}
+            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
             accessibilityLabel="Select Language"
           >
             <Globe size={14} color="#0284C7" />
@@ -98,44 +99,45 @@ export const Header: React.FC<HeaderProps> = ({
         animationType="fade"
         onRequestClose={() => setIsDropdownVisible(false)}
       >
-        <TouchableWithoutFeedback onPress={() => setIsDropdownVisible(false)}>
-          <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback>
-              <View style={styles.dropdownMenu}>
-                <View style={styles.dropdownHeader}>
-                  <Globe size={16} color="#0284C7" />
-                  <Text style={styles.dropdownHeaderText}>Select Senior Language</Text>
-                </View>
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setIsDropdownVisible(false)}
+          />
+          <View style={styles.dropdownMenu}>
+            <View style={styles.dropdownHeader}>
+              <Globe size={16} color="#0284C7" />
+              <Text style={styles.dropdownHeaderText}>Select Senior Language</Text>
+            </View>
 
-                {SUPPORTED_LANGUAGES.map((lang) => {
-                  const isSelected = lang.code === selectedLanguage;
-                  return (
-                    <TouchableOpacity
-                      key={lang.code}
-                      style={[
-                        styles.langItem,
-                        isSelected && styles.langItemSelected,
-                      ]}
-                      onPress={() => handleLanguageSelect(lang)}
-                      activeOpacity={0.8}
-                    >
-                      <View style={styles.langItemLeft}>
-                        <Text style={styles.flagIcon}>{lang.flag}</Text>
-                        <View>
-                          <Text style={[styles.langNativeName, isSelected && styles.langSelectedText]}>
-                            {lang.nativeName}
-                          </Text>
-                          <Text style={styles.langEnglishName}>{lang.name}</Text>
-                        </View>
-                      </View>
-                      {isSelected && <Check size={18} color="#0284C7" />}
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </TouchableWithoutFeedback>
+            {SUPPORTED_LANGUAGES.map((lang) => {
+              const isSelected = lang.code === selectedLanguage;
+              return (
+                <TouchableOpacity
+                  key={lang.code}
+                  style={[
+                    styles.langItem,
+                    isSelected && styles.langItemSelected,
+                  ]}
+                  onPress={() => handleLanguageSelect(lang)}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.langItemLeft}>
+                    <Text style={styles.flagIcon}>{lang.flag}</Text>
+                    <View>
+                      <Text style={[styles.langNativeName, isSelected && styles.langSelectedText]}>
+                        {lang.nativeName}
+                      </Text>
+                      <Text style={styles.langEnglishName}>{lang.name}</Text>
+                    </View>
+                  </View>
+                  {isSelected && <Check size={18} color="#0284C7" />}
+                </TouchableOpacity>
+              );
+            })}
           </View>
-        </TouchableWithoutFeedback>
+        </View>
       </Modal>
     </View>
   );
