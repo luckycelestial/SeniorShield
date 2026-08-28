@@ -69,17 +69,60 @@ export function calculateCumulativeExposure(
   };
 }
 
-/**
- * Creates initial campaign state preloaded with realistic demonstration data
- * showcasing the Impersonated Entity box, Targeted Assets chips, and Timeline.
- */
 export function createInitialCampaignState(): CampaignState {
+  const initialEvents: DeviceEvent[] = [
+    {
+      id: 'evt_init_da_sms_1',
+      timestamp: Date.now() - 1000 * 60 * 60 * 2, // 2 hours ago
+      type: 'SMS',
+      senderOrNumber: 'VD-FEDEX-IND',
+      contentOrDuration:
+        'FedEx Alert: Parcel #IND-94821 addressed in your name containing contraband has been intercepted at Mumbai Airport. Police FIR registered. Case ref: CBI-CR-8492.',
+    },
+    {
+      id: 'evt_init_da_call_2',
+      timestamp: Date.now() - 1000 * 60 * 25, // 25 mins ago
+      type: 'CALL',
+      senderOrNumber: '+91 91234 56789',
+      contentOrDuration:
+        'Incoming Call (Duration: 5m 12s). Caller impersonating CBI Inspector Verma demanding digital arrest video isolation & fund transfer to RBI escrow.',
+    },
+  ];
+
+  const initialReport: ScamReport = {
+    is_scam: true,
+    threat_level: 'CRITICAL',
+    scam_type: 'Digital Arrest & Law Enforcement Impersonation',
+    confidence_score: 98,
+    impersonated_entity: 'Central Bureau of Investigation (CBI) / Cyber Crime Police',
+    assets_at_risk: [
+      'Bank Savings & Fixed Deposits',
+      'Senior Personal Liberty & Peace',
+      'Aadhaar & Digital Identity',
+    ],
+    senior_explanation:
+      'Fake police/CBI officers are falsely claiming illegal parcels exist in your name to terrorize you into staying on a video call and transferring money.',
+    action_required:
+      'DO NOT PAY & DO NOT JOIN VIDEO CALLS! Indian Police & CBI never arrest citizens via phone or video call, and never demand money transfers.',
+    guardian_alert_message:
+      'SeniorShield Alert: Mom/Dad targeted by Digital Arrest extortion call from +91 91234 56789 claiming CBI case. Call blocked.',
+    threat_indicators: [
+      'Digital Arrest Coercion',
+      'Law Enforcement Impersonation',
+      'Urgent Financial Transfer Demand',
+      'Video Call Isolation Threat',
+    ],
+  };
+
   return {
-    cumulativeRiskScore: 0,
-    events: [],
-    activeThreats: [],
-    latestReport: null,
-    campaignStage: 'DORMANT',
+    cumulativeRiskScore: 94,
+    events: initialEvents,
+    activeThreats: [
+      'Digital Arrest & Law Enforcement Impersonation',
+      'Multi-Channel Attack (Customs SMS + Fake Police Call)',
+    ],
+    latestReport: initialReport,
+    campaignStage: 'EXTRACTION_ATTEMPT',
     lastUpdated: Date.now(),
   };
 }
