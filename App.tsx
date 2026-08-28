@@ -29,6 +29,7 @@ import { ThreatCard } from './src/components/ThreatCard';
 import { CampaignTimeline } from './src/components/CampaignTimeline';
 import { SimulationDrawer } from './src/components/SimulationDrawer';
 import { PreCallAlertCard } from './src/components/PreCallAlertCard';
+import { PostCallDebriefModal, PostCallDebriefData } from './src/components/PostCallDebriefModal';
 import { OnboardingWizard } from './src/onboarding/OnboardingWizard';
 import { OnboardingState } from './src/onboarding/types';
 
@@ -65,6 +66,7 @@ export default function App() {
     null
   );
   const [preCallAlert, setPreCallAlert] = useState<PreCallReputation | null>(null);
+  const [postCallDebrief, setPostCallDebrief] = useState<PostCallDebriefData | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
 
   // Settings & Configuration
@@ -96,9 +98,22 @@ export default function App() {
   }, []);
 
   const startCallSttMonitoring = () => {
-    callSttService.startListening((analysis: ChunkSttAnalysis) => {
-      handleInCallAudioChunkAnalysis(analysis);
-    });
+    callSttService.startListening(
+      (analysis: ChunkSttAnalysis) => {
+        handleInCallAudioChunkAnalysis(analysis);
+      },
+      (callEndedData) => {
+        console.log('📞 [App] Displaying Post-Call Debrief Screen for:', callEndedData.phoneNumber);
+        setPostCallDebrief({
+          phoneNumber: callEndedData.phoneNumber,
+          durationSeconds: callEndedData.durationSeconds,
+          wasMonitored: callEndedData.wasMonitored,
+          transcript: callEndedData.transcript,
+          report: campaignState.latestReport,
+          timestamp: Date.now(),
+        });
+      }
+    );
   };
 
   const handleInCallAudioChunkAnalysis = (analysis: ChunkSttAnalysis) => {
@@ -392,6 +407,28 @@ export default function App() {
               visible={isSimulationVisible}
               onClose={() => setIsSimulationVisible(false)}
               onSelectScenario={handleSelectMockScenario}
+            />
+
+            {/* Post-Call Protection Debrief Modal */}
+            <PostCallDebriefModal
+              visible={!!postCallDebrief}
+              data={postCallDebrief}
+              selectedLanguage={selectedLanguage}
+              onDismiss={() => setPostCallDebrief(null)}
+              onBlockNumber={(phoneNumber) => {
+                Alert.alert(
+                  'Threat Neutralized',
+                  `Caller ${phoneNumber} has been blocked and reported to the cyber defense network.`
+                );
+                setPostCallDebrief(null);
+              }}
+              onAlertGuardian={(phoneNumber) => {
+                Alert.alert(
+                  'Guardian Alert Dispatched',
+                  `Emergency SMS report regarding suspicious call from ${phoneNumber} dispatched to guardian (${guardianPhone}).`
+                );
+                setPostCallDebrief(null);
+              }}
             />
 
             {/* Configuration & Settings Modal */}

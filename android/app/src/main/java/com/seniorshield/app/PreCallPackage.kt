@@ -60,6 +60,25 @@ class PreCallModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                     .emit("onCallAudioChunk", params)
             }
         }
+
+        fun sendCallEndedEvent(
+            phoneNumber: String,
+            durationSeconds: Int,
+            wasMonitored: Boolean
+        ) {
+            val reactContext = instance?.reactApplicationContext ?: return
+            if (reactContext.hasActiveReactInstance()) {
+                val params = Arguments.createMap().apply {
+                    putString("phoneNumber", phoneNumber)
+                    putInt("durationSeconds", durationSeconds)
+                    putBoolean("wasMonitored", wasMonitored)
+                    putDouble("timestamp", System.currentTimeMillis().toDouble())
+                }
+                reactContext
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                    .emit("onCallEnded", params)
+            }
+        }
     }
 }
 

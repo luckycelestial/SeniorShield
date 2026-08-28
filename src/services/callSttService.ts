@@ -22,15 +22,30 @@ export interface ChunkSttAnalysis {
   impersonatedEntity: string;
 }
 
+export interface CallEndedEvent {
+  phoneNumber: string;
+  durationSeconds: number;
+  wasMonitored: boolean;
+  timestamp: number;
+}
+
 type ChunkCallback = (analysis: ChunkSttAnalysis) => void;
+type CallEndedCallback = (data: {
+  phoneNumber: string;
+  durationSeconds: number;
+  wasMonitored: boolean;
+  transcript: string;
+}) => void;
 
 const GEMINI_MODEL = process.env.EXPO_PUBLIC_GEMINI_MODEL || 'gemini-2.5-flash-lite';
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 class CallSttService {
   private eventEmitter: NativeEventEmitter | null = null;
-  private listenerSubscription: any = null;
+  private chunkSubscription: any = null;
+  private callEndedSubscription: any = null;
   private subscribers: Set<ChunkCallback> = new Set();
+  private callEndedSubscribers: Set<CallEndedCallback> = new Set();
   private fullCallTranscripts: Map<string, string[]> = new Map();
 
   constructor() {
@@ -40,41 +55,78 @@ class CallSttService {
   }
 
   /**
-   * Start listening for 10-second live audio chunks from native Android call chunker
+   * Start listening for 10-second live audio chunks and call-ended events
    */
-  startListening(callback?: ChunkCallback) {
-    if (callback) {
-      this.subscribers.add(callback);
+  startListening(
+    chunkCallback?: ChunkCallback,
+    callEndedCallback?: CallEndedCallback
+  ) {
+    if (chunkCallback) {
+      this.subscribers.add(chunkCallback);
+    }
+    if (callEndedCallback) {
+      this.callEndedSubscribers.add(callEndedCallback);
     }
 
-    if (this.listenerSubscription || !this.eventEmitter) return;
+    if (!this.eventEmitter) return;
 
-    console.log('🎙️ [CallSttService] Subscribing to native onCallAudioChunk events...');
-    this.listenerSubscription = this.eventEmitter.addListener(
-      'onCallAudioChunk',
-      async (event: CallAudioChunkEvent) => {
-        console.log(`📦 [CallSttService] Received Chunk #${event.chunkIndex} (${event.durationSeconds}s) for ${event.phoneNumber}`);
-        try {
-          const analysis = await this.transcribeAndAnalyzeChunk(event);
-          this.subscribers.forEach((sub) => sub(analysis));
-        } catch (error) {
-          console.error('❌ [CallSttService] Error processing audio chunk:', error);
+    if (!this.chunkSubscription) {
+      console.log('🎙️ [CallSttService] Subscribing to native onCallAudioChunk events...');
+      this.chunkSubscription = this.eventEmitter.addListener(
+        'onCallAudioChunk',
+        async (event: CallAudioChunkEvent) => {
+          console.log(`📦 [CallSttService] Received Chunk #${event.chunkIndex} (${event.durationSeconds}s) for ${event.phoneNumber}`);
+          try {
+            const analysis = await this.transcribeAndAnalyzeChunk(event);
+            this.subscribers.forEach((sub) => sub(analysis));
+          } catch (error) {
+            console.error('❌ [CallSttService] Error processing audio chunk:', error);
+          }
         }
-      }
-    );
+      );
+    }
+
+    if (!this.callEndedSubscription) {
+      console.log('⏹️ [CallSttService] Subscribing to native onCallEnded events...');
+      this.callEndedSubscription = this.eventEmitter.addListener(
+        'onCallEnded',
+        (event: CallEndedEvent) => {
+          console.log(`📞 [CallSttService] Call Ended with ${event.phoneNumber} (Duration: ${event.durationSeconds}s, Monitored: ${event.wasMonitored})`);
+          const fullTranscript = this.getFullTranscript(event.phoneNumber);
+          this.callEndedSubscribers.forEach((sub) =>
+            sub({
+              phoneNumber: event.phoneNumber,
+              durationSeconds: event.durationSeconds,
+              wasMonitored: event.wasMonitored,
+              transcript: fullTranscript,
+            })
+          );
+        }
+      );
+    }
   }
 
   /**
-   * Stop listening for chunk events
+   * Stop listening for chunk and call-ended events
    */
-  stopListening(callback?: ChunkCallback) {
-    if (callback) {
-      this.subscribers.delete(callback);
+  stopListening(
+    chunkCallback?: ChunkCallback,
+    callEndedCallback?: CallEndedCallback
+  ) {
+    if (chunkCallback) {
+      this.subscribers.delete(chunkCallback);
+    }
+    if (callEndedCallback) {
+      this.callEndedSubscribers.delete(callEndedCallback);
     }
 
-    if (this.subscribers.size === 0 && this.listenerSubscription) {
-      this.listenerSubscription.remove();
-      this.listenerSubscription = null;
+    if (this.subscribers.size === 0 && this.chunkSubscription) {
+      this.chunkSubscription.remove();
+      this.chunkSubscription = null;
+    }
+    if (this.callEndedSubscribers.size === 0 && this.callEndedSubscription) {
+      this.callEndedSubscription.remove();
+      this.callEndedSubscription = null;
     }
   }
 
