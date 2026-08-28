@@ -64,7 +64,7 @@ export default function App() {
     null
   );
   const [preCallAlert, setPreCallAlert] = useState<PreCallReputation | null>(null);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('ta');
 
   // Settings & Configuration
   const [guardianPhone, setGuardianPhone] = useState<string>('+919876543210');
