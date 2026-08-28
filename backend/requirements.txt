@@ -1,16 +1,20 @@
 # SeniorShield Backend - Python Dependencies
-# Step 1: DistilBERT classifier + FastAPI pipeline
-# Additional dependencies will be added incrementally per step.
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+requests>=2.31.0
 
-fastapi==0.115.5
-uvicorn[standard]==0.32.1
-python-dotenv==1.0.1
-
-# AI / ML - Step 1: DistilBERT classifier
+# AI / ML
 torch>=2.0.0
 transformers>=4.40.0
 
-# Evaluation + benchmarking
+# Graph Database (Optional / Extensible)
+neo4j>=5.0.0
+
+# Evaluation & Metrics
 scikit-learn>=1.4.0
 pandas>=2.0.0
 numpy>=1.26.0
+pytest>=8.0.0
+httpx>=0.27.0
