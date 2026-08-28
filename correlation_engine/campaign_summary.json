@@ -1,0 +1,3249 @@
+{
+  "total_events_analyzed": 200,
+  "detected_scam_campaigns_count": 3,
+  "benign_unclustered_count": 50,
+  "leiden": {
+    "node_count": 200,
+    "edge_count": 1365,
+    "community_count": 21,
+    "modularity": 0.6885309074320062
+  },
+  "campaigns": [
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_0",
+      "community_id": 0,
+      "threat_level": "CRITICAL",
+      "primary_intent": "urgency_coercion",
+      "avg_risk_score": 0.858,
+      "max_risk_score": 0.98,
+      "cumulative_risk": 42.92,
+      "total_events": 50,
+      "channels_involved": [
+        "SMS",
+        "URL",
+        "call",
+        "payment"
+      ],
+      "shared_identifiers": {
+        "phones": [
+          "+919876543210",
+          "+919876543211"
+        ],
+        "senders": [
+          "EB-NOTIF",
+          "PWR-ALERT"
+        ],
+        "domains": [
+          "electricity-update.in",
+          "pay-elec-bill-now.com"
+        ],
+        "apps": [
+          "Chrome",
+          "GPay",
+          "Messages",
+          "Phone"
+        ]
+      },
+      "event_ids": [
+        "EVT_001",
+        "EVT_006",
+        "EVT_009",
+        "EVT_010",
+        "EVT_014",
+        "EVT_018",
+        "EVT_019",
+        "EVT_024",
+        "EVT_025",
+        "EVT_028",
+        "EVT_030",
+        "EVT_039",
+        "EVT_040",
+        "EVT_045",
+        "EVT_050",
+        "EVT_053",
+        "EVT_059",
+        "EVT_070",
+        "EVT_074",
+        "EVT_076",
+        "EVT_077",
+        "EVT_078",
+        "EVT_083",
+        "EVT_084",
+        "EVT_085",
+        "EVT_093",
+        "EVT_098",
+        "EVT_101",
+        "EVT_103",
+        "EVT_108",
+        "EVT_109",
+        "EVT_124",
+        "EVT_132",
+        "EVT_136",
+        "EVT_139",
+        "EVT_144",
+        "EVT_146",
+        "EVT_155",
+        "EVT_157",
+        "EVT_159",
+        "EVT_163",
+        "EVT_165",
+        "EVT_169",
+        "EVT_175",
+        "EVT_182",
+        "EVT_188",
+        "EVT_190",
+        "EVT_195",
+        "EVT_197",
+        "EVT_199"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_001",
+          "timestamp": "2026-08-20T09:29:00Z",
+          "channel": "call",
+          "phone": "+919876543210",
+          "sender": "EB-NOTIF",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.9,
+          "intent": "fake_utility_disconnection",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_006",
+          "timestamp": "2026-08-20T11:26:00Z",
+          "channel": "payment",
+          "phone": "+919876543211",
+          "sender": "PWR-ALERT",
+          "domain": "pay-elec-bill-now.com",
+          "app": "GPay",
+          "risk_score": 0.78,
+          "intent": "phishing_payment",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_009",
+          "timestamp": "2026-08-20T12:47:00Z",
+          "channel": "call",
+          "phone": "+919876543210",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.77,
+          "intent": "urgency_coercion",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_010",
+          "timestamp": "2026-08-20T13:24:00Z",
+          "channel": "URL",
+          "phone": "+919876543210",
+          "sender": "",
+          "domain": "electricity-update.in",
+          "app": "Chrome",
+          "risk_score": 0.84,
+          "intent": "urgency_coercion",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_014",
+          "timestamp": "2026-08-20T15:07:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "pay-elec-bill-now.com",
+          "app": "Chrome",
+          "risk_score": 0.95,
+          "intent": "credential_harvesting",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_018",
+          "timestamp": "2026-08-20T16:52:00Z",
+          "channel": "call",
+          "phone": "+919876543210",
+          "sender": "PWR-ALERT",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.78,
+          "intent": "urgency_coercion",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_019",
+          "timestamp": "2026-08-20T17:05:00Z",
+          "channel": "call",
+          "phone": "+919876543210",
+          "sender": "PWR-ALERT",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.81,
+          "intent": "urgency_coercion",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_024",
+          "timestamp": "2026-08-20T18:56:00Z",
+          "channel": "call",
+          "phone": "+919876543211",
+          "sender": "EB-NOTIF",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.97,
+          "intent": "phishing_payment",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_025",
+          "timestamp": "2026-08-20T19:27:00Z",
+          "channel": "payment",
+          "phone": "+919876543211",
+          "sender": "",
+          "domain": "electricity-update.in",
+          "app": "GPay",
+          "risk_score": 0.97,
+          "intent": "phishing_payment",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_028",
+          "timestamp": "2026-08-20T20:34:00Z",
+          "channel": "URL",
+          "phone": "+919876543211",
+          "sender": "EB-NOTIF",
+          "domain": "electricity-update.in",
+          "app": "Chrome",
+          "risk_score": 0.75,
+          "intent": "fake_utility_disconnection",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_030",
+          "timestamp": "2026-08-20T21:16:00Z",
+          "channel": "call",
+          "phone": "+919876543210",
+          "sender": "",
+          "domain": "electricity-update.in",
+          "app": "Phone",
+          "risk_score": 0.89,
+          "intent": "urgency_coercion",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_039",
+          "timestamp": "2026-08-20T23:56:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "EB-NOTIF",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.89,
+          "intent": "fake_utility_disconnection",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_040",
+          "timestamp": "2026-08-21T00:11:00Z",
+          "channel": "payment",
+          "phone": "+919876543210",
+          "sender": "EB-NOTIF",
+          "domain": "pay-elec-bill-now.com",
+          "app": "GPay",
+          "risk_score": 0.76,
+          "intent": "urgency_coercion",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_045",
+          "timestamp": "2026-08-21T01:36:00Z",
+          "channel": "SMS",
+          "phone": "+919876543211",
+          "sender": "EB-NOTIF",
+          "domain": "pay-elec-bill-now.com",
+          "app": "Messages",
+          "risk_score": 0.95,
+          "intent": "fake_utility_disconnection",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_050",
+          "timestamp": "2026-08-21T03:40:00Z",
+          "channel": "SMS",
+          "phone": "+919876543211",
+          "sender": "EB-NOTIF",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.9,
+          "intent": "phishing_payment",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_053",
+          "timestamp": "2026-08-21T04:25:00Z",
+          "channel": "payment",
+          "phone": "+919876543210",
+          "sender": "EB-NOTIF",
+          "domain": "pay-elec-bill-now.com",
+          "app": "GPay",
+          "risk_score": 0.85,
+          "intent": "phishing_payment",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_059",
+          "timestamp": "2026-08-21T06:09:00Z",
+          "channel": "SMS",
+          "phone": "+919876543211",
+          "sender": "EB-NOTIF",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.77,
+          "intent": "credential_harvesting",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_070",
+          "timestamp": "2026-08-21T09:52:00Z",
+          "channel": "call",
+          "phone": "+919876543211",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.97,
+          "intent": "urgency_coercion",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_074",
+          "timestamp": "2026-08-21T10:35:00Z",
+          "channel": "call",
+          "phone": "+919876543210",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.81,
+          "intent": "credential_harvesting",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_076",
+          "timestamp": "2026-08-21T11:50:00Z",
+          "channel": "call",
+          "phone": "+919876543211",
+          "sender": "PWR-ALERT",
+          "domain": "pay-elec-bill-now.com",
+          "app": "Phone",
+          "risk_score": 0.91,
+          "intent": "urgency_coercion",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_077",
+          "timestamp": "2026-08-21T12:24:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "pay-elec-bill-now.com",
+          "app": "Chrome",
+          "risk_score": 0.81,
+          "intent": "urgency_coercion",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_078",
+          "timestamp": "2026-08-21T12:52:00Z",
+          "channel": "URL",
+          "phone": "+919876543210",
+          "sender": "EB-NOTIF",
+          "domain": "pay-elec-bill-now.com",
+          "app": "Chrome",
+          "risk_score": 0.98,
+          "intent": "fake_utility_disconnection",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_083",
+          "timestamp": "2026-08-21T14:03:00Z",
+          "channel": "call",
+          "phone": "+919876543211",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.9,
+          "intent": "phishing_payment",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_084",
+          "timestamp": "2026-08-21T14:07:00Z",
+          "channel": "payment",
+          "phone": "+919876543210",
+          "sender": "EB-NOTIF",
+          "domain": "pay-elec-bill-now.com",
+          "app": "GPay",
+          "risk_score": 0.94,
+          "intent": "credential_harvesting",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_085",
+          "timestamp": "2026-08-21T14:23:00Z",
+          "channel": "URL",
+          "phone": "+919876543211",
+          "sender": "",
+          "domain": "pay-elec-bill-now.com",
+          "app": "Chrome",
+          "risk_score": 0.88,
+          "intent": "credential_harvesting",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_093",
+          "timestamp": "2026-08-21T18:05:00Z",
+          "channel": "payment",
+          "phone": "+919876543210",
+          "sender": "PWR-ALERT",
+          "domain": "pay-elec-bill-now.com",
+          "app": "GPay",
+          "risk_score": 0.81,
+          "intent": "credential_harvesting",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_098",
+          "timestamp": "2026-08-21T20:33:00Z",
+          "channel": "URL",
+          "phone": "+919876543211",
+          "sender": "EB-NOTIF",
+          "domain": "pay-elec-bill-now.com",
+          "app": "Chrome",
+          "risk_score": 0.84,
+          "intent": "urgency_coercion",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_101",
+          "timestamp": "2026-08-21T21:18:00Z",
+          "channel": "SMS",
+          "phone": "+919876543211",
+          "sender": "PWR-ALERT",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.86,
+          "intent": "urgency_coercion",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_103",
+          "timestamp": "2026-08-21T21:47:00Z",
+          "channel": "payment",
+          "phone": "+919876543210",
+          "sender": "",
+          "domain": "electricity-update.in",
+          "app": "GPay",
+          "risk_score": 0.94,
+          "intent": "fake_utility_disconnection",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_108",
+          "timestamp": "2026-08-22T00:10:00Z",
+          "channel": "SMS",
+          "phone": "+919876543210",
+          "sender": "PWR-ALERT",
+          "domain": "electricity-update.in",
+          "app": "Messages",
+          "risk_score": 0.8,
+          "intent": "phishing_payment",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_109",
+          "timestamp": "2026-08-22T00:22:00Z",
+          "channel": "call",
+          "phone": "+919876543210",
+          "sender": "PWR-ALERT",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.86,
+          "intent": "fake_utility_disconnection",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_124",
+          "timestamp": "2026-08-22T06:49:00Z",
+          "channel": "payment",
+          "phone": "+919876543210",
+          "sender": "PWR-ALERT",
+          "domain": "pay-elec-bill-now.com",
+          "app": "GPay",
+          "risk_score": 0.84,
+          "intent": "credential_harvesting",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_132",
+          "timestamp": "2026-08-22T09:29:00Z",
+          "channel": "SMS",
+          "phone": "+919876543210",
+          "sender": "EB-NOTIF",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.96,
+          "intent": "fake_utility_disconnection",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_136",
+          "timestamp": "2026-08-22T11:16:00Z",
+          "channel": "URL",
+          "phone": "+919876543210",
+          "sender": "",
+          "domain": "electricity-update.in",
+          "app": "Chrome",
+          "risk_score": 0.83,
+          "intent": "phishing_payment",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_139",
+          "timestamp": "2026-08-22T12:25:00Z",
+          "channel": "URL",
+          "phone": "+919876543210",
+          "sender": "",
+          "domain": "pay-elec-bill-now.com",
+          "app": "Chrome",
+          "risk_score": 0.76,
+          "intent": "credential_harvesting",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_144",
+          "timestamp": "2026-08-22T14:30:00Z",
+          "channel": "SMS",
+          "phone": "+919876543210",
+          "sender": "EB-NOTIF",
+          "domain": "electricity-update.in",
+          "app": "Messages",
+          "risk_score": 0.8,
+          "intent": "phishing_payment",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_146",
+          "timestamp": "2026-08-22T15:26:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "electricity-update.in",
+          "app": "Chrome",
+          "risk_score": 0.77,
+          "intent": "fake_utility_disconnection",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_155",
+          "timestamp": "2026-08-22T18:52:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "EB-NOTIF",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.96,
+          "intent": "urgency_coercion",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_157",
+          "timestamp": "2026-08-22T19:24:00Z",
+          "channel": "payment",
+          "phone": "+919876543211",
+          "sender": "",
+          "domain": "pay-elec-bill-now.com",
+          "app": "GPay",
+          "risk_score": 0.87,
+          "intent": "phishing_payment",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_159",
+          "timestamp": "2026-08-22T19:40:00Z",
+          "channel": "call",
+          "phone": "+919876543210",
+          "sender": "EB-NOTIF",
+          "domain": "pay-elec-bill-now.com",
+          "app": "Phone",
+          "risk_score": 0.78,
+          "intent": "urgency_coercion",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_163",
+          "timestamp": "2026-08-22T20:57:00Z",
+          "channel": "URL",
+          "phone": "+919876543211",
+          "sender": "PWR-ALERT",
+          "domain": "electricity-update.in",
+          "app": "Chrome",
+          "risk_score": 0.9,
+          "intent": "urgency_coercion",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_165",
+          "timestamp": "2026-08-22T21:58:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "PWR-ALERT",
+          "domain": "pay-elec-bill-now.com",
+          "app": "Messages",
+          "risk_score": 0.88,
+          "intent": "urgency_coercion",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_169",
+          "timestamp": "2026-08-22T23:31:00Z",
+          "channel": "SMS",
+          "phone": "+919876543211",
+          "sender": "EB-NOTIF",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.86,
+          "intent": "fake_utility_disconnection",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_175",
+          "timestamp": "2026-08-23T01:34:00Z",
+          "channel": "payment",
+          "phone": "+919876543210",
+          "sender": "EB-NOTIF",
+          "domain": "pay-elec-bill-now.com",
+          "app": "GPay",
+          "risk_score": 0.97,
+          "intent": "urgency_coercion",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_182",
+          "timestamp": "2026-08-23T04:12:00Z",
+          "channel": "call",
+          "phone": "+919876543211",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.88,
+          "intent": "phishing_payment",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_188",
+          "timestamp": "2026-08-23T06:59:00Z",
+          "channel": "payment",
+          "phone": "+919876543210",
+          "sender": "PWR-ALERT",
+          "domain": "electricity-update.in",
+          "app": "GPay",
+          "risk_score": 0.78,
+          "intent": "fake_utility_disconnection",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_190",
+          "timestamp": "2026-08-23T07:51:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "pay-elec-bill-now.com",
+          "app": "Chrome",
+          "risk_score": 0.75,
+          "intent": "fake_utility_disconnection",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_195",
+          "timestamp": "2026-08-23T09:38:00Z",
+          "channel": "payment",
+          "phone": "+919876543211",
+          "sender": "",
+          "domain": "electricity-update.in",
+          "app": "GPay",
+          "risk_score": 0.85,
+          "intent": "credential_harvesting",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_197",
+          "timestamp": "2026-08-23T10:25:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "EB-NOTIF",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.89,
+          "intent": "phishing_payment",
+          "community_id": 0
+        },
+        {
+          "event_id": "EVT_199",
+          "timestamp": "2026-08-23T11:05:00Z",
+          "channel": "SMS",
+          "phone": "+919876543211",
+          "sender": "EB-NOTIF",
+          "domain": "pay-elec-bill-now.com",
+          "app": "Messages",
+          "risk_score": 0.75,
+          "intent": "urgency_coercion",
+          "community_id": 0
+        }
+      ],
+      "classification": "SCAM_CAMPAIGN"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_1",
+      "community_id": 1,
+      "threat_level": "CRITICAL",
+      "primary_intent": "remote_access_harvest",
+      "avg_risk_score": 0.915,
+      "max_risk_score": 0.99,
+      "cumulative_risk": 45.75,
+      "total_events": 50,
+      "channels_involved": [
+        "SMS",
+        "URL",
+        "call",
+        "payment"
+      ],
+      "shared_identifiers": {
+        "phones": [
+          "+919123456789",
+          "+919123456790"
+        ],
+        "senders": [
+          "CBI-NOTICE",
+          "POLICE-DEPT"
+        ],
+        "domains": [
+          "cbi-verification-portal.com",
+          "cyber-dept-verify.net"
+        ],
+        "apps": [
+          "Chrome",
+          "Phone",
+          "PhonePe",
+          "WhatsApp"
+        ]
+      },
+      "event_ids": [
+        "EVT_002",
+        "EVT_004",
+        "EVT_016",
+        "EVT_020",
+        "EVT_026",
+        "EVT_034",
+        "EVT_037",
+        "EVT_038",
+        "EVT_041",
+        "EVT_044",
+        "EVT_054",
+        "EVT_055",
+        "EVT_058",
+        "EVT_060",
+        "EVT_061",
+        "EVT_063",
+        "EVT_067",
+        "EVT_071",
+        "EVT_072",
+        "EVT_073",
+        "EVT_080",
+        "EVT_081",
+        "EVT_088",
+        "EVT_089",
+        "EVT_090",
+        "EVT_099",
+        "EVT_113",
+        "EVT_119",
+        "EVT_121",
+        "EVT_122",
+        "EVT_123",
+        "EVT_129",
+        "EVT_130",
+        "EVT_138",
+        "EVT_140",
+        "EVT_141",
+        "EVT_147",
+        "EVT_148",
+        "EVT_160",
+        "EVT_161",
+        "EVT_164",
+        "EVT_168",
+        "EVT_177",
+        "EVT_178",
+        "EVT_179",
+        "EVT_180",
+        "EVT_187",
+        "EVT_191",
+        "EVT_196",
+        "EVT_200"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_002",
+          "timestamp": "2026-08-20T09:44:00Z",
+          "channel": "URL",
+          "phone": "+919123456790",
+          "sender": "POLICE-DEPT",
+          "domain": "cbi-verification-portal.com",
+          "app": "Chrome",
+          "risk_score": 0.99,
+          "intent": "fake_arrest_warrant",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_004",
+          "timestamp": "2026-08-20T10:35:00Z",
+          "channel": "SMS",
+          "phone": "+919123456790",
+          "sender": "POLICE-DEPT",
+          "domain": "cyber-dept-verify.net",
+          "app": "WhatsApp",
+          "risk_score": 0.89,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_016",
+          "timestamp": "2026-08-20T16:14:00Z",
+          "channel": "SMS",
+          "phone": "+919123456790",
+          "sender": "POLICE-DEPT",
+          "domain": "cbi-verification-portal.com",
+          "app": "WhatsApp",
+          "risk_score": 0.94,
+          "intent": "authority_impersonation",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_020",
+          "timestamp": "2026-08-20T17:44:00Z",
+          "channel": "SMS",
+          "phone": "+919123456790",
+          "sender": "CBI-NOTICE",
+          "domain": "",
+          "app": "WhatsApp",
+          "risk_score": 0.88,
+          "intent": "fake_arrest_warrant",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_026",
+          "timestamp": "2026-08-20T19:51:00Z",
+          "channel": "call",
+          "phone": "+919123456790",
+          "sender": "POLICE-DEPT",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.94,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_034",
+          "timestamp": "2026-08-20T22:10:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "cbi-verification-portal.com",
+          "app": "Chrome",
+          "risk_score": 0.9,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_037",
+          "timestamp": "2026-08-20T23:22:00Z",
+          "channel": "payment",
+          "phone": "+919123456789",
+          "sender": "",
+          "domain": "cyber-dept-verify.net",
+          "app": "PhonePe",
+          "risk_score": 0.96,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_038",
+          "timestamp": "2026-08-20T23:50:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "POLICE-DEPT",
+          "domain": "cbi-verification-portal.com",
+          "app": "WhatsApp",
+          "risk_score": 0.97,
+          "intent": "authority_impersonation",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_041",
+          "timestamp": "2026-08-21T00:40:00Z",
+          "channel": "payment",
+          "phone": "+919123456790",
+          "sender": "",
+          "domain": "cbi-verification-portal.com",
+          "app": "PhonePe",
+          "risk_score": 0.91,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_044",
+          "timestamp": "2026-08-21T01:32:00Z",
+          "channel": "call",
+          "phone": "+919123456789",
+          "sender": "",
+          "domain": "cbi-verification-portal.com",
+          "app": "Phone",
+          "risk_score": 0.85,
+          "intent": "extortion_fear",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_054",
+          "timestamp": "2026-08-21T04:27:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "POLICE-DEPT",
+          "domain": "cyber-dept-verify.net",
+          "app": "Chrome",
+          "risk_score": 0.87,
+          "intent": "extortion_fear",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_055",
+          "timestamp": "2026-08-21T04:48:00Z",
+          "channel": "payment",
+          "phone": "+919123456789",
+          "sender": "",
+          "domain": "cyber-dept-verify.net",
+          "app": "PhonePe",
+          "risk_score": 0.93,
+          "intent": "fake_arrest_warrant",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_058",
+          "timestamp": "2026-08-21T05:59:00Z",
+          "channel": "SMS",
+          "phone": "+919123456790",
+          "sender": "CBI-NOTICE",
+          "domain": "cyber-dept-verify.net",
+          "app": "WhatsApp",
+          "risk_score": 0.9,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_060",
+          "timestamp": "2026-08-21T06:18:00Z",
+          "channel": "URL",
+          "phone": "+919123456790",
+          "sender": "POLICE-DEPT",
+          "domain": "cyber-dept-verify.net",
+          "app": "Chrome",
+          "risk_score": 0.88,
+          "intent": "extortion_fear",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_061",
+          "timestamp": "2026-08-21T06:21:00Z",
+          "channel": "URL",
+          "phone": "+919123456789",
+          "sender": "",
+          "domain": "cyber-dept-verify.net",
+          "app": "Chrome",
+          "risk_score": 0.88,
+          "intent": "authority_impersonation",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_063",
+          "timestamp": "2026-08-21T07:11:00Z",
+          "channel": "payment",
+          "phone": "+919123456789",
+          "sender": "",
+          "domain": "cbi-verification-portal.com",
+          "app": "PhonePe",
+          "risk_score": 0.88,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_067",
+          "timestamp": "2026-08-21T09:05:00Z",
+          "channel": "payment",
+          "phone": "+919123456790",
+          "sender": "POLICE-DEPT",
+          "domain": "cbi-verification-portal.com",
+          "app": "PhonePe",
+          "risk_score": 0.91,
+          "intent": "authority_impersonation",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_071",
+          "timestamp": "2026-08-21T09:54:00Z",
+          "channel": "SMS",
+          "phone": "+919123456790",
+          "sender": "CBI-NOTICE",
+          "domain": "cbi-verification-portal.com",
+          "app": "WhatsApp",
+          "risk_score": 0.87,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_072",
+          "timestamp": "2026-08-21T10:11:00Z",
+          "channel": "payment",
+          "phone": "+919123456790",
+          "sender": "CBI-NOTICE",
+          "domain": "cbi-verification-portal.com",
+          "app": "PhonePe",
+          "risk_score": 0.97,
+          "intent": "extortion_fear",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_073",
+          "timestamp": "2026-08-21T10:25:00Z",
+          "channel": "SMS",
+          "phone": "+919123456790",
+          "sender": "POLICE-DEPT",
+          "domain": "",
+          "app": "WhatsApp",
+          "risk_score": 0.9,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_080",
+          "timestamp": "2026-08-21T13:19:00Z",
+          "channel": "SMS",
+          "phone": "+919123456789",
+          "sender": "POLICE-DEPT",
+          "domain": "",
+          "app": "WhatsApp",
+          "risk_score": 0.98,
+          "intent": "fake_arrest_warrant",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_081",
+          "timestamp": "2026-08-21T13:35:00Z",
+          "channel": "URL",
+          "phone": "+919123456790",
+          "sender": "",
+          "domain": "cbi-verification-portal.com",
+          "app": "Chrome",
+          "risk_score": 0.93,
+          "intent": "fake_arrest_warrant",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_088",
+          "timestamp": "2026-08-21T16:11:00Z",
+          "channel": "call",
+          "phone": "+919123456790",
+          "sender": "POLICE-DEPT",
+          "domain": "cyber-dept-verify.net",
+          "app": "Phone",
+          "risk_score": 0.92,
+          "intent": "fake_arrest_warrant",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_089",
+          "timestamp": "2026-08-21T16:41:00Z",
+          "channel": "SMS",
+          "phone": "+919123456789",
+          "sender": "POLICE-DEPT",
+          "domain": "",
+          "app": "WhatsApp",
+          "risk_score": 0.86,
+          "intent": "fake_arrest_warrant",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_090",
+          "timestamp": "2026-08-21T16:46:00Z",
+          "channel": "call",
+          "phone": "+919123456789",
+          "sender": "CBI-NOTICE",
+          "domain": "cbi-verification-portal.com",
+          "app": "Phone",
+          "risk_score": 0.86,
+          "intent": "extortion_fear",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_099",
+          "timestamp": "2026-08-21T20:49:00Z",
+          "channel": "SMS",
+          "phone": "+919123456790",
+          "sender": "POLICE-DEPT",
+          "domain": "cyber-dept-verify.net",
+          "app": "WhatsApp",
+          "risk_score": 0.9,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_113",
+          "timestamp": "2026-08-22T02:28:00Z",
+          "channel": "payment",
+          "phone": "+919123456790",
+          "sender": "POLICE-DEPT",
+          "domain": "cbi-verification-portal.com",
+          "app": "PhonePe",
+          "risk_score": 0.89,
+          "intent": "authority_impersonation",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_119",
+          "timestamp": "2026-08-22T05:12:00Z",
+          "channel": "SMS",
+          "phone": "+919123456790",
+          "sender": "POLICE-DEPT",
+          "domain": "cbi-verification-portal.com",
+          "app": "WhatsApp",
+          "risk_score": 0.98,
+          "intent": "extortion_fear",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_121",
+          "timestamp": "2026-08-22T05:50:00Z",
+          "channel": "URL",
+          "phone": "+919123456790",
+          "sender": "CBI-NOTICE",
+          "domain": "cbi-verification-portal.com",
+          "app": "Chrome",
+          "risk_score": 0.92,
+          "intent": "extortion_fear",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_122",
+          "timestamp": "2026-08-22T06:15:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "CBI-NOTICE",
+          "domain": "cyber-dept-verify.net",
+          "app": "Chrome",
+          "risk_score": 0.99,
+          "intent": "fake_arrest_warrant",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_123",
+          "timestamp": "2026-08-22T06:46:00Z",
+          "channel": "call",
+          "phone": "+919123456789",
+          "sender": "",
+          "domain": "cbi-verification-portal.com",
+          "app": "Phone",
+          "risk_score": 0.93,
+          "intent": "extortion_fear",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_129",
+          "timestamp": "2026-08-22T08:38:00Z",
+          "channel": "payment",
+          "phone": "+919123456789",
+          "sender": "POLICE-DEPT",
+          "domain": "cbi-verification-portal.com",
+          "app": "PhonePe",
+          "risk_score": 0.92,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_130",
+          "timestamp": "2026-08-22T09:01:00Z",
+          "channel": "call",
+          "phone": "+919123456789",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.85,
+          "intent": "extortion_fear",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_138",
+          "timestamp": "2026-08-22T12:16:00Z",
+          "channel": "call",
+          "phone": "+919123456790",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.88,
+          "intent": "fake_arrest_warrant",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_140",
+          "timestamp": "2026-08-22T12:28:00Z",
+          "channel": "call",
+          "phone": "+919123456790",
+          "sender": "CBI-NOTICE",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.96,
+          "intent": "authority_impersonation",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_141",
+          "timestamp": "2026-08-22T12:51:00Z",
+          "channel": "payment",
+          "phone": "+919123456789",
+          "sender": "CBI-NOTICE",
+          "domain": "cbi-verification-portal.com",
+          "app": "PhonePe",
+          "risk_score": 0.98,
+          "intent": "extortion_fear",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_147",
+          "timestamp": "2026-08-22T15:56:00Z",
+          "channel": "URL",
+          "phone": "+919123456789",
+          "sender": "POLICE-DEPT",
+          "domain": "cbi-verification-portal.com",
+          "app": "Chrome",
+          "risk_score": 0.93,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_148",
+          "timestamp": "2026-08-22T16:41:00Z",
+          "channel": "call",
+          "phone": "+919123456789",
+          "sender": "POLICE-DEPT",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.86,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_160",
+          "timestamp": "2026-08-22T19:43:00Z",
+          "channel": "call",
+          "phone": "+919123456790",
+          "sender": "POLICE-DEPT",
+          "domain": "cyber-dept-verify.net",
+          "app": "Phone",
+          "risk_score": 0.88,
+          "intent": "extortion_fear",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_161",
+          "timestamp": "2026-08-22T20:04:00Z",
+          "channel": "payment",
+          "phone": "+919123456789",
+          "sender": "POLICE-DEPT",
+          "domain": "cbi-verification-portal.com",
+          "app": "PhonePe",
+          "risk_score": 0.94,
+          "intent": "fake_arrest_warrant",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_164",
+          "timestamp": "2026-08-22T21:23:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "POLICE-DEPT",
+          "domain": "cyber-dept-verify.net",
+          "app": "Chrome",
+          "risk_score": 0.88,
+          "intent": "fake_arrest_warrant",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_168",
+          "timestamp": "2026-08-22T22:49:00Z",
+          "channel": "payment",
+          "phone": "+919123456790",
+          "sender": "POLICE-DEPT",
+          "domain": "cbi-verification-portal.com",
+          "app": "PhonePe",
+          "risk_score": 0.94,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_177",
+          "timestamp": "2026-08-23T02:00:00Z",
+          "channel": "payment",
+          "phone": "+919123456790",
+          "sender": "POLICE-DEPT",
+          "domain": "cyber-dept-verify.net",
+          "app": "PhonePe",
+          "risk_score": 0.93,
+          "intent": "fake_arrest_warrant",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_178",
+          "timestamp": "2026-08-23T02:24:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "POLICE-DEPT",
+          "domain": "cyber-dept-verify.net",
+          "app": "Chrome",
+          "risk_score": 0.93,
+          "intent": "extortion_fear",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_179",
+          "timestamp": "2026-08-23T02:52:00Z",
+          "channel": "call",
+          "phone": "+919123456789",
+          "sender": "CBI-NOTICE",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.92,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_180",
+          "timestamp": "2026-08-23T03:18:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "POLICE-DEPT",
+          "domain": "cyber-dept-verify.net",
+          "app": "WhatsApp",
+          "risk_score": 0.95,
+          "intent": "authority_impersonation",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_187",
+          "timestamp": "2026-08-23T06:35:00Z",
+          "channel": "call",
+          "phone": "+919123456789",
+          "sender": "POLICE-DEPT",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.95,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_191",
+          "timestamp": "2026-08-23T07:57:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "POLICE-DEPT",
+          "domain": "cyber-dept-verify.net",
+          "app": "Chrome",
+          "risk_score": 0.89,
+          "intent": "extortion_fear",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_196",
+          "timestamp": "2026-08-23T09:50:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "CBI-NOTICE",
+          "domain": "cyber-dept-verify.net",
+          "app": "WhatsApp",
+          "risk_score": 0.92,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        },
+        {
+          "event_id": "EVT_200",
+          "timestamp": "2026-08-23T11:12:00Z",
+          "channel": "call",
+          "phone": "+919123456789",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.86,
+          "intent": "remote_access_harvest",
+          "community_id": 1
+        }
+      ],
+      "classification": "SCAM_CAMPAIGN"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_2",
+      "community_id": 2,
+      "threat_level": "CRITICAL",
+      "primary_intent": "unauthorized_transfer",
+      "avg_risk_score": 0.832,
+      "max_risk_score": 0.94,
+      "cumulative_risk": 41.61,
+      "total_events": 50,
+      "channels_involved": [
+        "SMS",
+        "URL",
+        "call",
+        "payment"
+      ],
+      "shared_identifiers": {
+        "phones": [
+          "+919988776644",
+          "+919988776655"
+        ],
+        "senders": [
+          "HDFC-KYC",
+          "SBI-UPDATE"
+        ],
+        "domains": [
+          "sbi-kyc-update-portal.org",
+          "verify-bank-account.info"
+        ],
+        "apps": [
+          "Chrome",
+          "Messages",
+          "Paytm",
+          "Phone"
+        ]
+      },
+      "event_ids": [
+        "EVT_003",
+        "EVT_007",
+        "EVT_008",
+        "EVT_013",
+        "EVT_015",
+        "EVT_023",
+        "EVT_027",
+        "EVT_032",
+        "EVT_035",
+        "EVT_036",
+        "EVT_047",
+        "EVT_048",
+        "EVT_049",
+        "EVT_052",
+        "EVT_057",
+        "EVT_062",
+        "EVT_079",
+        "EVT_082",
+        "EVT_087",
+        "EVT_092",
+        "EVT_094",
+        "EVT_097",
+        "EVT_104",
+        "EVT_105",
+        "EVT_107",
+        "EVT_111",
+        "EVT_115",
+        "EVT_117",
+        "EVT_125",
+        "EVT_126",
+        "EVT_127",
+        "EVT_131",
+        "EVT_133",
+        "EVT_137",
+        "EVT_142",
+        "EVT_143",
+        "EVT_145",
+        "EVT_150",
+        "EVT_151",
+        "EVT_152",
+        "EVT_153",
+        "EVT_154",
+        "EVT_171",
+        "EVT_174",
+        "EVT_181",
+        "EVT_183",
+        "EVT_184",
+        "EVT_189",
+        "EVT_193",
+        "EVT_198"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_003",
+          "timestamp": "2026-08-20T10:19:00Z",
+          "channel": "SMS",
+          "phone": "+919988776644",
+          "sender": "HDFC-KYC",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.73,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_007",
+          "timestamp": "2026-08-20T11:39:00Z",
+          "channel": "call",
+          "phone": "+919988776644",
+          "sender": "SBI-UPDATE",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Phone",
+          "risk_score": 0.82,
+          "intent": "kyc_harvesting",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_008",
+          "timestamp": "2026-08-20T12:03:00Z",
+          "channel": "URL",
+          "phone": "+919988776655",
+          "sender": "HDFC-KYC",
+          "domain": "verify-bank-account.info",
+          "app": "Chrome",
+          "risk_score": 0.83,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_013",
+          "timestamp": "2026-08-20T14:42:00Z",
+          "channel": "URL",
+          "phone": "+919988776644",
+          "sender": "HDFC-KYC",
+          "domain": "verify-bank-account.info",
+          "app": "Chrome",
+          "risk_score": 0.94,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_015",
+          "timestamp": "2026-08-20T15:40:00Z",
+          "channel": "call",
+          "phone": "+919988776655",
+          "sender": "HDFC-KYC",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.88,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_023",
+          "timestamp": "2026-08-20T18:14:00Z",
+          "channel": "payment",
+          "phone": "+919988776644",
+          "sender": "HDFC-KYC",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Paytm",
+          "risk_score": 0.82,
+          "intent": "phishing_login",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_027",
+          "timestamp": "2026-08-20T20:27:00Z",
+          "channel": "payment",
+          "phone": "+919988776644",
+          "sender": "SBI-UPDATE",
+          "domain": "verify-bank-account.info",
+          "app": "Paytm",
+          "risk_score": 0.74,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_032",
+          "timestamp": "2026-08-20T21:41:00Z",
+          "channel": "SMS",
+          "phone": "+919988776655",
+          "sender": "SBI-UPDATE",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.86,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_035",
+          "timestamp": "2026-08-20T22:39:00Z",
+          "channel": "call",
+          "phone": "+919988776644",
+          "sender": "HDFC-KYC",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Phone",
+          "risk_score": 0.94,
+          "intent": "account_block_panic",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_036",
+          "timestamp": "2026-08-20T23:12:00Z",
+          "channel": "payment",
+          "phone": "+919988776644",
+          "sender": "",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Paytm",
+          "risk_score": 0.71,
+          "intent": "phishing_login",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_047",
+          "timestamp": "2026-08-21T02:35:00Z",
+          "channel": "SMS",
+          "phone": "+919988776655",
+          "sender": "SBI-UPDATE",
+          "domain": "verify-bank-account.info",
+          "app": "Messages",
+          "risk_score": 0.93,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_048",
+          "timestamp": "2026-08-21T02:59:00Z",
+          "channel": "SMS",
+          "phone": "+919988776655",
+          "sender": "SBI-UPDATE",
+          "domain": "verify-bank-account.info",
+          "app": "Messages",
+          "risk_score": 0.77,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_049",
+          "timestamp": "2026-08-21T03:15:00Z",
+          "channel": "call",
+          "phone": "+919988776644",
+          "sender": "HDFC-KYC",
+          "domain": "verify-bank-account.info",
+          "app": "Phone",
+          "risk_score": 0.82,
+          "intent": "phishing_login",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_052",
+          "timestamp": "2026-08-21T04:10:00Z",
+          "channel": "call",
+          "phone": "+919988776655",
+          "sender": "SBI-UPDATE",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Phone",
+          "risk_score": 0.84,
+          "intent": "kyc_harvesting",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_057",
+          "timestamp": "2026-08-21T05:37:00Z",
+          "channel": "SMS",
+          "phone": "+919988776655",
+          "sender": "SBI-UPDATE",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.76,
+          "intent": "account_block_panic",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_062",
+          "timestamp": "2026-08-21T06:40:00Z",
+          "channel": "payment",
+          "phone": "+919988776644",
+          "sender": "SBI-UPDATE",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Paytm",
+          "risk_score": 0.88,
+          "intent": "phishing_login",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_079",
+          "timestamp": "2026-08-21T13:00:00Z",
+          "channel": "SMS",
+          "phone": "+919988776644",
+          "sender": "HDFC-KYC",
+          "domain": "verify-bank-account.info",
+          "app": "Messages",
+          "risk_score": 0.79,
+          "intent": "phishing_login",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_082",
+          "timestamp": "2026-08-21T13:55:00Z",
+          "channel": "payment",
+          "phone": "+919988776655",
+          "sender": "",
+          "domain": "verify-bank-account.info",
+          "app": "Paytm",
+          "risk_score": 0.9,
+          "intent": "phishing_login",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_087",
+          "timestamp": "2026-08-21T15:31:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "SBI-UPDATE",
+          "domain": "verify-bank-account.info",
+          "app": "Chrome",
+          "risk_score": 0.71,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_092",
+          "timestamp": "2026-08-21T17:26:00Z",
+          "channel": "SMS",
+          "phone": "+919988776655",
+          "sender": "HDFC-KYC",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Messages",
+          "risk_score": 0.87,
+          "intent": "account_block_panic",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_094",
+          "timestamp": "2026-08-21T18:40:00Z",
+          "channel": "SMS",
+          "phone": "+919988776644",
+          "sender": "SBI-UPDATE",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.94,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_097",
+          "timestamp": "2026-08-21T19:56:00Z",
+          "channel": "call",
+          "phone": "+919988776644",
+          "sender": "SBI-UPDATE",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Phone",
+          "risk_score": 0.91,
+          "intent": "kyc_harvesting",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_104",
+          "timestamp": "2026-08-21T22:27:00Z",
+          "channel": "payment",
+          "phone": "+919988776655",
+          "sender": "SBI-UPDATE",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Paytm",
+          "risk_score": 0.93,
+          "intent": "account_block_panic",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_105",
+          "timestamp": "2026-08-21T22:50:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "SBI-UPDATE",
+          "domain": "verify-bank-account.info",
+          "app": "Chrome",
+          "risk_score": 0.81,
+          "intent": "phishing_login",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_107",
+          "timestamp": "2026-08-21T23:43:00Z",
+          "channel": "call",
+          "phone": "+919988776644",
+          "sender": "",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Phone",
+          "risk_score": 0.82,
+          "intent": "phishing_login",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_111",
+          "timestamp": "2026-08-22T01:48:00Z",
+          "channel": "call",
+          "phone": "+919988776655",
+          "sender": "HDFC-KYC",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Phone",
+          "risk_score": 0.73,
+          "intent": "account_block_panic",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_115",
+          "timestamp": "2026-08-22T02:57:00Z",
+          "channel": "call",
+          "phone": "+919988776644",
+          "sender": "SBI-UPDATE",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Phone",
+          "risk_score": 0.91,
+          "intent": "phishing_login",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_117",
+          "timestamp": "2026-08-22T04:06:00Z",
+          "channel": "payment",
+          "phone": "+919988776655",
+          "sender": "HDFC-KYC",
+          "domain": "verify-bank-account.info",
+          "app": "Paytm",
+          "risk_score": 0.74,
+          "intent": "account_block_panic",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_125",
+          "timestamp": "2026-08-22T07:30:00Z",
+          "channel": "SMS",
+          "phone": "+919988776644",
+          "sender": "SBI-UPDATE",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Messages",
+          "risk_score": 0.93,
+          "intent": "account_block_panic",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_126",
+          "timestamp": "2026-08-22T07:55:00Z",
+          "channel": "URL",
+          "phone": "+919988776644",
+          "sender": "",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Chrome",
+          "risk_score": 0.78,
+          "intent": "kyc_harvesting",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_127",
+          "timestamp": "2026-08-22T08:19:00Z",
+          "channel": "payment",
+          "phone": "+919988776655",
+          "sender": "HDFC-KYC",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Paytm",
+          "risk_score": 0.85,
+          "intent": "phishing_login",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_131",
+          "timestamp": "2026-08-22T09:06:00Z",
+          "channel": "URL",
+          "phone": "+919988776655",
+          "sender": "",
+          "domain": "verify-bank-account.info",
+          "app": "Chrome",
+          "risk_score": 0.79,
+          "intent": "account_block_panic",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_133",
+          "timestamp": "2026-08-22T09:45:00Z",
+          "channel": "payment",
+          "phone": "+919988776655",
+          "sender": "SBI-UPDATE",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Paytm",
+          "risk_score": 0.78,
+          "intent": "kyc_harvesting",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_137",
+          "timestamp": "2026-08-22T11:54:00Z",
+          "channel": "SMS",
+          "phone": "+919988776644",
+          "sender": "SBI-UPDATE",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.79,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_142",
+          "timestamp": "2026-08-22T13:26:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "HDFC-KYC",
+          "domain": "verify-bank-account.info",
+          "app": "Messages",
+          "risk_score": 0.86,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_143",
+          "timestamp": "2026-08-22T13:48:00Z",
+          "channel": "call",
+          "phone": "+919988776655",
+          "sender": "HDFC-KYC",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.86,
+          "intent": "account_block_panic",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_145",
+          "timestamp": "2026-08-22T14:42:00Z",
+          "channel": "call",
+          "phone": "+919988776655",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.94,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_150",
+          "timestamp": "2026-08-22T17:53:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Chrome",
+          "risk_score": 0.77,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_151",
+          "timestamp": "2026-08-22T18:05:00Z",
+          "channel": "call",
+          "phone": "+919988776655",
+          "sender": "HDFC-KYC",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Phone",
+          "risk_score": 0.91,
+          "intent": "kyc_harvesting",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_152",
+          "timestamp": "2026-08-22T18:14:00Z",
+          "channel": "call",
+          "phone": "+919988776655",
+          "sender": "SBI-UPDATE",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.8,
+          "intent": "account_block_panic",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_153",
+          "timestamp": "2026-08-22T18:19:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "HDFC-KYC",
+          "domain": "sbi-kyc-update-portal.org",
+          "app": "Chrome",
+          "risk_score": 0.83,
+          "intent": "account_block_panic",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_154",
+          "timestamp": "2026-08-22T18:49:00Z",
+          "channel": "URL",
+          "phone": "+919988776655",
+          "sender": "HDFC-KYC",
+          "domain": "verify-bank-account.info",
+          "app": "Chrome",
+          "risk_score": 0.92,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_171",
+          "timestamp": "2026-08-23T00:03:00Z",
+          "channel": "payment",
+          "phone": "+919988776644",
+          "sender": "HDFC-KYC",
+          "domain": "verify-bank-account.info",
+          "app": "Paytm",
+          "risk_score": 0.77,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_174",
+          "timestamp": "2026-08-23T01:12:00Z",
+          "channel": "URL",
+          "phone": "+919988776655",
+          "sender": "SBI-UPDATE",
+          "domain": "verify-bank-account.info",
+          "app": "Chrome",
+          "risk_score": 0.74,
+          "intent": "kyc_harvesting",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_181",
+          "timestamp": "2026-08-23T03:47:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "HDFC-KYC",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.72,
+          "intent": "kyc_harvesting",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_183",
+          "timestamp": "2026-08-23T04:34:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "verify-bank-account.info",
+          "app": "Chrome",
+          "risk_score": 0.82,
+          "intent": "account_block_panic",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_184",
+          "timestamp": "2026-08-23T04:46:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "verify-bank-account.info",
+          "app": "Chrome",
+          "risk_score": 0.88,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_189",
+          "timestamp": "2026-08-23T07:33:00Z",
+          "channel": "payment",
+          "phone": "+919988776655",
+          "sender": "HDFC-KYC",
+          "domain": "verify-bank-account.info",
+          "app": "Paytm",
+          "risk_score": 0.77,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_193",
+          "timestamp": "2026-08-23T08:31:00Z",
+          "channel": "SMS",
+          "phone": "+919988776655",
+          "sender": "HDFC-KYC",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.91,
+          "intent": "unauthorized_transfer",
+          "community_id": 2
+        },
+        {
+          "event_id": "EVT_198",
+          "timestamp": "2026-08-23T10:44:00Z",
+          "channel": "payment",
+          "phone": "+919988776655",
+          "sender": "SBI-UPDATE",
+          "domain": "verify-bank-account.info",
+          "app": "Paytm",
+          "risk_score": 0.86,
+          "intent": "account_block_panic",
+          "community_id": 2
+        }
+      ],
+      "classification": "SCAM_CAMPAIGN"
+    }
+  ],
+  "benign_communities": [
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_3",
+      "community_id": 3,
+      "threat_level": "MEDIUM",
+      "primary_intent": "otp_notification",
+      "avg_risk_score": 0.09,
+      "max_risk_score": 0.17,
+      "cumulative_risk": 0.81,
+      "total_events": 9,
+      "channels_involved": [
+        "call"
+      ],
+      "shared_identifiers": {
+        "phones": [
+          "+919820012345"
+        ],
+        "senders": [],
+        "domains": [],
+        "apps": [
+          "Phone"
+        ]
+      },
+      "event_ids": [
+        "EVT_011",
+        "EVT_017",
+        "EVT_056",
+        "EVT_065",
+        "EVT_095",
+        "EVT_149",
+        "EVT_156",
+        "EVT_166",
+        "EVT_186"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_011",
+          "timestamp": "2026-08-20T13:53:00Z",
+          "channel": "call",
+          "phone": "+919820012345",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.17,
+          "intent": "personal_call",
+          "community_id": 3
+        },
+        {
+          "event_id": "EVT_017",
+          "timestamp": "2026-08-20T16:41:00Z",
+          "channel": "call",
+          "phone": "+919820012345",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.1,
+          "intent": "delivery_update",
+          "community_id": 3
+        },
+        {
+          "event_id": "EVT_056",
+          "timestamp": "2026-08-21T04:55:00Z",
+          "channel": "call",
+          "phone": "+919820012345",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.03,
+          "intent": "delivery_update",
+          "community_id": 3
+        },
+        {
+          "event_id": "EVT_065",
+          "timestamp": "2026-08-21T08:05:00Z",
+          "channel": "call",
+          "phone": "+919820012345",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.04,
+          "intent": "otp_notification",
+          "community_id": 3
+        },
+        {
+          "event_id": "EVT_095",
+          "timestamp": "2026-08-21T18:42:00Z",
+          "channel": "call",
+          "phone": "+919820012345",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.05,
+          "intent": "regular_payment",
+          "community_id": 3
+        },
+        {
+          "event_id": "EVT_149",
+          "timestamp": "2026-08-22T17:12:00Z",
+          "channel": "call",
+          "phone": "+919820012345",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.16,
+          "intent": "otp_notification",
+          "community_id": 3
+        },
+        {
+          "event_id": "EVT_156",
+          "timestamp": "2026-08-22T19:11:00Z",
+          "channel": "call",
+          "phone": "+919820012345",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.17,
+          "intent": "benign_social",
+          "community_id": 3
+        },
+        {
+          "event_id": "EVT_166",
+          "timestamp": "2026-08-22T22:29:00Z",
+          "channel": "call",
+          "phone": "+919820012345",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.06,
+          "intent": "otp_notification",
+          "community_id": 3
+        },
+        {
+          "event_id": "EVT_186",
+          "timestamp": "2026-08-23T06:03:00Z",
+          "channel": "call",
+          "phone": "+919820012345",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.03,
+          "intent": "personal_call",
+          "community_id": 3
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_4",
+      "community_id": 4,
+      "threat_level": "MEDIUM",
+      "primary_intent": "regular_payment",
+      "avg_risk_score": 0.126,
+      "max_risk_score": 0.2,
+      "cumulative_risk": 1.01,
+      "total_events": 8,
+      "channels_involved": [
+        "URL",
+        "payment"
+      ],
+      "shared_identifiers": {
+        "phones": [],
+        "senders": [],
+        "domains": [
+          "swiggy.com"
+        ],
+        "apps": [
+          "Chrome",
+          "GPay",
+          "Paytm",
+          "PhonePe"
+        ]
+      },
+      "event_ids": [
+        "EVT_012",
+        "EVT_029",
+        "EVT_033",
+        "EVT_091",
+        "EVT_118",
+        "EVT_120",
+        "EVT_167",
+        "EVT_172"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_012",
+          "timestamp": "2026-08-20T14:23:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "swiggy.com",
+          "app": "Chrome",
+          "risk_score": 0.06,
+          "intent": "delivery_update",
+          "community_id": 4
+        },
+        {
+          "event_id": "EVT_029",
+          "timestamp": "2026-08-20T21:08:00Z",
+          "channel": "payment",
+          "phone": "",
+          "sender": "",
+          "domain": "swiggy.com",
+          "app": "PhonePe",
+          "risk_score": 0.08,
+          "intent": "benign_social",
+          "community_id": 4
+        },
+        {
+          "event_id": "EVT_033",
+          "timestamp": "2026-08-20T21:52:00Z",
+          "channel": "payment",
+          "phone": "",
+          "sender": "",
+          "domain": "swiggy.com",
+          "app": "Paytm",
+          "risk_score": 0.08,
+          "intent": "otp_notification",
+          "community_id": 4
+        },
+        {
+          "event_id": "EVT_091",
+          "timestamp": "2026-08-21T16:54:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "swiggy.com",
+          "app": "Chrome",
+          "risk_score": 0.17,
+          "intent": "benign_social",
+          "community_id": 4
+        },
+        {
+          "event_id": "EVT_118",
+          "timestamp": "2026-08-22T04:39:00Z",
+          "channel": "payment",
+          "phone": "",
+          "sender": "",
+          "domain": "swiggy.com",
+          "app": "Paytm",
+          "risk_score": 0.14,
+          "intent": "regular_payment",
+          "community_id": 4
+        },
+        {
+          "event_id": "EVT_120",
+          "timestamp": "2026-08-22T05:48:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "swiggy.com",
+          "app": "Chrome",
+          "risk_score": 0.1,
+          "intent": "regular_payment",
+          "community_id": 4
+        },
+        {
+          "event_id": "EVT_167",
+          "timestamp": "2026-08-22T22:46:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "swiggy.com",
+          "app": "Chrome",
+          "risk_score": 0.2,
+          "intent": "personal_call",
+          "community_id": 4
+        },
+        {
+          "event_id": "EVT_172",
+          "timestamp": "2026-08-23T00:26:00Z",
+          "channel": "payment",
+          "phone": "",
+          "sender": "",
+          "domain": "swiggy.com",
+          "app": "GPay",
+          "risk_score": 0.18,
+          "intent": "delivery_update",
+          "community_id": 4
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_5",
+      "community_id": 5,
+      "threat_level": "MEDIUM",
+      "primary_intent": "delivery_update",
+      "avg_risk_score": 0.11,
+      "max_risk_score": 0.17,
+      "cumulative_risk": 0.77,
+      "total_events": 7,
+      "channels_involved": [
+        "call"
+      ],
+      "shared_identifiers": {
+        "phones": [
+          "+919870011223"
+        ],
+        "senders": [],
+        "domains": [],
+        "apps": [
+          "Phone"
+        ]
+      },
+      "event_ids": [
+        "EVT_005",
+        "EVT_046",
+        "EVT_086",
+        "EVT_116",
+        "EVT_128",
+        "EVT_173",
+        "EVT_192"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_005",
+          "timestamp": "2026-08-20T10:55:00Z",
+          "channel": "call",
+          "phone": "+919870011223",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.09,
+          "intent": "delivery_update",
+          "community_id": 5
+        },
+        {
+          "event_id": "EVT_046",
+          "timestamp": "2026-08-21T02:02:00Z",
+          "channel": "call",
+          "phone": "+919870011223",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.01,
+          "intent": "delivery_update",
+          "community_id": 5
+        },
+        {
+          "event_id": "EVT_086",
+          "timestamp": "2026-08-21T14:50:00Z",
+          "channel": "call",
+          "phone": "+919870011223",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.11,
+          "intent": "regular_payment",
+          "community_id": 5
+        },
+        {
+          "event_id": "EVT_116",
+          "timestamp": "2026-08-22T03:31:00Z",
+          "channel": "call",
+          "phone": "+919870011223",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.17,
+          "intent": "delivery_update",
+          "community_id": 5
+        },
+        {
+          "event_id": "EVT_128",
+          "timestamp": "2026-08-22T08:36:00Z",
+          "channel": "call",
+          "phone": "+919870011223",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.17,
+          "intent": "otp_notification",
+          "community_id": 5
+        },
+        {
+          "event_id": "EVT_173",
+          "timestamp": "2026-08-23T00:30:00Z",
+          "channel": "call",
+          "phone": "+919870011223",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.09,
+          "intent": "benign_social",
+          "community_id": 5
+        },
+        {
+          "event_id": "EVT_192",
+          "timestamp": "2026-08-23T08:25:00Z",
+          "channel": "call",
+          "phone": "+919870011223",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.13,
+          "intent": "regular_payment",
+          "community_id": 5
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_6",
+      "community_id": 6,
+      "threat_level": "MEDIUM",
+      "primary_intent": "otp_notification",
+      "avg_risk_score": 0.064,
+      "max_risk_score": 0.13,
+      "cumulative_risk": 0.32,
+      "total_events": 5,
+      "channels_involved": [
+        "SMS"
+      ],
+      "shared_identifiers": {
+        "phones": [],
+        "senders": [
+          "IRCTC"
+        ],
+        "domains": [],
+        "apps": [
+          "Messages"
+        ]
+      },
+      "event_ids": [
+        "EVT_064",
+        "EVT_096",
+        "EVT_102",
+        "EVT_134",
+        "EVT_194"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_064",
+          "timestamp": "2026-08-21T07:56:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "IRCTC",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.05,
+          "intent": "otp_notification",
+          "community_id": 6
+        },
+        {
+          "event_id": "EVT_096",
+          "timestamp": "2026-08-21T19:23:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "IRCTC",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.04,
+          "intent": "otp_notification",
+          "community_id": 6
+        },
+        {
+          "event_id": "EVT_102",
+          "timestamp": "2026-08-21T21:46:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "IRCTC",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.13,
+          "intent": "benign_social",
+          "community_id": 6
+        },
+        {
+          "event_id": "EVT_134",
+          "timestamp": "2026-08-22T10:28:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "IRCTC",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.04,
+          "intent": "personal_call",
+          "community_id": 6
+        },
+        {
+          "event_id": "EVT_194",
+          "timestamp": "2026-08-23T08:59:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "IRCTC",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.06,
+          "intent": "otp_notification",
+          "community_id": 6
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_7",
+      "community_id": 7,
+      "threat_level": "MEDIUM",
+      "primary_intent": "otp_notification",
+      "avg_risk_score": 0.093,
+      "max_risk_score": 0.11,
+      "cumulative_risk": 0.28,
+      "total_events": 3,
+      "channels_involved": [
+        "SMS"
+      ],
+      "shared_identifiers": {
+        "phones": [],
+        "senders": [
+          "ZOMATO"
+        ],
+        "domains": [],
+        "apps": [
+          "Messages"
+        ]
+      },
+      "event_ids": [
+        "EVT_051",
+        "EVT_066",
+        "EVT_114"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_051",
+          "timestamp": "2026-08-21T03:46:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "ZOMATO",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.08,
+          "intent": "delivery_update",
+          "community_id": 7
+        },
+        {
+          "event_id": "EVT_066",
+          "timestamp": "2026-08-21T08:36:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "ZOMATO",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.09,
+          "intent": "otp_notification",
+          "community_id": 7
+        },
+        {
+          "event_id": "EVT_114",
+          "timestamp": "2026-08-22T02:52:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "ZOMATO",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.11,
+          "intent": "otp_notification",
+          "community_id": 7
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_8",
+      "community_id": 8,
+      "threat_level": "MEDIUM",
+      "primary_intent": "regular_payment",
+      "avg_risk_score": 0.08,
+      "max_risk_score": 0.16,
+      "cumulative_risk": 0.24,
+      "total_events": 3,
+      "channels_involved": [
+        "URL",
+        "payment"
+      ],
+      "shared_identifiers": {
+        "phones": [],
+        "senders": [],
+        "domains": [
+          "zomato.com"
+        ],
+        "apps": [
+          "Chrome",
+          "GPay",
+          "Paytm"
+        ]
+      },
+      "event_ids": [
+        "EVT_031",
+        "EVT_068",
+        "EVT_100"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_031",
+          "timestamp": "2026-08-20T21:35:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "zomato.com",
+          "app": "Chrome",
+          "risk_score": 0.07,
+          "intent": "otp_notification",
+          "community_id": 8
+        },
+        {
+          "event_id": "EVT_068",
+          "timestamp": "2026-08-21T09:45:00Z",
+          "channel": "payment",
+          "phone": "",
+          "sender": "",
+          "domain": "zomato.com",
+          "app": "Paytm",
+          "risk_score": 0.01,
+          "intent": "regular_payment",
+          "community_id": 8
+        },
+        {
+          "event_id": "EVT_100",
+          "timestamp": "2026-08-21T20:59:00Z",
+          "channel": "payment",
+          "phone": "",
+          "sender": "",
+          "domain": "zomato.com",
+          "app": "GPay",
+          "risk_score": 0.16,
+          "intent": "personal_call",
+          "community_id": 8
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_9",
+      "community_id": 9,
+      "threat_level": "MEDIUM",
+      "primary_intent": "regular_payment",
+      "avg_risk_score": 0.153,
+      "max_risk_score": 0.17,
+      "cumulative_risk": 0.46,
+      "total_events": 3,
+      "channels_involved": [
+        "call"
+      ],
+      "shared_identifiers": {
+        "phones": [
+          "+919711009988"
+        ],
+        "senders": [],
+        "domains": [],
+        "apps": [
+          "Phone"
+        ]
+      },
+      "event_ids": [
+        "EVT_106",
+        "EVT_110",
+        "EVT_162"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_106",
+          "timestamp": "2026-08-21T23:06:00Z",
+          "channel": "call",
+          "phone": "+919711009988",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.17,
+          "intent": "regular_payment",
+          "community_id": 9
+        },
+        {
+          "event_id": "EVT_110",
+          "timestamp": "2026-08-22T01:05:00Z",
+          "channel": "call",
+          "phone": "+919711009988",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.15,
+          "intent": "otp_notification",
+          "community_id": 9
+        },
+        {
+          "event_id": "EVT_162",
+          "timestamp": "2026-08-22T20:24:00Z",
+          "channel": "call",
+          "phone": "+919711009988",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.14,
+          "intent": "regular_payment",
+          "community_id": 9
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_10",
+      "community_id": 10,
+      "threat_level": "MEDIUM",
+      "primary_intent": "regular_payment",
+      "avg_risk_score": 0.15,
+      "max_risk_score": 0.16,
+      "cumulative_risk": 0.3,
+      "total_events": 2,
+      "channels_involved": [
+        "URL"
+      ],
+      "shared_identifiers": {
+        "phones": [],
+        "senders": [],
+        "domains": [
+          "hdfcbank.com"
+        ],
+        "apps": [
+          "Chrome"
+        ]
+      },
+      "event_ids": [
+        "EVT_158",
+        "EVT_170"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_158",
+          "timestamp": "2026-08-22T19:27:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "hdfcbank.com",
+          "app": "Chrome",
+          "risk_score": 0.16,
+          "intent": "personal_call",
+          "community_id": 10
+        },
+        {
+          "event_id": "EVT_170",
+          "timestamp": "2026-08-22T23:44:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "hdfcbank.com",
+          "app": "Chrome",
+          "risk_score": 0.14,
+          "intent": "regular_payment",
+          "community_id": 10
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_11",
+      "community_id": 11,
+      "threat_level": "MEDIUM",
+      "primary_intent": "personal_call",
+      "avg_risk_score": 0.06,
+      "max_risk_score": 0.06,
+      "cumulative_risk": 0.06,
+      "total_events": 1,
+      "channels_involved": [
+        "call"
+      ],
+      "shared_identifiers": {
+        "phones": [
+          "+919820054321"
+        ],
+        "senders": [],
+        "domains": [],
+        "apps": [
+          "Phone"
+        ]
+      },
+      "event_ids": [
+        "EVT_021"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_021",
+          "timestamp": "2026-08-20T17:53:00Z",
+          "channel": "call",
+          "phone": "+919820054321",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.06,
+          "intent": "personal_call",
+          "community_id": 11
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_12",
+      "community_id": 12,
+      "threat_level": "MEDIUM",
+      "primary_intent": "personal_call",
+      "avg_risk_score": 0.1,
+      "max_risk_score": 0.1,
+      "cumulative_risk": 0.1,
+      "total_events": 1,
+      "channels_involved": [
+        "call"
+      ],
+      "shared_identifiers": {
+        "phones": [
+          "+919711009988"
+        ],
+        "senders": [],
+        "domains": [],
+        "apps": [
+          "Phone"
+        ]
+      },
+      "event_ids": [
+        "EVT_022"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_022",
+          "timestamp": "2026-08-20T18:10:00Z",
+          "channel": "call",
+          "phone": "+919711009988",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.1,
+          "intent": "personal_call",
+          "community_id": 12
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_13",
+      "community_id": 13,
+      "threat_level": "MEDIUM",
+      "primary_intent": "delivery_update",
+      "avg_risk_score": 0.06,
+      "max_risk_score": 0.06,
+      "cumulative_risk": 0.06,
+      "total_events": 1,
+      "channels_involved": [
+        "SMS"
+      ],
+      "shared_identifiers": {
+        "phones": [],
+        "senders": [
+          "SWIGGY"
+        ],
+        "domains": [],
+        "apps": [
+          "Messages"
+        ]
+      },
+      "event_ids": [
+        "EVT_042"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_042",
+          "timestamp": "2026-08-21T01:03:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "SWIGGY",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.06,
+          "intent": "delivery_update",
+          "community_id": 13
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_14",
+      "community_id": 14,
+      "threat_level": "MEDIUM",
+      "primary_intent": "regular_payment",
+      "avg_risk_score": 0.03,
+      "max_risk_score": 0.03,
+      "cumulative_risk": 0.03,
+      "total_events": 1,
+      "channels_involved": [
+        "URL"
+      ],
+      "shared_identifiers": {
+        "phones": [],
+        "senders": [],
+        "domains": [
+          "amazon.in"
+        ],
+        "apps": [
+          "Chrome"
+        ]
+      },
+      "event_ids": [
+        "EVT_043"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_043",
+          "timestamp": "2026-08-21T01:05:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "amazon.in",
+          "app": "Chrome",
+          "risk_score": 0.03,
+          "intent": "regular_payment",
+          "community_id": 14
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_15",
+      "community_id": 15,
+      "threat_level": "MEDIUM",
+      "primary_intent": "personal_call",
+      "avg_risk_score": 0.02,
+      "max_risk_score": 0.02,
+      "cumulative_risk": 0.02,
+      "total_events": 1,
+      "channels_involved": [
+        "SMS"
+      ],
+      "shared_identifiers": {
+        "phones": [],
+        "senders": [
+          "HDFCBK"
+        ],
+        "domains": [],
+        "apps": [
+          "Messages"
+        ]
+      },
+      "event_ids": [
+        "EVT_069"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_069",
+          "timestamp": "2026-08-21T09:46:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "HDFCBK",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.02,
+          "intent": "personal_call",
+          "community_id": 15
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_16",
+      "community_id": 16,
+      "threat_level": "MEDIUM",
+      "primary_intent": "benign_social",
+      "avg_risk_score": 0.06,
+      "max_risk_score": 0.06,
+      "cumulative_risk": 0.06,
+      "total_events": 1,
+      "channels_involved": [
+        "URL"
+      ],
+      "shared_identifiers": {
+        "phones": [],
+        "senders": [],
+        "domains": [
+          "irctc.co.in"
+        ],
+        "apps": [
+          "Chrome"
+        ]
+      },
+      "event_ids": [
+        "EVT_075"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_075",
+          "timestamp": "2026-08-21T11:11:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "irctc.co.in",
+          "app": "Chrome",
+          "risk_score": 0.06,
+          "intent": "benign_social",
+          "community_id": 16
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_17",
+      "community_id": 17,
+      "threat_level": "MEDIUM",
+      "primary_intent": "benign_social",
+      "avg_risk_score": 0.08,
+      "max_risk_score": 0.08,
+      "cumulative_risk": 0.08,
+      "total_events": 1,
+      "channels_involved": [
+        "URL"
+      ],
+      "shared_identifiers": {
+        "phones": [],
+        "senders": [],
+        "domains": [
+          "amazon.in"
+        ],
+        "apps": [
+          "Chrome"
+        ]
+      },
+      "event_ids": [
+        "EVT_112"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_112",
+          "timestamp": "2026-08-22T01:54:00Z",
+          "channel": "URL",
+          "phone": "",
+          "sender": "",
+          "domain": "amazon.in",
+          "app": "Chrome",
+          "risk_score": 0.08,
+          "intent": "benign_social",
+          "community_id": 17
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_18",
+      "community_id": 18,
+      "threat_level": "MEDIUM",
+      "primary_intent": "otp_notification",
+      "avg_risk_score": 0.13,
+      "max_risk_score": 0.13,
+      "cumulative_risk": 0.13,
+      "total_events": 1,
+      "channels_involved": [
+        "SMS"
+      ],
+      "shared_identifiers": {
+        "phones": [],
+        "senders": [
+          "AMAZON"
+        ],
+        "domains": [],
+        "apps": [
+          "Messages"
+        ]
+      },
+      "event_ids": [
+        "EVT_135"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_135",
+          "timestamp": "2026-08-22T11:09:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "AMAZON",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.13,
+          "intent": "otp_notification",
+          "community_id": 18
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_19",
+      "community_id": 19,
+      "threat_level": "MEDIUM",
+      "primary_intent": "benign_social",
+      "avg_risk_score": 0.06,
+      "max_risk_score": 0.06,
+      "cumulative_risk": 0.06,
+      "total_events": 1,
+      "channels_involved": [
+        "SMS"
+      ],
+      "shared_identifiers": {
+        "phones": [],
+        "senders": [
+          "SWIGGY"
+        ],
+        "domains": [],
+        "apps": [
+          "Messages"
+        ]
+      },
+      "event_ids": [
+        "EVT_176"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_176",
+          "timestamp": "2026-08-23T01:52:00Z",
+          "channel": "SMS",
+          "phone": "",
+          "sender": "SWIGGY",
+          "domain": "",
+          "app": "Messages",
+          "risk_score": 0.06,
+          "intent": "benign_social",
+          "community_id": 19
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    },
+    {
+      "campaign_id": "CAMPAIGN_LEIDEN_20",
+      "community_id": 20,
+      "threat_level": "MEDIUM",
+      "primary_intent": "personal_call",
+      "avg_risk_score": 0.13,
+      "max_risk_score": 0.13,
+      "cumulative_risk": 0.13,
+      "total_events": 1,
+      "channels_involved": [
+        "call"
+      ],
+      "shared_identifiers": {
+        "phones": [
+          "+919820054321"
+        ],
+        "senders": [],
+        "domains": [],
+        "apps": [
+          "Phone"
+        ]
+      },
+      "event_ids": [
+        "EVT_185"
+      ],
+      "timeline": [
+        {
+          "event_id": "EVT_185",
+          "timestamp": "2026-08-23T05:18:00Z",
+          "channel": "call",
+          "phone": "+919820054321",
+          "sender": "",
+          "domain": "",
+          "app": "Phone",
+          "risk_score": 0.13,
+          "intent": "personal_call",
+          "community_id": 20
+        }
+      ],
+      "classification": "BENIGN_OR_NOISE"
+    }
+  ]
+}
