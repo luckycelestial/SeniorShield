@@ -1,34 +1,57 @@
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { PhoneCall, SlidersHorizontal } from 'lucide-react-native';
+import React, { useState } from 'react';
+import {
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
+import { PhoneCall, Globe, ChevronDown, Check } from 'lucide-react-native';
 import { ThreatLevel } from '../types/scam';
+import { SUPPORTED_LANGUAGES, LanguageOption, TRANSLATIONS } from '../constants/languages';
 
 interface HeaderProps {
   threatLevel: ThreatLevel;
+  selectedLanguage: string;
+  onSelectLanguage: (langCode: string) => void;
   onCallHelpline: () => void;
-  onOpenSettings: () => void;
   onOpenOnboarding?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   threatLevel,
+  selectedLanguage,
+  onSelectLanguage,
   onCallHelpline,
-  onOpenSettings,
   onOpenOnboarding,
 }) => {
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+
+  const currentLang =
+    SUPPORTED_LANGUAGES.find((l) => l.code === selectedLanguage) ||
+    SUPPORTED_LANGUAGES[0];
+
+  const t = TRANSLATIONS[selectedLanguage] || TRANSLATIONS.en;
+
+  const handleLanguageSelect = (lang: LanguageOption) => {
+    onSelectLanguage(lang.code);
+    setIsDropdownVisible(false);
+  };
+
   return (
     <View style={styles.container}>
       {/* Top Brand Bar */}
       <View style={styles.topRow}>
         <View style={styles.brandGroup}>
           <View style={styles.titleBadgeRow}>
-            <Text style={styles.appTitle}>SeniorShield</Text>
+            <Text style={styles.appTitle}>{t.appTitle || 'SeniorShield'}</Text>
             {/* Solid AI 3.5 Badge */}
             <View style={styles.aiBadge}>
               <Text style={styles.aiBadgeText}>AI 3.5</Text>
             </View>
           </View>
-          <Text style={styles.appSubtitle}>Autonomous Scam Defense</Text>
+          <Text style={styles.appSubtitle}>{t.appSubtitle || 'Autonomous Scam Defense'}</Text>
         </View>
 
         <View style={styles.headerRightActions}>
@@ -42,15 +65,16 @@ export const Header: React.FC<HeaderProps> = ({
             </TouchableOpacity>
           )}
 
-          {/* Settings Pill */}
+          {/* Language Dropdown Selector Button */}
           <TouchableOpacity
-            style={styles.settingsButton}
-            onPress={onOpenSettings}
+            style={styles.languageButton}
+            onPress={() => setIsDropdownVisible(true)}
             activeOpacity={0.8}
-            accessibilityLabel="Setup & Guardian Config"
+            accessibilityLabel="Select Language"
           >
-            <SlidersHorizontal size={15} color="#1F1F1F" />
-            <Text style={styles.settingsText}>Setup</Text>
+            <Globe size={14} color="#0284C7" />
+            <Text style={styles.languageButtonText}>{currentLang.nativeName}</Text>
+            <ChevronDown size={14} color="#1F1F1F" />
           </TouchableOpacity>
         </View>
       </View>
@@ -64,10 +88,55 @@ export const Header: React.FC<HeaderProps> = ({
         accessibilityLabel="Call Cyber Crime Helpline 1930"
       >
         <PhoneCall size={18} color="#FFFFFF" />
-        <Text style={styles.helplineText}>
-          Emergency Cyber Helpline (1930)
-        </Text>
+        <Text style={styles.helplineText}>{t.helpline || 'Emergency Cyber Helpline (1930)'}</Text>
       </TouchableOpacity>
+
+      {/* Language Selection Modal Dropdown */}
+      <Modal
+        visible={isDropdownVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setIsDropdownVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setIsDropdownVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.dropdownMenu}>
+                <View style={styles.dropdownHeader}>
+                  <Globe size={16} color="#0284C7" />
+                  <Text style={styles.dropdownHeaderText}>Select Senior Language</Text>
+                </View>
+
+                {SUPPORTED_LANGUAGES.map((lang) => {
+                  const isSelected = lang.code === selectedLanguage;
+                  return (
+                    <TouchableOpacity
+                      key={lang.code}
+                      style={[
+                        styles.langItem,
+                        isSelected && styles.langItemSelected,
+                      ]}
+                      onPress={() => handleLanguageSelect(lang)}
+                      activeOpacity={0.8}
+                    >
+                      <View style={styles.langItemLeft}>
+                        <Text style={styles.flagIcon}>{lang.flag}</Text>
+                        <View>
+                          <Text style={[styles.langNativeName, isSelected && styles.langSelectedText]}>
+                            {lang.nativeName}
+                          </Text>
+                          <Text style={styles.langEnglishName}>{lang.name}</Text>
+                        </View>
+                      </View>
+                      {isSelected && <Check size={18} color="#0284C7" />}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 };
@@ -89,6 +158,7 @@ const styles = StyleSheet.create({
   },
   brandGroup: {
     justifyContent: 'center',
+    flex: 1,
   },
   titleBadgeRow: {
     flexDirection: 'row',
@@ -103,7 +173,7 @@ const styles = StyleSheet.create({
   },
   aiBadge: {
     backgroundColor: '#1F1F1F',
-    paddingHorizontal: 9,
+    paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 9999,
   },
@@ -125,26 +195,26 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   onboardingHeaderButton: {
-    backgroundColor: '#F0F9FF',
+    backgroundColor: '#F0FDF4',
     borderWidth: 1,
-    borderColor: '#BAE6FD',
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    borderColor: '#BBF7D0',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: 9999,
   },
   onboardingHeaderText: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#0284C7',
+    color: '#15803D',
   },
-  settingsButton: {
+  languageButton: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E6E6E6',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     paddingVertical: 7,
     borderRadius: 9999,
     shadowColor: '#000',
@@ -153,9 +223,9 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 1,
   },
-  settingsText: {
-    fontSize: 12,
-    fontWeight: '700',
+  languageButtonText: {
+    fontSize: 13,
+    fontWeight: '800',
     color: '#1F1F1F',
   },
   helplineButton: {
@@ -177,5 +247,72 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '800',
     letterSpacing: 0.3,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  dropdownMenu: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+    width: '100%',
+    maxWidth: 340,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    elevation: 10,
+  },
+  dropdownHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+    marginBottom: 8,
+  },
+  dropdownHeaderText: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: '#1F1F1F',
+  },
+  langItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    marginVertical: 2,
+  },
+  langItemSelected: {
+    backgroundColor: '#F0F9FF',
+  },
+  langItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  flagIcon: {
+    fontSize: 18,
+  },
+  langNativeName: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#1F1F1F',
+  },
+  langEnglishName: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#8E8E93',
+    marginTop: 1,
+  },
+  langSelectedText: {
+    color: '#0284C7',
   },
 });

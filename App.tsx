@@ -50,6 +50,7 @@ import {
 import { autonomousSmsWatcher } from './src/services/autonomousSmsWatcher';
 import { preCallSentinel, PreCallReputation } from './src/services/preCallSentinel';
 import { MOCK_SCAM_SCENARIOS } from './src/constants/mockScams';
+import { TRANSLATIONS } from './src/constants/languages';
 
 export default function App() {
   // Onboarding Navigation State
@@ -63,6 +64,7 @@ export default function App() {
     null
   );
   const [preCallAlert, setPreCallAlert] = useState<PreCallReputation | null>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
 
   // Settings & Configuration
   const [guardianPhone, setGuardianPhone] = useState<string>('+919876543210');
@@ -223,6 +225,8 @@ export default function App() {
     ? '#F59E0B'
     : '#10B981';
 
+  const t = TRANSLATIONS[selectedLanguage] || TRANSLATIONS.en;
+
   return (
     <SafeAreaProvider>
       {!isOnboardingCompleted ? (
@@ -232,11 +236,12 @@ export default function App() {
           <SafeAreaView style={styles.safeArea}>
             <StatusBar barStyle="dark-content" backgroundColor="#FCFCFC" />
 
-            {/* Header */}
+            {/* Header with Language Dropdown & Guide */}
             <Header
               threatLevel={currentThreatLevel}
+              selectedLanguage={selectedLanguage}
+              onSelectLanguage={setSelectedLanguage}
               onCallHelpline={handleCallHelpline}
-              onOpenSettings={() => setIsSettingsVisible(true)}
               onOpenOnboarding={() => setIsOnboardingCompleted(false)}
             />
 
@@ -262,7 +267,7 @@ export default function App() {
                     <View style={styles.gaugeIconBox}>
                       <Activity size={18} color="#0284C7" />
                     </View>
-                    <Text style={styles.gaugeTitle}>CUMULATIVE RISK EXPOSURE</Text>
+                    <Text style={styles.gaugeTitle}>{t.riskExposure || 'CUMULATIVE RISK EXPOSURE'}</Text>
                   </View>
                   <Text style={[styles.gaugeScoreText, { color: scoreTextColor }]}>
                     {riskScore} <Text style={styles.gaugeScoreDenom}>/ 100</Text>
@@ -284,56 +289,57 @@ export default function App() {
               </View>
 
               {/* Dynamic Threat Report Card */}
-              <ThreatCard
-                report={campaignState.latestReport}
-                guardianPhone={guardianPhone}
-                onBlockNumber={() => {
-                  Alert.alert(
-                    'Threat Mitigated',
-                    'Number blocked and cyber telemetry logged.'
-                  );
-                }}
-              />
+            <ThreatCard
+              report={campaignState.latestReport}
+              guardianPhone={guardianPhone}
+              selectedLanguage={selectedLanguage}
+              onBlockNumber={() => {
+                Alert.alert(
+                  'Threat Mitigated',
+                  'Number blocked and cyber telemetry logged.'
+                );
+              }}
+            />
 
-              {/* Multi-Step Attack Chain Timeline */}
-              <CampaignTimeline
-                events={campaignState.events}
-                stage={campaignState.campaignStage}
-              />
+            {/* Multi-Step Attack Chain Timeline */}
+            <CampaignTimeline
+              events={campaignState.events}
+              stage={campaignState.campaignStage}
+            />
 
-              {/* Senior Golden Safety Rules */}
-              <View style={styles.goldenRulesCard}>
-                <View style={styles.goldenRulesHeader}>
-                  <Lightbulb size={18} color="#D97706" />
-                  <Text style={styles.goldenRulesTitle}>
-                    Golden Safety Rules for Seniors
+            {/* Senior Golden Safety Rules */}
+            <View style={styles.goldenRulesCard}>
+              <View style={styles.goldenRulesHeader}>
+                <Lightbulb size={18} color="#D97706" />
+                <Text style={styles.goldenRulesTitle}>
+                  {t.goldenRules || 'Golden Safety Rules for Seniors'}
+                </Text>
+              </View>
+
+              <View style={styles.rulesList}>
+                <View style={styles.ruleItem}>
+                  <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
+                  <Text style={styles.ruleText}>
+                    {t.ruleEb || 'Electricity Boards never cut off power at night without paper notices.'}
                   </Text>
                 </View>
 
-                <View style={styles.rulesList}>
-                  <View style={styles.ruleItem}>
-                    <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
-                    <Text style={styles.ruleText}>
-                      <Text style={styles.ruleHighlight}>Electricity Boards</Text> never cut off power at night without paper notices.
-                    </Text>
-                  </View>
+                <View style={styles.ruleItem}>
+                  <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
+                  <Text style={styles.ruleText}>
+                    {t.rulePolice || 'Police & CBI never arrest citizens over phone or Skype/WhatsApp video calls.'}
+                  </Text>
+                </View>
 
-                  <View style={styles.ruleItem}>
-                    <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
-                    <Text style={styles.ruleText}>
-                      <Text style={styles.ruleHighlight}>Police & CBI</Text> never arrest citizens over phone or Skype/WhatsApp video calls.
-                    </Text>
-                  </View>
-
-                  <View style={styles.ruleItem}>
-                    <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
-                    <Text style={styles.ruleText}>
-                      <Text style={styles.ruleHighlight}>Banks</Text> never send apps (.apk links) or ask for OTPs to update KYC.
-                    </Text>
-                  </View>
+                <View style={styles.ruleItem}>
+                  <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
+                  <Text style={styles.ruleText}>
+                    {t.ruleBank || 'Banks never send apps (.apk links) or ask for OTPs to update KYC.'}
+                  </Text>
                 </View>
               </View>
-            </ScrollView>
+            </View>
+          </ScrollView>
 
             {/* Demo Simulation Drawer */}
             <SimulationDrawer
