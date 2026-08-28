@@ -1,0 +1,45 @@
+{
+  "benchmark_metadata": {
+    "dataset": "test_set.csv",
+    "total_samples": 16,
+    "class_distribution": {
+      "SAFE": 8,
+      "SCAM": 8
+    },
+    "hardware": {
+      "platform": "Windows-11-10.0.26200-SP0",
+      "processor": "AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD",
+      "python": "3.13.3",
+      "device": "cpu"
+    }
+  },
+  "model": {
+    "name": "distilbert",
+    "version": "C:\\Users\\Asus\\Desktop\\HackFusion\\SeniorShield\\backend\\models\\distilbert-scam-v1",
+    "status": "fine-tuned on SeniorShield-SMS-v1"
+  },
+  "model_quality": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "false_positive_rate": 0.0,
+    "pr_auc": 1.0,
+    "confusion_matrix": {
+      "TN": 8,
+      "FP": 0,
+      "FN": 0,
+      "TP": 8
+    }
+  },
+  "latency": {
+    "cold_start_ms": 41.32,
+    "dataset_mean_inference_ms": 58.23,
+    "dataset_p50_ms": 57.14,
+    "dataset_p95_ms": 65.68,
+    "warm_runs": 100,
+    "warm_mean_ms": 58.1,
+    "warm_p50_ms": 58.41,
+    "warm_p95_ms": 61.31
+  }
+}

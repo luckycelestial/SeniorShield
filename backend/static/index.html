@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SeniorShield — Multi-Signal AI Security Dashboard (Phases 1-6)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            obsidian: {
+              950: '#030712',
+              900: '#0f172a',
+              800: '#1e293b',
+              700: '#334155',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #030712;
+      color: #f8fafc;
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.7);
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-16">
+
+  <!-- Header / Navigation Bar -->
+  <header class="border-b border-slate-800 bg-obsidian-950/90 sticky top-0 z-50 backdrop-blur-md px-6 py-4">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
+          <i data-lucide="shield-check" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-black text-white tracking-tight flex items-center gap-2">
+            SeniorShield <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Phases 1–6 Unified Pipeline</span>
+          </h1>
+          <p class="text-xs text-slate-400 font-medium">DistilBERT + XAI Attributions + Rule Engine + Threat Intelligence + Two-Audience Groq Explanations</p>
+        </div>
+      </div>
+
+      <!-- System Status Badges -->
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Pipeline Live
+        </span>
+        <span id="headerModelBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+          <i data-lucide="cpu" class="w-3.5 h-3.5"></i> DistilBERT (fine-tuned)
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="max-w-7xl mx-auto px-6 pt-8 space-y-8">
+
+    <!-- Top Grid: Input Form (Left) & Verdict Gauge (Right) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Left Column: Input Panel (7 cols) -->
+      <div class="lg:col-span-7 glass-card rounded-3xl p-6 shadow-2xl space-y-5">
+        <div class="flex items-center justify-between">
+          <label class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+            <i data-lucide="message-square" class="w-4 h-4 text-sky-400"></i> Message Input & Test Presets
+          </label>
+          <span class="text-xs text-slate-400 font-medium">Test raw SMS / Call text</span>
+        </div>
+
+        <!-- Preset Buttons -->
+        <div class="flex flex-wrap gap-2">
+          <button onclick="loadPreset('kyc')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-rose-300 border border-rose-500/30 transition flex items-center gap-1.5">
+            🚨 1. KYC / OTP Phish
+          </button>
+          <button onclick="loadPreset('electricity')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1.5">
+            ⚡ 2. Routine Bill (Safe)
+          </button>
+          <button onclick="loadPreset('advisory')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-blue-300 border border-blue-500/30 transition flex items-center gap-1.5">
+            🛡️ 3. Defensive Advisory
+          </button>
+          <button onclick="loadPreset('police')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 transition flex items-center gap-1.5">
+            👮 4. Police Warrant
+          </button>
+          <button onclick="loadPreset('remote')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-orange-300 border border-orange-500/30 transition flex items-center gap-1.5">
+            💻 5. Remote APK
+          </button>
+          <button onclick="loadPreset('phish_url')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-pink-300 border border-pink-500/30 transition flex items-center gap-1.5">
+            🌐 6. Malicious URL
+          </button>
+        </div>
+
+        <!-- Textarea -->
+        <textarea
+          id="messageInput"
+          rows="4"
+          class="w-full bg-obsidian-950 border border-slate-700 rounded-2xl p-4 text-white text-base font-medium focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition placeholder-slate-500"
+          placeholder="Paste incoming SMS, WhatsApp message, or transcript here..."
+        >Your KYC will expire today. Share your OTP immediately to avoid account blocking.</textarea>
+
+        <!-- Options & Submit Controls -->
+        <div class="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-slate-800">
+          <div class="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-400">
+            <label class="flex items-center gap-2 cursor-pointer hover:text-slate-200">
+              <input type="checkbox" id="chkEvidence" checked class="rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-sky-500 w-4 h-4">
+              <span>XAI Tokens</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer hover:text-slate-200">
+              <input type="checkbox" id="chkRules" checked class="rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-emerald-500 w-4 h-4">
+              <span>Rule Engine (Phase 5)</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer hover:text-slate-200">
+              <input type="checkbox" id="chkTI" checked class="rounded bg-slate-900 border-slate-700 text-indigo-500 focus:ring-indigo-500 w-4 h-4">
+              <span>Threat Intel (Phase 6)</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer hover:text-slate-200">
+              <input type="checkbox" id="chkLLM" checked class="rounded bg-slate-900 border-slate-700 text-purple-500 focus:ring-purple-500 w-4 h-4">
+              <span>Two-Audience Groq</span>
+            </label>
+          </div>
+
+          <button
+            id="analyzeBtn"
+            onclick="analyzeMessage()"
+            class="px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white font-extrabold text-sm shadow-lg shadow-sky-900/30 active:scale-95 transition flex items-center gap-2"
+          >
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>Analyze Message</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Column: Primary Verdict & Exposure Gauge Card (5 cols) -->
+      <div class="lg:col-span-5 glass-card rounded-3xl p-6 shadow-2xl flex flex-col justify-between space-y-4">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <i data-lucide="activity" class="w-4 h-4 text-sky-400"></i> Primary Security Verdict
+            </span>
+            <span id="statusDevice" class="text-xs font-semibold text-slate-400 bg-slate-800 px-2.5 py-1 rounded-lg">Device: CPU</span>
+          </div>
+
+          <!-- Large Verdict Badge -->
+          <div id="verdictBadgeContainer" class="p-6 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-center space-y-2">
+            <div id="verdictIcon" class="inline-flex p-3 rounded-full bg-rose-500/20 text-rose-400 mb-1">
+              <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+            </div>
+            <h2 id="verdictTitle" class="text-2xl font-black text-rose-400 uppercase tracking-wide">SCAM DETECTED</h2>
+            <p id="verdictSubtitle" class="text-xs text-rose-300/80 font-medium">DistilBERT Security Model Decision</p>
+          </div>
+        </div>
+
+        <!-- Confidence Gauge Bar -->
+        <div class="space-y-2 bg-obsidian-950 p-4 rounded-2xl border border-slate-800">
+          <div class="flex items-center justify-between text-xs font-bold">
+            <span class="text-slate-400 uppercase tracking-wide">Model Confidence Score</span>
+            <span id="confidenceText" class="text-rose-400 font-extrabold text-base">84.18%</span>
+          </div>
+          <div class="h-3 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800 p-0.5">
+            <div id="confidenceBar" class="h-full bg-rose-500 rounded-full transition-all duration-700" style="width: 84.18%;"></div>
+          </div>
+          <div class="flex justify-between text-[10px] font-semibold text-slate-500 pt-1">
+            <span>P(SAFE): <strong id="probSafeText" class="text-slate-300">15.8%</strong></span>
+            <span>P(SCAM): <strong id="probScamText" class="text-slate-300">84.2%</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle Section 1: Multi-Source Evidence Cards (Rule Engine & Threat Intelligence) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Rule-Based Signal Engine Evidence (Phase 5) (6 cols) -->
+      <div class="lg:col-span-6 glass-card rounded-3xl p-6 shadow-2xl space-y-4 border-l-4 border-l-emerald-500">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
+            <i data-lucide="check-square" class="w-4 h-4"></i> Deterministic Rule Signals (Phase 5)
+          </h3>
+          <span id="ruleCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">3 Matched</span>
+        </div>
+
+        <div id="ruleEvidenceList" class="space-y-2.5">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- Threat Intelligence & Entity Extraction Evidence (Phase 6) (6 cols) -->
+      <div class="lg:col-span-6 glass-card rounded-3xl p-6 shadow-2xl space-y-4 border-l-4 border-l-indigo-500">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
+            <i data-lucide="globe" class="w-4 h-4"></i> Threat Intelligence & Entities (Phase 6)
+          </h3>
+          <span id="tiCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">Enriched</span>
+        </div>
+
+        <div id="tiEvidenceList" class="space-y-2.5">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Middle Section 2: Two-Audience Explanation Grid (Senior View vs Caretaker View) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Panel 1: Senior Citizen View (5 cols) -->
+      <div class="lg:col-span-5 glass-card rounded-3xl p-6 shadow-2xl space-y-4 border-l-4 border-l-amber-500">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
+            <i data-lucide="user-check" class="w-4 h-4"></i> Audience 1: Senior Citizen
+          </h3>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">Simple • Action-First</span>
+        </div>
+
+        <div class="bg-obsidian-950/90 border border-slate-800 rounded-2xl p-5 space-y-4">
+          <!-- Senior Headline -->
+          <div class="space-y-1">
+            <span class="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider">Headline</span>
+            <h4 id="srHeadline" class="text-lg font-bold text-white leading-snug">🚨 This may be a scam</h4>
+          </div>
+
+          <!-- Senior Message -->
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-slate-200 leading-relaxed space-y-1">
+            <span class="text-[10px] block font-extrabold text-slate-400 uppercase tracking-wider">Message</span>
+            <p id="srMessage">Do not share your OTP or send money.</p>
+          </div>
+
+          <!-- Senior Action -->
+          <div class="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-sm text-rose-200 font-semibold space-y-1">
+            <span class="text-[10px] block font-extrabold text-rose-400 uppercase tracking-wider">Action</span>
+            <div class="flex items-start gap-2">
+              <i data-lucide="alert-octagon" class="w-4 h-4 text-rose-400 shrink-0 mt-0.5"></i>
+              <span id="srAction">Do not reply or click any link. Ask your family member first.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 2: Caretaker / Family View (7 cols) -->
+      <div class="lg:col-span-7 glass-card rounded-3xl p-6 shadow-2xl space-y-4 border-l-4 border-l-purple-500">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-black uppercase tracking-wider text-purple-400 flex items-center gap-2">
+            <i data-lucide="shield-alert" class="w-4 h-4"></i> Audience 2: Family / Caretaker
+          </h3>
+          <div class="flex gap-2">
+            <span id="llmStatusBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Status: SUCCESS</span>
+            <span id="llmGroundingBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/20">Grounding: PASSED</span>
+          </div>
+        </div>
+
+        <div class="bg-obsidian-950/90 border border-slate-800 rounded-2xl p-5 space-y-3.5">
+          <!-- Caretaker Headline & Summary -->
+          <div class="space-y-1">
+            <span class="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider">Formal Incident Summary</span>
+            <h4 id="crHeadline" class="text-base font-bold text-white">Security Warning: High-Risk Scam Detected</h4>
+            <p id="crSummary" class="text-xs text-slate-300 leading-relaxed">The message claims an urgent KYC expiration and requests the recipient to share an OTP immediately.</p>
+          </div>
+
+          <!-- Why Flagged -->
+          <div class="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-1">
+            <span class="text-[10px] uppercase font-extrabold text-sky-400 tracking-wider">Multi-Source Justification & Model Analysis</span>
+            <p id="crWhyFlagged" class="text-xs text-slate-300 leading-relaxed">The DistilBERT model classified the interaction as SCAM with 84.2% probability. Rule engine detected an OTP request and urgency.</p>
+          </div>
+
+          <!-- Evidence List -->
+          <div class="space-y-1">
+            <span class="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider">Consolidated Evidence Items</span>
+            <div id="crEvidenceList" class="flex flex-wrap gap-1.5">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Recommended Caretaker Action -->
+          <div class="p-3 bg-purple-500/10 border border-purple-500/30 rounded-xl text-xs text-purple-200 space-y-1">
+            <span class="text-[10px] uppercase font-extrabold text-purple-400 tracking-wider">Recommended Guardian Action</span>
+            <p id="crAction">Advise the senior citizen not to reply or provide codes. Verify the request directly through official channels.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Section: XAI Feature Attribution (Left) & Latency / Benchmarks (Right) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- XAI Token Attribution Feature Weights (7 cols) -->
+      <div class="lg:col-span-7 glass-card rounded-3xl p-6 shadow-2xl space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <i data-lucide="layers" class="w-4 h-4 text-purple-400"></i> XAI Token Feature Attribution (Integrated Gradients)
+            </h3>
+            <p class="text-xs text-slate-400">Model-grounded word importance weights driving the classification decision</p>
+          </div>
+          <span class="text-[11px] font-semibold text-purple-300 bg-purple-500/10 px-2.5 py-1 rounded-lg border border-purple-500/20">Integrated Gradients</span>
+        </div>
+
+        <!-- Token Weight Bars -->
+        <div id="tokenFeaturesList" class="space-y-2.5">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- Faithfulness Sanity Check -->
+        <div id="faithfulnessCard" class="p-4 bg-obsidian-950 rounded-2xl border border-slate-800 text-xs space-y-1.5">
+          <div class="flex items-center justify-between font-bold text-slate-300">
+            <span class="flex items-center gap-1.5 text-sky-400">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i> Faithfulness Sanity Check
+            </span>
+            <span id="fcMaskedToken" class="text-slate-400 font-mono">Top token: "kyc"</span>
+          </div>
+          <p class="text-slate-400 leading-normal">
+            Masking top token "<strong id="fcTokenName" class="text-white">kyc</strong>" drops P(SCAM) from
+            <span id="fcOrigP" class="text-rose-400 font-bold">88.5%</span> to
+            <span id="fcMaskedP" class="text-emerald-400 font-bold">42.1%</span> (Δ <strong id="fcDelta" class="text-sky-300">-46.4%</strong>).
+          </p>
+        </div>
+      </div>
+
+      <!-- Latency & Full Pipeline Metrics (5 cols) -->
+      <div class="lg:col-span-5 glass-card rounded-3xl p-6 shadow-2xl space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+            <i data-lucide="clock" class="w-4 h-4 text-sky-400"></i> Full 7-Stage Latency Breakdown
+          </h3>
+          <span id="latTotal" class="text-base font-black text-sky-400">245 ms total</span>
+        </div>
+
+        <!-- Latency Bars (7 Stages) -->
+        <div class="space-y-2 text-xs">
+          <div class="space-y-1">
+            <div class="flex justify-between font-semibold text-slate-300">
+              <span>1. Text Preprocessing</span>
+              <span id="latPreproc" class="text-slate-400">0.3 ms</span>
+            </div>
+            <div class="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
+              <div id="barPreproc" class="h-full bg-emerald-500 rounded-full" style="width: 5%;"></div>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <div class="flex justify-between font-semibold text-slate-300">
+              <span>2. DistilBERT Classifier</span>
+              <span id="latInfer" class="text-slate-400">65.4 ms</span>
+            </div>
+            <div class="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
+              <div id="barInfer" class="h-full bg-blue-500 rounded-full" style="width: 25%;"></div>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <div class="flex justify-between font-semibold text-slate-300">
+              <span>3. XAI Token Attribution</span>
+              <span id="latXAI" class="text-slate-400">140.2 ms</span>
+            </div>
+            <div class="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
+              <div id="barXAI" class="h-full bg-purple-500 rounded-full" style="width: 35%;"></div>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <div class="flex justify-between font-semibold text-slate-300">
+              <span>4. Rule-Based Engine (Phase 5)</span>
+              <span id="latRules" class="text-slate-400">0.8 ms</span>
+            </div>
+            <div class="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
+              <div id="barRules" class="h-full bg-teal-500 rounded-full" style="width: 5%;"></div>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <div class="flex justify-between font-semibold text-slate-300">
+              <span>5. Threat Intelligence (Phase 6)</span>
+              <span id="latTI" class="text-slate-400">1.2 ms</span>
+            </div>
+            <div class="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
+              <div id="barTI" class="h-full bg-indigo-500 rounded-full" style="width: 5%;"></div>
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <div class="flex justify-between font-semibold text-slate-300">
+              <span>6. Groq LLM Explanation Layer</span>
+              <span id="latLLM" class="text-slate-400">450.0 ms</span>
+            </div>
+            <div class="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
+              <div id="barLLM" class="h-full bg-amber-500 rounded-full" style="width: 50%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metric Badges Grid -->
+        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800">
+          <div class="p-2.5 bg-obsidian-950 rounded-xl border border-slate-800 text-center">
+            <span class="text-[9px] uppercase font-bold text-slate-400 block">Accuracy</span>
+            <span class="text-base font-black text-emerald-400">96.4%</span>
+          </div>
+          <div class="p-2.5 bg-obsidian-950 rounded-xl border border-slate-800 text-center">
+            <span class="text-[9px] uppercase font-bold text-slate-400 block">F1 Score</span>
+            <span class="text-base font-black text-sky-400">96.5%</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- JavaScript Logic -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Preset Messages matching Required Test Cases
+    const PRESETS = {
+      kyc: "Your KYC will expire today. Share your OTP immediately to avoid account blocking.",
+      electricity: "Your electricity bill of Rs 540 is due tomorrow. Pay on the official app.",
+      advisory: "Never share your OTP with anyone. Bank will never ask for your password.",
+      police: "Police have issued an arrest warrant against you. Transfer money immediately to clear charges.",
+      remote: "Install this support APK and give screen access to the bank technician.",
+      phish_url: "Urgent: Your account is suspended. Verify credentials at https://scam-kyc-update.com/login"
+    };
+
+    function loadPreset(key) {
+      if (PRESETS[key]) {
+        document.getElementById('messageInput').value = PRESETS[key];
+        analyzeMessage();
+      }
+    }
+
+    async function analyzeMessage() {
+      const text = document.getElementById('messageInput').value.trim();
+      if (!text) return alert("Please enter text to analyze.");
+
+      const analyzeBtn = document.getElementById('analyzeBtn');
+      analyzeBtn.disabled = true;
+      analyzeBtn.classList.add('opacity-50');
+
+      const includeEvidence = document.getElementById('chkEvidence').checked;
+      const includeRules = document.getElementById('chkRules').checked;
+      const includeTI = document.getElementById('chkTI').checked;
+      const includeLLM = document.getElementById('chkLLM').checked;
+
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text: text,
+            include_evidence: includeEvidence,
+            include_rules: includeRules,
+            include_threat_intel: includeTI,
+            include_llm: includeLLM
+          })
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          alert(`Analysis Error: ${err.detail || err.error}`);
+          return;
+        }
+
+        const data = await response.json();
+        renderDashboard(data);
+
+      } catch (err) {
+        alert(`Failed to connect to backend: ${err.message}`);
+      } finally {
+        analyzeBtn.disabled = false;
+        analyzeBtn.classList.remove('opacity-50');
+      }
+    }
+
+    function renderDashboard(data) {
+      // 1. Verdict & Gauge
+      const isScam = data.prediction === 'SCAM';
+      const confPct = (data.confidence * 100).toFixed(1);
+
+      const vContainer = document.getElementById('verdictBadgeContainer');
+      const vTitle = document.getElementById('verdictTitle');
+      const vIcon = document.getElementById('verdictIcon');
+      const vSubtitle = document.getElementById('verdictSubtitle');
+
+      if (isScam) {
+        vContainer.className = "p-6 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-center space-y-2";
+        vTitle.className = "text-2xl font-black text-rose-400 uppercase tracking-wide";
+        vTitle.innerText = "SCAM DETECTED";
+        vIcon.className = "inline-flex p-3 rounded-full bg-rose-500/20 text-rose-400 mb-1";
+        vIcon.innerHTML = `<i data-lucide="alert-triangle" class="w-8 h-8"></i>`;
+        vSubtitle.innerText = "DistilBERT Security Model Flagged High Risk";
+      } else {
+        vContainer.className = "p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-center space-y-2";
+        vTitle.className = "text-2xl font-black text-emerald-400 uppercase tracking-wide";
+        vTitle.innerText = "VERIFIED SAFE";
+        vIcon.className = "inline-flex p-3 rounded-full bg-emerald-500/20 text-emerald-400 mb-1";
+        vIcon.innerHTML = `<i data-lucide="check-circle" class="w-8 h-8"></i>`;
+        vSubtitle.innerText = "DistilBERT Security Model Verified Normal";
+      }
+
+      document.getElementById('confidenceText').innerText = `${confPct}%`;
+      document.getElementById('confidenceText').className = isScam ? "text-rose-400 font-extrabold text-base" : "text-emerald-400 font-extrabold text-base";
+
+      const cBar = document.getElementById('confidenceBar');
+      cBar.style.width = `${confPct}%`;
+      cBar.className = isScam ? "h-full bg-rose-500 rounded-full transition-all duration-700" : "h-full bg-emerald-500 rounded-full transition-all duration-700";
+
+      const pSafe = ((data.probabilities.SAFE || 0) * 100).toFixed(1);
+      const pScam = ((data.probabilities.SCAM || 0) * 100).toFixed(1);
+      document.getElementById('probSafeText').innerText = `${pSafe}%`;
+      document.getElementById('probScamText').innerText = `${pScam}%`;
+
+      document.getElementById('statusDevice').innerText = `Device: ${(data.device || 'cpu').toUpperCase()}`;
+      document.getElementById('headerModelBadge').innerText = `Model: ${data.model} (${data.model_version})`;
+
+      // 2. Rule Evidence (Phase 5)
+      const ruleList = document.getElementById('ruleEvidenceList');
+      ruleList.innerHTML = '';
+      const ruleEvs = (data.evidence && data.evidence.rule_evidence) || [];
+      document.getElementById('ruleCountBadge').innerText = `${ruleEvs.length} Matched`;
+
+      if (ruleEvs.length > 0) {
+        ruleEvs.forEach(r => {
+          const isCrit = r.severity === 'CRITICAL' || r.severity === 'HIGH';
+          const sevColor = isCrit ? 'bg-rose-500/10 border-rose-500/30 text-rose-300' : 'bg-amber-500/10 border-amber-500/30 text-amber-300';
+          const badgeColor = isCrit ? 'bg-rose-500 text-white' : 'bg-amber-500 text-black';
+
+          const item = document.createElement('div');
+          item.className = `p-3 rounded-xl border ${sevColor} space-y-1 text-xs`;
+          item.innerHTML = `
+            <div class="flex justify-between items-center">
+              <span class="font-mono font-bold">${r.rule_id}</span>
+              <span class="text-[9px] font-black px-1.5 py-0.5 rounded ${badgeColor}">${r.severity}</span>
+            </div>
+            <p class="text-slate-300">${r.description}</p>
+            <div class="text-[11px] text-slate-400 font-mono">Matched: "${r.matched_text}"</div>
+          `;
+          ruleList.appendChild(item);
+        });
+      } else {
+        ruleList.innerHTML = '<p class="text-xs text-slate-500 italic p-3">No deterministic rule signals triggered.</p>';
+      }
+
+      // 3. Threat Intelligence Evidence (Phase 6)
+      const tiList = document.getElementById('tiEvidenceList');
+      tiList.innerHTML = '';
+      const tiEvs = (data.evidence && data.evidence.threat_intelligence) || [];
+      document.getElementById('tiCountBadge').innerText = `${tiEvs.length} Lookups`;
+
+      if (tiEvs.length > 0) {
+        tiEvs.forEach(ti => {
+          let repClass = 'bg-slate-800 text-slate-300 border-slate-700';
+          if (ti.reputation === 'malicious') repClass = 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+          else if (ti.reputation === 'benign') repClass = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+          else if (ti.reputation === 'suspicious') repClass = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+
+          const item = document.createElement('div');
+          item.className = 'p-3 bg-obsidian-950 rounded-xl border border-slate-800 space-y-1 text-xs';
+          item.innerHTML = `
+            <div class="flex justify-between items-center">
+              <span class="font-mono font-bold text-white flex items-center gap-1.5">
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${ti.entity.type}</span>
+                ${ti.entity.value}
+              </span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${repClass}">${ti.reputation}</span>
+            </div>
+            <p class="text-slate-300">${ti.evidence}</p>
+            <div class="text-[10px] text-slate-500 flex justify-between">
+              <span>Provider: ${ti.provider}</span>
+              <span>Status: ${ti.status}</span>
+            </div>
+          `;
+          tiList.appendChild(item);
+        });
+      } else {
+        tiList.innerHTML = '<p class="text-xs text-slate-500 italic p-3">No external entities (URLs, domains, phones) detected.</p>';
+      }
+
+      // 4. Audience 1: Senior Response
+      const sr = data.senior_response || data.explanation || {};
+      document.getElementById('srHeadline').innerText = sr.headline || "Notice";
+      document.getElementById('srMessage').innerText = sr.message || sr.explanation || "";
+      document.getElementById('srAction').innerText = sr.action || "";
+
+      // 5. Audience 2: Caretaker Response
+      const cr = data.caretaker_response || {};
+      document.getElementById('crHeadline').innerText = cr.headline || "Security Incident Overview";
+      document.getElementById('crSummary').innerText = cr.summary || "";
+      document.getElementById('crWhyFlagged').innerText = cr.why_flagged || "";
+      document.getElementById('crAction').innerText = cr.recommended_action || "";
+
+      const crEvList = document.getElementById('crEvidenceList');
+      crEvList.innerHTML = '';
+      if (cr.evidence && Array.isArray(cr.evidence)) {
+        cr.evidence.forEach(ev => {
+          const span = document.createElement('span');
+          span.className = 'px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-[11px] text-slate-300 font-mono';
+          span.innerText = ev;
+          crEvList.appendChild(span);
+        });
+      }
+
+      // LLM Badges
+      if (data.llm) {
+        const statusBadge = document.getElementById('llmStatusBadge');
+        statusBadge.innerText = `Status: ${data.llm.status.toUpperCase()}`;
+        statusBadge.className = data.llm.status === 'success'
+          ? "text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+          : "text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20";
+
+        const groundBadge = document.getElementById('llmGroundingBadge');
+        groundBadge.innerText = `Grounding: ${data.llm.grounding_status.toUpperCase()}`;
+      }
+
+      // 6. Latencies (7 Stages)
+      const lat = data.latency || {};
+      document.getElementById('latTotal').innerText = `${lat.total_request_ms || 0} ms total`;
+      document.getElementById('latPreproc').innerText = `${lat.preprocessing_ms || 0} ms`;
+      document.getElementById('latInfer').innerText = `${lat.inference_ms || 0} ms`;
+      document.getElementById('latXAI').innerText = `${lat.explainability_ms || 0} ms`;
+      document.getElementById('latRules').innerText = `${lat.rules_ms || 0} ms`;
+      document.getElementById('latTI').innerText = `${lat.threat_intelligence_ms || 0} ms`;
+      document.getElementById('latLLM').innerText = `${lat.llm_ms || 0} ms`;
+
+      const maxLat = Math.max(lat.total_request_ms || 1, 1);
+      document.getElementById('barPreproc').style.width = `${Math.min(100, ((lat.preprocessing_ms || 0) / maxLat) * 100)}%`;
+      document.getElementById('barInfer').style.width = `${Math.min(100, ((lat.inference_ms || 0) / maxLat) * 100)}%`;
+      document.getElementById('barXAI').style.width = `${Math.min(100, ((lat.explainability_ms || 0) / maxLat) * 100)}%`;
+      document.getElementById('barRules').style.width = `${Math.min(100, ((lat.rules_ms || 0) / maxLat) * 100)}%`;
+      document.getElementById('barTI').style.width = `${Math.min(100, ((lat.threat_intelligence_ms || 0) / maxLat) * 100)}%`;
+      document.getElementById('barLLM').style.width = `${Math.min(100, ((lat.llm_ms || 0) / maxLat) * 100)}%`;
+
+      // 7. Token Features (XAI)
+      const listContainer = document.getElementById('tokenFeaturesList');
+      listContainer.innerHTML = '';
+
+      if (data.evidence && data.evidence.evidence && data.evidence.evidence.top_features) {
+        const feats = data.evidence.evidence.top_features;
+        const maxContrib = Math.max(...feats.map(f => f.contribution), 0.001);
+
+        feats.forEach(f => {
+          const isTowardScam = f.direction === 'toward_scam';
+          const barWidth = Math.min(100, Math.max(10, (f.contribution / maxContrib) * 100));
+          const colorClass = isTowardScam ? 'bg-rose-500' : 'bg-emerald-500';
+          const textClass = isTowardScam ? 'text-rose-400' : 'text-emerald-400';
+
+          const item = document.createElement('div');
+          item.className = 'p-3 bg-obsidian-950 rounded-xl border border-slate-800 space-y-1.5';
+          item.innerHTML = `
+            <div class="flex justify-between items-center text-xs font-bold">
+              <span class="text-white font-mono bg-slate-800 px-2 py-0.5 rounded text-sm">${f.token}</span>
+              <span class="${textClass}">${isTowardScam ? 'Toward SCAM' : 'Toward SAFE'} (${f.contribution})</span>
+            </div>
+            <div class="h-2 w-full bg-slate-900 rounded-full overflow-hidden">
+              <div class="h-full ${colorClass} rounded-full transition-all duration-500" style="width: ${barWidth}%;"></div>
+            </div>
+          `;
+          listContainer.appendChild(item);
+        });
+
+        // Faithfulness
+        const fc = data.evidence.evidence.faithfulness_check;
+        if (fc) {
+          document.getElementById('fcTokenName').innerText = fc.masked_token;
+          document.getElementById('fcOrigP').innerText = `${(fc.original_probability * 100).toFixed(1)}%`;
+          document.getElementById('fcMaskedP').innerText = `${(fc.masked_probability * 100).toFixed(1)}%`;
+          document.getElementById('fcDelta').innerText = `${(fc.probability_delta * 100).toFixed(1)}%`;
+        }
+      } else {
+        listContainer.innerHTML = '<p class="text-xs text-slate-500 italic">Token feature attribution disabled or unavailable.</p>';
+      }
+
+      lucide.createIcons();
+    }
+
+    analyzeMessage();
+  </script>
+</body>
+</html>

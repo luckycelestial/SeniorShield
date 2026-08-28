@@ -43,3 +43,26 @@ yarn-error.log*
 .DS_Store
 *.pem
 Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+venv/
+.venv/
+env/
+backend/.env
+backend/.env.local
+
+# ML Models & Heavy Weights (>100MB)
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.onnx
+backend/models/**/*.safetensors
+backend/models/**/*.bin
+
