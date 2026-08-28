@@ -39,6 +39,27 @@ class PreCallModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                     .emit("onIncomingCall", params)
             }
         }
+
+        fun sendCallAudioChunkEvent(
+            base64Wav: String,
+            chunkIndex: Int,
+            durationSeconds: Int,
+            phoneNumber: String
+        ) {
+            val reactContext = instance?.reactApplicationContext ?: return
+            if (reactContext.hasActiveReactInstance()) {
+                val params = Arguments.createMap().apply {
+                    putString("base64Wav", base64Wav)
+                    putInt("chunkIndex", chunkIndex)
+                    putInt("durationSeconds", durationSeconds)
+                    putString("phoneNumber", phoneNumber)
+                    putDouble("timestamp", System.currentTimeMillis().toDouble())
+                }
+                reactContext
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                    .emit("onCallAudioChunk", params)
+            }
+        }
     }
 }
 

@@ -49,6 +49,7 @@ import {
 } from './src/services/notificationReader';
 import { autonomousSmsWatcher } from './src/services/autonomousSmsWatcher';
 import { preCallSentinel, PreCallReputation } from './src/services/preCallSentinel';
+import { callSttService, ChunkSttAnalysis } from './src/services/callSttService';
 import { MOCK_SCAM_SCENARIOS } from './src/constants/mockScams';
 import { TRANSLATIONS } from './src/constants/languages';
 
@@ -64,7 +65,7 @@ export default function App() {
     null
   );
   const [preCallAlert, setPreCallAlert] = useState<PreCallReputation | null>(null);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>('ta');
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
 
   // Settings & Configuration
   const [guardianPhone, setGuardianPhone] = useState<string>('+919876543210');
@@ -79,18 +80,63 @@ export default function App() {
     }
   };
 
-  // Initial Auto-Analysis, Notification Reader, and Autonomous SMS Inbox Watcher
+  // Initial Auto-Analysis, Notification Reader, Autonomous SMS Inbox Watcher & 10s Call Chunker STT
   useEffect(() => {
     runInitialBaseline();
     initializeNotificationReader();
     startAutonomousSmsMonitoring();
     startPreCallMonitoring();
+    startCallSttMonitoring();
 
     return () => {
       autonomousSmsWatcher.stopWatching();
       preCallSentinel.stopPreCallMonitoring();
+      callSttService.stopListening();
     };
   }, []);
+
+  const startCallSttMonitoring = () => {
+    callSttService.startListening((analysis: ChunkSttAnalysis) => {
+      handleInCallAudioChunkAnalysis(analysis);
+    });
+  };
+
+  const handleInCallAudioChunkAnalysis = (analysis: ChunkSttAnalysis) => {
+    console.log(`🎙️ [App] Processing STT Chunk #${analysis.chunkIndex}:`, analysis.transcript);
+
+    const chunkEvent: DeviceEvent = {
+      id: `call_chunk_${analysis.chunkIndex}_${Date.now()}`,
+      type: 'CALL',
+      senderOrNumber: analysis.phoneNumber,
+      timestamp: Date.now(),
+      contentOrDuration: `[10s Audio Chunk #${analysis.chunkIndex}]: "${analysis.transcript}" (Intent: ${analysis.speakerIntent})`,
+      rawPayload: {
+        markers: analysis.scamMarkers,
+        score: analysis.confidenceScore,
+      },
+    };
+
+    if (analysis.isScamThreat) {
+      const liveReport: ScamReport = {
+        is_scam: true,
+        threat_level: analysis.threatLevel,
+        scam_type: analysis.impersonatedEntity ? `${analysis.impersonatedEntity} Impersonation Call` : 'Suspicious Stranger Call',
+        confidence_score: analysis.confidenceScore,
+        senior_explanation: `${analysis.impersonatedEntity || 'Unknown Caller'}: "${analysis.transcript}"`,
+        action_required: analysis.seniorActionDirective,
+        assets_at_risk: ['Bank Account Balance', 'Personal Privacy', 'Device Screen & Remote Access'],
+        impersonated_entity: analysis.impersonatedEntity || 'Unknown Stranger',
+        threat_indicators: analysis.scamMarkers,
+      };
+
+      setCampaignState((prev) => updateCampaignState(prev, [chunkEvent], liveReport));
+    } else {
+      setCampaignState((prev) => ({
+        ...prev,
+        events: [chunkEvent, ...prev.events],
+      }));
+    }
+  };
 
   const startPreCallMonitoring = async () => {
     await preCallSentinel.startPreCallMonitoring((alert: PreCallReputation) => {
