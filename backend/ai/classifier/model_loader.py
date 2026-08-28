@@ -1,8 +1,8 @@
-﻿"""
+"""
 ai/classifier/model_loader.py
 ==============================
 Singleton model loader for FastAPI startup.
-Loads fine-tuned DistilBERT model if available, else base checkpoint.
+Loads fine-tuned bert-tiny model (16MB, ~40MB RAM) or DistilBERT if configured.
 """
 
 import os
@@ -23,15 +23,18 @@ def load_classifier() -> BaseClassifier:
         return _classifier
 
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    fine_tuned_path = os.path.join(base_dir, "models", "distilbert-scam-v1")
+    bert_tiny_path = os.path.join(base_dir, "models", "bert-tiny-scam-v1")
+    distilbert_path = os.path.join(base_dir, "models", "distilbert-scam-v1")
 
-    if os.path.exists(fine_tuned_path):
-        default_path = fine_tuned_path
+    if os.path.exists(bert_tiny_path):
+        default_path = bert_tiny_path
+    elif os.path.exists(distilbert_path):
+        default_path = distilbert_path
     else:
-        default_path = "distilbert-base-uncased"
+        default_path = "prajjwal1/bert-tiny"
 
     model_path = os.environ.get("MODEL_PATH", default_path)
-    device = os.environ.get("MODEL_DEVICE", None)   # None = auto
+    device = os.environ.get("MODEL_DEVICE", None)
 
     _classifier = DistilBertClassifier(model_path=model_path, device=device)
     return _classifier
