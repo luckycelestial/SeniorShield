@@ -24,7 +24,14 @@ CRITICAL CONSTRAINTS:
 import os
 import json
 import time
-import requests
+import urllib.request
+import urllib.error
+
+try:
+    import requests
+except ImportError:
+    requests = None
+
 from typing import Dict, Any, Tuple, Optional, List, Union
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
@@ -252,29 +259,44 @@ class GroqService:
 
         # 3. API Call to Groq
         try:
-            response = requests.post(
-                "https://api.groq.com/openai/v1/chat/completions",
-                headers=headers,
-                json=payload,
-                timeout=timeout
-            )
-            elapsed_ms = (time.perf_counter() - llm_start) * 1000.0
-
-            if response.status_code != 200:
-                print(f"[GroqService] Groq API returned HTTP {response.status_code}: {response.text[:200]}")
-                return (
-                    fallback_output,
-                    LLMStatus(
-                        status="api_error",
-                        model=model_name,
-                        grounding_status="failed",
-                        error_message=f"Groq API returned HTTP {response.status_code}"
-                    ),
-                    round(elapsed_ms, 3)
+            if requests is not None:
+                response = requests.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers=headers,
+                    json=payload,
+                    timeout=timeout
                 )
+                elapsed_ms = (time.perf_counter() - llm_start) * 1000.0
 
-            res_json = response.json()
-            raw_content = res_json["choices"][0]["message"]["content"]
+                if response.status_code != 200:
+                    print(f"[GroqService] Groq API returned HTTP {response.status_code}: {response.text[:200]}")
+                    return (
+                        fallback_output,
+                        LLMStatus(
+                            status="api_error",
+                            model=model_name,
+                            grounding_status="failed",
+                            error_message=f"Groq API returned HTTP {response.status_code}"
+                        ),
+                        round(elapsed_ms, 3)
+                    )
+
+                res_json = response.json()
+                raw_content = res_json["choices"][0]["message"]["content"]
+            else:
+                # Built-in urllib fallback (requires zero external packages)
+                req_data = json.dumps(payload).encode("utf-8")
+                req_obj = urllib.request.Request(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    data=req_data,
+                    headers=headers,
+                    method="POST"
+                )
+                with urllib.request.urlopen(req_obj, timeout=timeout) as resp:
+                    elapsed_ms = (time.perf_counter() - llm_start) * 1000.0
+                    resp_body = resp.read().decode("utf-8")
+                    res_json = json.loads(resp_body)
+                    raw_content = res_json["choices"][0]["message"]["content"]
 
             # Parse JSON output into ExplanationResponse schema
             parsed_data = json.loads(raw_content)
