@@ -4,7 +4,6 @@
     "strict": true
   },
   "exclude": [
-    "SeniorShield-onboarding",
     "node_modules"
   ]
 }
