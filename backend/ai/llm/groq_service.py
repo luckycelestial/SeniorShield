@@ -142,7 +142,7 @@ class GroqService:
         api_key = os.environ.get("GROQ_API_KEY", "").strip()
         model_name = os.environ.get("GROQ_MODEL", "groq/compound-mini").strip()
         try:
-            timeout = float(os.environ.get("GROQ_TIMEOUT_SECONDS", "10.0"))
+            timeout = float(os.environ.get("GROQ_TIMEOUT_SECONDS", "3.0"))
         except ValueError:
             timeout = 10.0
 

@@ -1,12 +1,11 @@
 """
 SeniorShield Backend - main.py
 ==============================
-Clean, production-style FastAPI AI analysis service.
+Clean, minimal AI fraud analysis service for SeniorShield.
 
 Endpoints:
     GET  /health       -> Service health check (returns {"status": "ok"})
-    POST /api/analyze  -> Unified AI fraud analysis pipeline
-    POST /api/events   -> Event distribution to Neo4j graph database
+    POST /api/analyze  -> Unified AI fraud analysis pipeline (bert-tiny-scam-v1 + XAI + Rules + TI + Groq)
 """
 
 import os
@@ -22,7 +21,6 @@ load_dotenv(dotenv_path=env_path)
 
 from api.health import router as health_router
 from api.analysis import router as analysis_router
-from api.events import router as events_router
 
 
 @asynccontextmanager
@@ -41,18 +39,12 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    print("[Shutdown] Server shutting down.")
-    # Close Neo4j driver cleanly if connected
-    try:
-        from neo4j import get_event_repository
-        get_event_repository().client.close()
-    except Exception:
-        pass
+    print("[Shutdown] Server shutting down cleanly.")
 
 
 app = FastAPI(
     title="SeniorShield AI Backend",
-    description="Clean, modular fraud analysis and threat intelligence service for SeniorShield.",
+    description="Clean, minimal fraud analysis and threat intelligence service for SeniorShield.",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -82,4 +74,3 @@ async def root_check():
 # Primary Endpoints
 app.include_router(health_router)
 app.include_router(analysis_router)
-app.include_router(events_router)

@@ -112,7 +112,7 @@ RE_URGENCY = re.compile(r"|".join(URGENCY_PATTERNS), re.IGNORECASE)
 # ── Rule 5: PAYMENT_REQUEST ──
 # Matches contextual requests for money transfer, fee, deposit, fine
 PAYMENT_PATTERNS = [
-    r"(?:pay|transfer|send\s+money|remit|deposit)\s+(?:rs\.?|inr|usd|\$|amount|money|fee|fine|penalty|charges?)",
+    r"(?:pay|transfer|send|remit|deposit)\s+(?:the\s+|a\s+)?(?:rs\.?|inr|usd|\$|amount|money|fee|fine|penalty|charges?)",
     r"(?:transfer|pay)\s+immediately",
     r"processing\s+fee",
     r"verification\s+fee",
@@ -121,7 +121,8 @@ PAYMENT_PATTERNS = [
     r"pay\s+(?:the\s+)?fine\s+now",
     r"upi\s+payment\s+required",
     r"refund\s+fee",
-    r"courier\s+fee"
+    r"courier\s+fee",
+    r"parcel\s+fee"
 ]
 RE_PAYMENT = re.compile(r"|".join(PAYMENT_PATTERNS), re.IGNORECASE)
 
