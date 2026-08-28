@@ -229,14 +229,6 @@ export default function App() {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {/* Live Autonomous Sentinel Active Pill */}
-            <View style={styles.sentinelBanner}>
-              <Radio size={14} color="#10B981" />
-              <Text style={styles.sentinelText}>
-                Autonomous Sentinel: <Text style={styles.sentinelHighlight}>Active (SMS & Pre-Call Guard)</Text>
-              </Text>
-            </View>
-
             {/* Pre-Call Incoming Scammer Alert Banner */}
             <PreCallAlertCard
               alert={preCallAlert}
@@ -273,27 +265,7 @@ export default function App() {
                   ]}
                 />
               </View>
-
-              {/* Solid Active Context Pill */}
-              {activeScenarioTitle && (
-                <View style={styles.contextBadge}>
-                  <ShieldCheck size={14} color="#FFFFFF" />
-                  <Text style={styles.contextText}>
-                    Active Context: <Text style={styles.contextHighlight}>{activeScenarioTitle}</Text>
-                  </Text>
-                </View>
-              )}
             </View>
-
-            {/* Demo Hub Button */}
-            <TouchableOpacity
-              style={styles.demoHubButton}
-              onPress={() => setIsSimulationVisible(true)}
-              activeOpacity={0.88}
-            >
-              <Sparkles size={16} color="#B45309" />
-              <Text style={styles.demoHubButtonText}>Demo Hub (Simulate Attack Vectors)</Text>
-            </TouchableOpacity>
 
             {/* Dynamic Threat Report Card */}
             <ThreatCard
