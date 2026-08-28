@@ -18,27 +18,31 @@ import {
   Lock,
 } from 'lucide-react-native';
 import { ScamReport } from '../types/scam';
+import { TRANSLATIONS } from '../constants/languages';
 
 interface ThreatCardProps {
   report: ScamReport | null;
   guardianPhone: string;
+  selectedLanguage?: string;
   onBlockNumber?: () => void;
 }
 
 export const ThreatCard: React.FC<ThreatCardProps> = ({
   report,
   guardianPhone,
+  selectedLanguage = 'en',
   onBlockNumber,
 }) => {
+  const t = TRANSLATIONS[selectedLanguage] || TRANSLATIONS.en;
   if (!report) {
     return (
       <View style={styles.emptyCard}>
         <View style={styles.emptyIconCircle}>
-          <Shield size={32} color="#8E8E93" />
+          <Shield size={32} color="#10B981" />
         </View>
-        <Text style={styles.emptyTitle}>Ready to Scan</Text>
+        <Text style={styles.emptyTitle}>Autonomous Shield Active</Text>
         <Text style={styles.emptySubtitle}>
-          Tap "Scan Device & Protect" below or launch a simulation from the Demo Hub to analyze recent calls and messages.
+          Standing guard 24/7. Incoming calls from unverified numbers will automatically be analyzed with Gemini AI for coercion & fraud.
         </Text>
       </View>
     );
@@ -111,7 +115,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
         <View style={styles.entityBanner}>
           <Building2 size={18} color="#0284C7" />
           <View style={styles.entityInfo}>
-            <Text style={styles.entityLabel}>IMPERSONATED ENTITY</Text>
+            <Text style={styles.entityLabel}>{t.impersonatedEntity || 'IMPERSONATED ENTITY'}</Text>
             <Text style={styles.entityValue}>{report.impersonated_entity}</Text>
           </View>
         </View>
@@ -119,7 +123,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
 
       {/* Senior Plain Language Explanation Box */}
       <View style={styles.explanationBox}>
-        <Text style={styles.explanationLabel}>WHAT THIS MEANS FOR YOU</Text>
+        <Text style={styles.explanationLabel}>{t.whatThisMeans || 'WHAT THIS MEANS FOR YOU'}</Text>
         <Text style={styles.explanationText}>{report.senior_explanation}</Text>
       </View>
 
@@ -149,7 +153,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
             },
           ]}
         >
-          ⚡ WHAT YOU MUST DO NOW:
+          ⚡ {t.whatYouMustDo || 'WHAT YOU MUST DO NOW:'}
         </Text>
         <Text style={styles.actionText}>{report.action_required}</Text>
       </View>
@@ -159,7 +163,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
         <View style={styles.assetsSection}>
           <View style={styles.assetsHeader}>
             <Lock size={14} color="#8E8E93" />
-            <Text style={styles.assetsTitle}>Targeted Assets at Stake:</Text>
+            <Text style={styles.assetsTitle}>{t.targetedAssets || 'Targeted Assets at Stake:'}</Text>
           </View>
           <View style={styles.chipsRow}>
             {report.assets_at_risk.map((asset, idx) => (
@@ -181,7 +185,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
             activeOpacity={0.88}
           >
             <Ban size={20} color="#FFFFFF" />
-            <Text style={styles.blockButtonText}>Hang Up & Block Sender</Text>
+            <Text style={styles.blockButtonText}>{t.blockSender || 'Hang Up & Block Sender'}</Text>
           </TouchableOpacity>
 
           {/* Solid Charcoal for SMS notification */}
@@ -192,7 +196,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({
           >
             <BellRing size={20} color="#FFFFFF" />
             <Text style={styles.guardianButtonText}>
-              Alert Family Guardian (SMS)
+              {t.alertGuardian || 'Alert Family Guardian (SMS)'}
             </Text>
           </TouchableOpacity>
         </View>

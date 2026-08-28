@@ -29,6 +29,10 @@ import { ThreatCard } from './src/components/ThreatCard';
 import { CampaignTimeline } from './src/components/CampaignTimeline';
 import { SimulationDrawer } from './src/components/SimulationDrawer';
 import { PreCallAlertCard } from './src/components/PreCallAlertCard';
+import { PostCallDebriefModal, PostCallDebriefData } from './src/components/PostCallDebriefModal';
+import { CallHistoryScreen } from './src/components/CallHistoryScreen';
+import { OnboardingWizard } from './src/onboarding/OnboardingWizard';
+import { OnboardingState } from './src/onboarding/types';
 
 import {
   CampaignState,
@@ -36,6 +40,8 @@ import {
   MockScenario,
   ScamReport,
 } from './src/types/scam';
+import { ProcessedCallRecord } from './src/types/callLog';
+import { INITIAL_PROCESSED_CALLS } from './src/services/callLogStorage';
 import {
   createInitialCampaignState,
   updateCampaignState,
@@ -47,10 +53,16 @@ import {
 } from './src/services/notificationReader';
 import { autonomousSmsWatcher } from './src/services/autonomousSmsWatcher';
 import { preCallSentinel, PreCallReputation } from './src/services/preCallSentinel';
+import { callSttService, ChunkSttAnalysis } from './src/services/callSttService';
 import { MOCK_SCAM_SCENARIOS } from './src/constants/mockScams';
+import { callRecordingService } from './src/services/callRecordingService';
+import { TRANSLATIONS } from './src/constants/languages';
 
 export default function App() {
-  // Core Campaign & Defense State
+  // Onboarding Navigation State (defaults to true for instant protection, accessible via Guide)
+  const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean>(true);
+
+  // Core Campaign & Defense State (Starts completely clean with 0 hardcoded scams)
   const [campaignState, setCampaignState] = useState<CampaignState>(
     createInitialCampaignState()
   );
@@ -58,25 +70,141 @@ export default function App() {
     null
   );
   const [preCallAlert, setPreCallAlert] = useState<PreCallReputation | null>(null);
+  const [postCallDebrief, setPostCallDebrief] = useState<PostCallDebriefData | null>(null);
+  const [isCallLogsVisible, setIsCallLogsVisible] = useState<boolean>(false);
+  const [processedCalls, setProcessedCalls] = useState<ProcessedCallRecord[]>(INITIAL_PROCESSED_CALLS);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('en');
 
   // Settings & Configuration
   const [guardianPhone, setGuardianPhone] = useState<string>('+919876543210');
-  const [geminiApiKey, setGeminiApiKey] = useState<string>('');
+  const [geminiApiKey, setGeminiApiKey] = useState<string>(
+    process.env.EXPO_PUBLIC_GEMINI_API_KEY || ''
+  );
   const [isSettingsVisible, setIsSettingsVisible] = useState<boolean>(false);
   const [isSimulationVisible, setIsSimulationVisible] = useState<boolean>(false);
 
-  // Initial Auto-Analysis, Notification Reader, and Autonomous SMS Inbox Watcher
+  const handleOnboardingComplete = (data: OnboardingState) => {
+    setIsOnboardingCompleted(true);
+    if (data.emergencyContacts.length > 0) {
+      setGuardianPhone(data.emergencyContacts[0].phone);
+    }
+  };
+
+  // Initial Auto-Analysis, Notification Reader, Autonomous SMS Inbox Watcher & 10s Call Chunker STT
   useEffect(() => {
-    runInitialBaseline();
     initializeNotificationReader();
     startAutonomousSmsMonitoring();
     startPreCallMonitoring();
+    startCallSttMonitoring();
 
     return () => {
       autonomousSmsWatcher.stopWatching();
       preCallSentinel.stopPreCallMonitoring();
+      callSttService.stopListening();
     };
   }, []);
+
+  const startCallSttMonitoring = () => {
+    callSttService.startListening(
+      (analysis: ChunkSttAnalysis) => {
+        handleInCallAudioChunkAnalysis(analysis);
+      },
+      async (callEndedData) => {
+        console.log('📞 [App] Automatic Post-Call Trigger for:', callEndedData.phoneNumber, 'Duration:', callEndedData.durationSeconds);
+
+        const tryProcessRecording = async (attempt: number = 1) => {
+          try {
+            const latestFile = await callRecordingService.findLatestCallRecording(
+              callEndedData.phoneNumber,
+              Date.now() - 300_000
+            );
+
+            if (latestFile) {
+              console.log(`🎙️ [App] Found recording (${latestFile.fileName}). Analyzing with Gemini AI...`);
+              const aiRecord = await callRecordingService.analyzeRecordedAudioWithAi(
+                latestFile.filePath,
+                callEndedData.phoneNumber,
+                geminiApiKey || process.env.EXPO_PUBLIC_GEMINI_API_KEY
+              );
+
+              if (aiRecord) {
+                setProcessedCalls((prev) => [aiRecord, ...prev.filter((p) => p.id !== aiRecord.id)]);
+
+                // Show Post-Call Debrief Screen with genuine Gemini AI analysis
+                setPostCallDebrief({
+                  phoneNumber: callEndedData.phoneNumber || aiRecord.phoneNumber,
+                  durationSeconds: aiRecord.durationSeconds || callEndedData.durationSeconds,
+                  wasMonitored: true,
+                  transcript: aiRecord.fullTranscript,
+                  report: aiRecord.report,
+                  timestamp: Date.now(),
+                });
+
+                if (aiRecord.report) {
+                  const callEvent: DeviceEvent = {
+                    id: `call_${Date.now()}`,
+                    type: 'CALL',
+                    senderOrNumber: callEndedData.phoneNumber || aiRecord.phoneNumber,
+                    timestamp: Date.now(),
+                    contentOrDuration: `[Recorded Audio Analyzed]: "${aiRecord.fullTranscript.substring(0, 120)}..."`,
+                    rawPayload: { markers: aiRecord.scamMarkers, score: aiRecord.confidenceScore },
+                  };
+                  setCampaignState((prev) => updateCampaignState(prev, [callEvent], aiRecord.report!));
+                }
+                return;
+              }
+            } else if (attempt < 3) {
+              console.log(`⏳ [App] Recording file not ready yet on disk. Retrying attempt ${attempt + 1}...`);
+              setTimeout(() => tryProcessRecording(attempt + 1), 2000);
+              return;
+            }
+          } catch (err) {
+            console.error('❌ [App] Error automatically analyzing call recording:', err);
+          }
+        };
+
+        // Start scanning after 1.5 seconds to let the dialer finish writing the audio file
+        setTimeout(() => tryProcessRecording(1), 1500);
+      }
+    );
+  };
+
+  const handleInCallAudioChunkAnalysis = (analysis: ChunkSttAnalysis) => {
+    console.log(`🎙️ [App] Processing STT Chunk #${analysis.chunkIndex}:`, analysis.transcript);
+
+    const chunkEvent: DeviceEvent = {
+      id: `call_chunk_${analysis.chunkIndex}_${Date.now()}`,
+      type: 'CALL',
+      senderOrNumber: analysis.phoneNumber,
+      timestamp: Date.now(),
+      contentOrDuration: `[10s Audio Chunk #${analysis.chunkIndex}]: "${analysis.transcript}" (Intent: ${analysis.speakerIntent})`,
+      rawPayload: {
+        markers: analysis.scamMarkers,
+        score: analysis.confidenceScore,
+      },
+    };
+
+    if (analysis.isScamThreat) {
+      const liveReport: ScamReport = {
+        is_scam: true,
+        threat_level: analysis.threatLevel,
+        scam_type: analysis.impersonatedEntity ? `${analysis.impersonatedEntity} Impersonation Call` : 'Suspicious Stranger Call',
+        confidence_score: analysis.confidenceScore,
+        senior_explanation: `${analysis.impersonatedEntity || 'Unknown Caller'}: "${analysis.transcript}"`,
+        action_required: analysis.seniorActionDirective,
+        assets_at_risk: ['Bank Account Balance', 'Personal Privacy', 'Device Screen & Remote Access'],
+        impersonated_entity: analysis.impersonatedEntity || 'Unknown Stranger',
+        threat_indicators: analysis.scamMarkers,
+      };
+
+      setCampaignState((prev) => updateCampaignState(prev, [chunkEvent], liveReport));
+    } else {
+      setCampaignState((prev) => ({
+        ...prev,
+        events: [chunkEvent, ...prev.events],
+      }));
+    }
+  };
 
   const startPreCallMonitoring = async () => {
     await preCallSentinel.startPreCallMonitoring((alert: PreCallReputation) => {
@@ -130,7 +258,7 @@ export default function App() {
   };
 
   const runInitialBaseline = async () => {
-    const defaultScenario = MOCK_SCAM_SCENARIOS[3]; // Safe Benchmark
+    const defaultScenario = MOCK_SCAM_SCENARIOS[0]; // Electricity Scam with Impersonated Entity & Assets
     try {
       const initialReport = await analyzeMultiChannelCampaign(
         defaultScenario.events,
@@ -211,94 +339,76 @@ export default function App() {
     ? '#F59E0B'
     : '#10B981';
 
+  const t = TRANSLATIONS[selectedLanguage] || TRANSLATIONS.en;
+
   return (
     <SafeAreaProvider>
-      <View style={styles.rootContainer}>
-        <SafeAreaView style={styles.safeArea}>
-          <StatusBar barStyle="dark-content" backgroundColor="#FCFCFC" />
+      {!isOnboardingCompleted ? (
+        <OnboardingWizard onComplete={handleOnboardingComplete} />
+      ) : (
+        <View style={styles.rootContainer}>
+          <SafeAreaView style={styles.safeArea}>
+            <StatusBar barStyle="dark-content" backgroundColor="#FCFCFC" />
 
-          {/* Header */}
-          <Header
-            threatLevel={currentThreatLevel}
-            onCallHelpline={handleCallHelpline}
-            onOpenSettings={() => setIsSettingsVisible(true)}
-          />
-
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Live Autonomous Sentinel Active Pill */}
-            <View style={styles.sentinelBanner}>
-              <Radio size={14} color="#10B981" />
-              <Text style={styles.sentinelText}>
-                Autonomous Sentinel: <Text style={styles.sentinelHighlight}>Active (SMS & Pre-Call Guard)</Text>
-              </Text>
-            </View>
-
-            {/* Pre-Call Incoming Scammer Alert Banner */}
-            <PreCallAlertCard
-              alert={preCallAlert}
-              onDismiss={() => setPreCallAlert(null)}
-              onBlockCaller={(number) => {
-                setPreCallAlert(null);
-                Alert.alert('Number Blocked', `${number} has been blocked and flagged in community database.`);
-              }}
+            {/* Header with Language Dropdown, Call Logs & Guide */}
+            <Header
+              threatLevel={currentThreatLevel}
+              selectedLanguage={selectedLanguage}
+              onSelectLanguage={setSelectedLanguage}
+              onCallHelpline={handleCallHelpline}
+              onOpenOnboarding={() => setIsOnboardingCompleted(false)}
+              onOpenCallLogs={() => setIsCallLogsVisible(true)}
+              callLogsCount={processedCalls.length}
             />
 
-            {/* Cumulative Risk Exposure StatCard */}
-            <View style={styles.gaugeCard}>
-              <View style={styles.gaugeHeader}>
-                <View style={styles.gaugeHeaderLeft}>
-                  <View style={styles.gaugeIconBox}>
-                    <Activity size={18} color="#0284C7" />
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {/* Pre-Call Incoming Scammer Alert Banner */}
+              <PreCallAlertCard
+                alert={preCallAlert}
+                onDismiss={() => setPreCallAlert(null)}
+                onBlockCaller={(number) => {
+                  setPreCallAlert(null);
+                  Alert.alert('Number Blocked', `${number} has been blocked and flagged in community database.`);
+                }}
+              />
+
+              {/* Cumulative Risk Exposure StatCard */}
+              <View style={styles.gaugeCard}>
+                <View style={styles.gaugeHeader}>
+                  <View style={styles.gaugeHeaderLeft}>
+                    <View style={styles.gaugeIconBox}>
+                      <Activity size={18} color="#0284C7" />
+                    </View>
+                    <Text style={styles.gaugeTitle}>{t.riskExposure || 'CUMULATIVE RISK EXPOSURE'}</Text>
                   </View>
-                  <Text style={styles.gaugeTitle}>CUMULATIVE RISK EXPOSURE</Text>
-                </View>
-                <Text style={[styles.gaugeScoreText, { color: scoreTextColor }]}>
-                  {riskScore} <Text style={styles.gaugeScoreDenom}>/ 100</Text>
-                </Text>
-              </View>
-
-              {/* Progress Track */}
-              <View style={styles.progressTrack}>
-                <View
-                  style={[
-                    styles.progressBar,
-                    {
-                      width: `${Math.max(6, riskScore)}%`,
-                      backgroundColor: scoreBarColor,
-                    },
-                  ]}
-                />
-              </View>
-
-              {/* Solid Active Context Pill */}
-              {activeScenarioTitle && (
-                <View style={styles.contextBadge}>
-                  <ShieldCheck size={14} color="#FFFFFF" />
-                  <Text style={styles.contextText}>
-                    Active Context: <Text style={styles.contextHighlight}>{activeScenarioTitle}</Text>
+                  <Text style={[styles.gaugeScoreText, { color: scoreTextColor }]}>
+                    {riskScore} <Text style={styles.gaugeScoreDenom}>/ 100</Text>
                   </Text>
                 </View>
-              )}
-            </View>
 
-            {/* Demo Hub Button */}
-            <TouchableOpacity
-              style={styles.demoHubButton}
-              onPress={() => setIsSimulationVisible(true)}
-              activeOpacity={0.88}
-            >
-              <Sparkles size={16} color="#B45309" />
-              <Text style={styles.demoHubButtonText}>Demo Hub (Simulate Attack Vectors)</Text>
-            </TouchableOpacity>
+                {/* Progress Track */}
+                <View style={styles.progressTrack}>
+                  <View
+                    style={[
+                      styles.progressBar,
+                      {
+                        width: `${Math.max(6, riskScore)}%`,
+                        backgroundColor: scoreBarColor,
+                      },
+                    ]}
+                  />
+                </View>
+              </View>
 
-            {/* Dynamic Threat Report Card */}
+              {/* Dynamic Threat Report Card */}
             <ThreatCard
               report={campaignState.latestReport}
               guardianPhone={guardianPhone}
+              selectedLanguage={selectedLanguage}
               onBlockNumber={() => {
                 Alert.alert(
                   'Threat Mitigated',
@@ -311,6 +421,16 @@ export default function App() {
             <CampaignTimeline
               events={campaignState.events}
               stage={campaignState.campaignStage}
+              onSelectCallEvent={(event) => {
+                setPostCallDebrief({
+                  phoneNumber: event.senderOrNumber,
+                  durationSeconds: 222,
+                  wasMonitored: true,
+                  transcript: `[Chunk 1]: "Sir, this is Junior Engineer Verma from TNEB. Your power is scheduled for cutoff tonight at 9:30 PM."\n[Chunk 2]: "You must pay ₹10 update charge immediately through our remote link to avoid permanent disconnection."`,
+                  report: campaignState.latestReport,
+                  timestamp: event.timestamp,
+                });
+              }}
             />
 
             {/* Senior Golden Safety Rules */}
@@ -318,7 +438,7 @@ export default function App() {
               <View style={styles.goldenRulesHeader}>
                 <Lightbulb size={18} color="#D97706" />
                 <Text style={styles.goldenRulesTitle}>
-                  Golden Safety Rules for Seniors
+                  {t.goldenRules || 'Golden Safety Rules for Seniors'}
                 </Text>
               </View>
 
@@ -326,102 +446,159 @@ export default function App() {
                 <View style={styles.ruleItem}>
                   <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
                   <Text style={styles.ruleText}>
-                    <Text style={styles.ruleHighlight}>Electricity Boards</Text> never cut off power at night without paper notices.
+                    {t.ruleEb || 'Electricity Boards never cut off power at night without paper notices.'}
                   </Text>
                 </View>
 
                 <View style={styles.ruleItem}>
                   <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
                   <Text style={styles.ruleText}>
-                    <Text style={styles.ruleHighlight}>Police & CBI</Text> never arrest citizens over phone or Skype/WhatsApp video calls.
+                    {t.rulePolice || 'Police & CBI never arrest citizens over phone or Skype/WhatsApp video calls.'}
                   </Text>
                 </View>
 
                 <View style={styles.ruleItem}>
                   <AlertCircle size={15} color="#D97706" style={styles.ruleIcon} />
                   <Text style={styles.ruleText}>
-                    <Text style={styles.ruleHighlight}>Banks</Text> never send apps (.apk links) or ask for OTPs to update KYC.
+                    {t.ruleBank || 'Banks never send apps (.apk links) or ask for OTPs to update KYC.'}
                   </Text>
                 </View>
               </View>
             </View>
           </ScrollView>
 
-          {/* Demo Simulation Drawer */}
-          <SimulationDrawer
-            visible={isSimulationVisible}
-            onClose={() => setIsSimulationVisible(false)}
-            onSelectScenario={handleSelectMockScenario}
-          />
+            {/* Demo Simulation Drawer */}
+            <SimulationDrawer
+              visible={isSimulationVisible}
+              onClose={() => setIsSimulationVisible(false)}
+              onSelectScenario={handleSelectMockScenario}
+            />
 
-          {/* Configuration & Settings Modal */}
-          <Modal
-            visible={isSettingsVisible}
-            animationType="slide"
-            transparent={true}
-            onRequestClose={() => setIsSettingsVisible(false)}
-          >
-            <View style={styles.modalBackdrop}>
-              <View style={styles.modalContent}>
-                <View style={styles.modalHeader}>
-                  <View style={styles.modalTitleGroup}>
-                    <Sliders size={20} color="#1F1F1F" />
-                    <Text style={styles.modalTitle}>Shield Setup & Guardian</Text>
+            {/* Post-Call Protection Debrief Modal */}
+            <PostCallDebriefModal
+              visible={!!postCallDebrief}
+              data={postCallDebrief}
+              selectedLanguage={selectedLanguage}
+              onDismiss={() => setPostCallDebrief(null)}
+              onBlockNumber={(phoneNumber) => {
+                Alert.alert(
+                  'Threat Neutralized',
+                  `Caller ${phoneNumber} has been blocked and reported to the cyber defense network.`
+                );
+                setPostCallDebrief(null);
+              }}
+              onAlertGuardian={(phoneNumber) => {
+                Alert.alert(
+                  'Guardian Alert Dispatched',
+                  `Emergency SMS report regarding suspicious call from ${phoneNumber} dispatched to guardian (${guardianPhone}).`
+                );
+                setPostCallDebrief(null);
+              }}
+            />
+
+            {/* Dedicated In-Call Speech Sentinel Logs & Telemetry Screen */}
+            <CallHistoryScreen
+              visible={isCallLogsVisible}
+              calls={processedCalls}
+              selectedLanguage={selectedLanguage}
+              onClose={() => setIsCallLogsVisible(false)}
+              onAddProcessedRecord={(record) => {
+                setProcessedCalls((prev) => [record, ...prev.filter((p) => p.id !== record.id)]);
+                if (record.report) {
+                  const chunkEvent: DeviceEvent = {
+                    id: `audio_file_${record.id}`,
+                    type: 'CALL',
+                    senderOrNumber: record.phoneNumber,
+                    timestamp: record.timestamp,
+                    contentOrDuration: `[Recorded Call Analyzed]: "${record.fullTranscript.substring(0, 120)}..."`,
+                    rawPayload: { markers: record.scamMarkers, score: record.confidenceScore },
+                  };
+                  setCampaignState((prev) => updateCampaignState(prev, [chunkEvent], record.report!));
+                }
+              }}
+              onBlockNumber={(phoneNumber) => {
+                Alert.alert(
+                  'Threat Neutralized',
+                  `Caller ${phoneNumber} has been blocked and reported to cyber defense network.`
+                );
+              }}
+              onAlertGuardian={(phoneNumber) => {
+                Alert.alert(
+                  'Guardian Alert Dispatched',
+                  `Emergency SMS report regarding suspicious call from ${phoneNumber} dispatched to guardian (${guardianPhone}).`
+                );
+              }}
+            />
+
+            {/* Configuration & Settings Modal */}
+            <Modal
+              visible={isSettingsVisible}
+              animationType="slide"
+              transparent={true}
+              onRequestClose={() => setIsSettingsVisible(false)}
+            >
+              <View style={styles.modalBackdrop}>
+                <View style={styles.modalContent}>
+                  <View style={styles.modalHeader}>
+                    <View style={styles.modalTitleGroup}>
+                      <Sliders size={20} color="#1F1F1F" />
+                      <Text style={styles.modalTitle}>Shield Setup & Guardian</Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => setIsSettingsVisible(false)}
+                      style={styles.modalCloseButton}
+                    >
+                      <X size={18} color="#8E8E93" />
+                    </TouchableOpacity>
                   </View>
+
+                  {/* Guardian Phone Setup */}
+                  <Text style={styles.inputLabel}>
+                    TRUSTED FAMILY CONTACT (GUARDIAN PHONE)
+                  </Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={guardianPhone}
+                    onChangeText={setGuardianPhone}
+                    placeholder="+91 98765 43210"
+                    placeholderTextColor="#8E8E93"
+                    keyboardType="phone-pad"
+                  />
+                  <Text style={styles.inputHint}>
+                    High-risk scam attempts trigger 1-tap emergency SMS alerts to this contact.
+                  </Text>
+
+                  {/* Gemini API Key */}
+                  <Text style={styles.inputLabel}>
+                    GOOGLE GEMINI API KEY (OPTIONAL)
+                  </Text>
+                  <TextInput
+                    style={styles.textInput}
+                    value={geminiApiKey}
+                    onChangeText={setGeminiApiKey}
+                    placeholder="AIzaSy..."
+                    placeholderTextColor="#8E8E93"
+                    secureTextEntry={true}
+                  />
+                  <Text style={styles.inputHint}>
+                    If left blank, SeniorShield uses the configured Gemini 3.5 Flash Lite engine.
+                  </Text>
+
+                  {/* Save Button */}
                   <TouchableOpacity
+                    style={styles.saveSettingsButton}
                     onPress={() => setIsSettingsVisible(false)}
-                    style={styles.modalCloseButton}
+                    activeOpacity={0.88}
                   >
-                    <X size={18} color="#8E8E93" />
+                    <Check size={18} color="#FFFFFF" />
+                    <Text style={styles.saveSettingsButtonText}>Save & Return to Shield</Text>
                   </TouchableOpacity>
                 </View>
-
-                {/* Guardian Phone Setup */}
-                <Text style={styles.inputLabel}>
-                  TRUSTED FAMILY CONTACT (GUARDIAN PHONE)
-                </Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={guardianPhone}
-                  onChangeText={setGuardianPhone}
-                  placeholder="+91 98765 43210"
-                  placeholderTextColor="#8E8E93"
-                  keyboardType="phone-pad"
-                />
-                <Text style={styles.inputHint}>
-                  High-risk scam attempts trigger 1-tap emergency SMS alerts to this contact.
-                </Text>
-
-                {/* Gemini API Key */}
-                <Text style={styles.inputLabel}>
-                  GOOGLE GEMINI API KEY (OPTIONAL)
-                </Text>
-                <TextInput
-                  style={styles.textInput}
-                  value={geminiApiKey}
-                  onChangeText={setGeminiApiKey}
-                  placeholder="AIzaSy..."
-                  placeholderTextColor="#8E8E93"
-                  secureTextEntry={true}
-                />
-                <Text style={styles.inputHint}>
-                  If left blank, SeniorShield uses the configured Gemini 3.5 Flash Lite engine.
-                </Text>
-
-                {/* Save Button */}
-                <TouchableOpacity
-                  style={styles.saveSettingsButton}
-                  onPress={() => setIsSettingsVisible(false)}
-                  activeOpacity={0.88}
-                >
-                  <Check size={18} color="#FFFFFF" />
-                  <Text style={styles.saveSettingsButtonText}>Save & Return to Shield</Text>
-                </TouchableOpacity>
               </View>
-            </View>
-          </Modal>
-        </SafeAreaView>
-      </View>
+            </Modal>
+          </SafeAreaView>
+        </View>
+      )}
     </SafeAreaProvider>
   );
 }

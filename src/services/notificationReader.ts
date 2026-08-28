@@ -1,20 +1,29 @@
 import { Platform } from 'react-native';
-import * as Notifications from 'expo-notifications';
-import { DeviceEvent } from '../types/scam';
+let Notifications: any = null;
+try {
+  Notifications = require('expo-notifications');
+  if (Notifications && Notifications.setNotificationHandler) {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+  }
+} catch (e) {
+  console.warn('[NotificationReader] expo-notifications module not available in this environment');
+}
 
-// Configure foreground notification behavior
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+import { DeviceEvent } from '../types/scam';
 
 /**
  * Request notification permissions from the OS.
  */
 export async function requestNotificationPermissions(): Promise<boolean> {
+  if (!Notifications || !Notifications.getPermissionsAsync) {
+    return false;
+  }
   try {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
@@ -35,9 +44,9 @@ export async function requestNotificationPermissions(): Promise<boolean> {
  * Parses an incoming notification into a structured SeniorShield DeviceEvent.
  */
 export function parseNotificationToDeviceEvent(
-  notification: Notifications.Notification
+  notification: any
 ): DeviceEvent {
-  const content = notification.request.content;
+  const content = notification?.request?.content || {};
   const title = content.title || 'Incoming Message';
   const body = content.body || '';
 
@@ -58,14 +67,19 @@ export function parseNotificationToDeviceEvent(
 export function setupNotificationListener(
   onNotificationReceived: (event: DeviceEvent) => void
 ): () => void {
-  const subscription = Notifications.addNotificationReceivedListener((notification) => {
+  if (!Notifications || !Notifications.addNotificationReceivedListener) {
+    return () => {};
+  }
+  const subscription = Notifications.addNotificationReceivedListener((notification: any) => {
     console.log('[NotificationReader] Notification received:', notification);
     const event = parseNotificationToDeviceEvent(notification);
     onNotificationReceived(event);
   });
 
   return () => {
-    subscription.remove();
+    if (subscription && subscription.remove) {
+      subscription.remove();
+    }
   };
 }
 
@@ -76,6 +90,9 @@ export async function triggerTestSMSNotification(
   sender: string,
   body: string
 ): Promise<void> {
+  if (!Notifications || !Notifications.scheduleNotificationAsync) {
+    return;
+  }
   try {
     await Notifications.scheduleNotificationAsync({
       content: {

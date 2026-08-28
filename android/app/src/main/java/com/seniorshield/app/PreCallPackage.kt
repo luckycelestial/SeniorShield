@@ -24,6 +24,36 @@ class PreCallModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
     @ReactMethod
     fun removeListeners(count: Int) {}
 
+    @ReactMethod
+    fun scanCallRecordings(limit: Double, promise: com.facebook.react.bridge.Promise) {
+        try {
+            val list = CallRecordingScanner.scanRecordedAudioFiles(reactApplicationContext, limit.toInt())
+            promise.resolve(list)
+        } catch (e: Exception) {
+            promise.reject("SCAN_ERROR", e.message, e)
+        }
+    }
+
+    @ReactMethod
+    fun readAudioFileAsBase64(filePath: String, promise: com.facebook.react.bridge.Promise) {
+        try {
+            val map = CallRecordingScanner.readAudioFileAsBase64(filePath)
+            promise.resolve(map)
+        } catch (e: Exception) {
+            promise.reject("READ_ERROR", e.message, e)
+        }
+    }
+
+    @ReactMethod
+    fun findLatestCallRecording(phoneNumber: String, sinceTimestamp: Double, promise: com.facebook.react.bridge.Promise) {
+        try {
+            val map = CallRecordingScanner.findLatestRecordingForCall(phoneNumber, sinceTimestamp.toLong())
+            promise.resolve(map)
+        } catch (e: Exception) {
+            promise.reject("FIND_ERROR", e.message, e)
+        }
+    }
+
     companion object {
         private var instance: PreCallModule? = null
 
@@ -37,6 +67,46 @@ class PreCallModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 reactContext
                     .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
                     .emit("onIncomingCall", params)
+            }
+        }
+
+        fun sendCallAudioChunkEvent(
+            base64Wav: String,
+            chunkIndex: Int,
+            durationSeconds: Int,
+            phoneNumber: String
+        ) {
+            val reactContext = instance?.reactApplicationContext ?: return
+            if (reactContext.hasActiveReactInstance()) {
+                val params = Arguments.createMap().apply {
+                    putString("base64Wav", base64Wav)
+                    putInt("chunkIndex", chunkIndex)
+                    putInt("durationSeconds", durationSeconds)
+                    putString("phoneNumber", phoneNumber)
+                    putDouble("timestamp", System.currentTimeMillis().toDouble())
+                }
+                reactContext
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                    .emit("onCallAudioChunk", params)
+            }
+        }
+
+        fun sendCallEndedEvent(
+            phoneNumber: String,
+            durationSeconds: Int,
+            wasMonitored: Boolean
+        ) {
+            val reactContext = instance?.reactApplicationContext ?: return
+            if (reactContext.hasActiveReactInstance()) {
+                val params = Arguments.createMap().apply {
+                    putString("phoneNumber", phoneNumber)
+                    putInt("durationSeconds", durationSeconds)
+                    putBoolean("wasMonitored", wasMonitored)
+                    putDouble("timestamp", System.currentTimeMillis().toDouble())
+                }
+                reactContext
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                    .emit("onCallEnded", params)
             }
         }
     }
