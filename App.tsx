@@ -53,8 +53,8 @@ import { MOCK_SCAM_SCENARIOS } from './src/constants/mockScams';
 import { TRANSLATIONS } from './src/constants/languages';
 
 export default function App() {
-  // Onboarding Navigation State
-  const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean>(false);
+  // Onboarding Navigation State (defaults to true for instant protection, accessible via Guide)
+  const [isOnboardingCompleted, setIsOnboardingCompleted] = useState<boolean>(true);
 
   // Core Campaign & Defense State
   const [campaignState, setCampaignState] = useState<CampaignState>(
