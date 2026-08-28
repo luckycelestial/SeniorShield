@@ -479,6 +479,20 @@ export default function App() {
               calls={processedCalls}
               selectedLanguage={selectedLanguage}
               onClose={() => setIsCallLogsVisible(false)}
+              onAddProcessedRecord={(record) => {
+                setProcessedCalls((prev) => [record, ...prev.filter((p) => p.id !== record.id)]);
+                if (record.report) {
+                  const chunkEvent: DeviceEvent = {
+                    id: `audio_file_${record.id}`,
+                    type: 'CALL',
+                    senderOrNumber: record.phoneNumber,
+                    timestamp: record.timestamp,
+                    contentOrDuration: `[Recorded Call Analyzed]: "${record.fullTranscript.substring(0, 120)}..."`,
+                    rawPayload: { markers: record.scamMarkers, score: record.confidenceScore },
+                  };
+                  setCampaignState((prev) => updateCampaignState(prev, [chunkEvent], record.report!));
+                }
+              }}
               onBlockNumber={(phoneNumber) => {
                 Alert.alert(
                   'Threat Neutralized',

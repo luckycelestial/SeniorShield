@@ -24,6 +24,36 @@ class PreCallModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
     @ReactMethod
     fun removeListeners(count: Int) {}
 
+    @ReactMethod
+    fun scanCallRecordings(limit: Double, promise: com.facebook.react.bridge.Promise) {
+        try {
+            val list = CallRecordingScanner.scanRecordedAudioFiles(reactApplicationContext, limit.toInt())
+            promise.resolve(list)
+        } catch (e: Exception) {
+            promise.reject("SCAN_ERROR", e.message, e)
+        }
+    }
+
+    @ReactMethod
+    fun readAudioFileAsBase64(filePath: String, promise: com.facebook.react.bridge.Promise) {
+        try {
+            val map = CallRecordingScanner.readAudioFileAsBase64(filePath)
+            promise.resolve(map)
+        } catch (e: Exception) {
+            promise.reject("READ_ERROR", e.message, e)
+        }
+    }
+
+    @ReactMethod
+    fun findLatestCallRecording(phoneNumber: String, sinceTimestamp: Double, promise: com.facebook.react.bridge.Promise) {
+        try {
+            val map = CallRecordingScanner.findLatestRecordingForCall(phoneNumber, sinceTimestamp.toLong())
+            promise.resolve(map)
+        } catch (e: Exception) {
+            promise.reject("FIND_ERROR", e.message, e)
+        }
+    }
+
     companion object {
         private var instance: PreCallModule? = null
 
