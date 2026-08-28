@@ -130,7 +130,7 @@ export default function App() {
   };
 
   const runInitialBaseline = async () => {
-    const defaultScenario = MOCK_SCAM_SCENARIOS[3]; // Safe Benchmark
+    const defaultScenario = MOCK_SCAM_SCENARIOS[0]; // Electricity Scam with Impersonated Entity & Assets
     try {
       const initialReport = await analyzeMultiChannelCampaign(
         defaultScenario.events,

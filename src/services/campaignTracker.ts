@@ -70,15 +70,57 @@ export function calculateCumulativeExposure(
 }
 
 /**
- * Creates initial clean campaign state.
+ * Creates initial campaign state preloaded with realistic demonstration data
+ * showcasing the Impersonated Entity box, Targeted Assets chips, and Timeline.
  */
 export function createInitialCampaignState(): CampaignState {
+  const initialEvents: DeviceEvent[] = [
+    {
+      id: 'evt_init_sms_1',
+      timestamp: Date.now() - 1000 * 60 * 45, // 45 mins ago
+      type: 'SMS',
+      senderOrNumber: '+91 98765 43210 (TNEB-OFFICER)',
+      contentOrDuration:
+        'Dear Consumer, Your Electricity power will be disconnected tonight at 9:30 PM because your previous month bill was not updated. Immediately call Electricity Officer at +91 98765 43210. TNEB/BESCOM',
+    },
+    {
+      id: 'evt_init_call_2',
+      timestamp: Date.now() - 1000 * 60 * 15, // 15 mins ago
+      type: 'CALL',
+      senderOrNumber: '+91 98765 43210',
+      contentOrDuration:
+        'Incoming Call (Duration: 3m 42s). Caller impersonating Junior Engineer demanding ₹10 test recharge via remote APK link.',
+    },
+  ];
+
+  const initialReport: ScamReport = {
+    is_scam: true,
+    threat_level: 'CRITICAL',
+    scam_type: 'Electricity Bill Disconnection Fraud',
+    confidence_score: 98,
+    impersonated_entity: 'Tamil Nadu Electricity Board (TNEB) / Junior Engineer Verma',
+    assets_at_risk: [
+      'Bank Account Balance',
+      'Electricity Power Supply',
+      'Device Screen & Remote Access',
+    ],
+    senior_explanation:
+      'A fake person pretending to be an electricity officer is threatening to cut your power tonight unless you click a link and pay money.',
+    action_required:
+      'DO NOT PAY! Power will NOT be cut off. Electricity boards never call demanding night payments or remote APK downloads.',
+    guardian_alert_message:
+      'SeniorShield Alert: Mom/Dad received a fake Electricity Disconnection call from +91 98765 43210 attempting extortion. Threat blocked.',
+  };
+
   return {
-    cumulativeRiskScore: 0,
-    events: [],
-    activeThreats: [],
-    latestReport: null,
-    campaignStage: 'DORMANT',
+    cumulativeRiskScore: 92,
+    events: initialEvents,
+    activeThreats: [
+      'Electricity Bill Disconnection Fraud',
+      'Multi-Channel Attack (SMS Threat + Follow-up Coercion Call)',
+    ],
+    latestReport: initialReport,
+    campaignStage: 'EXTRACTION_ATTEMPT',
     lastUpdated: Date.now(),
   };
 }
