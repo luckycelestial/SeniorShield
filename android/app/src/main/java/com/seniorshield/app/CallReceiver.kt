@@ -59,20 +59,20 @@ class CallReceiver : BroadcastReceiver() {
                         ((System.currentTimeMillis() - callStartTimeMs) / 1000).toInt()
                     } else 0
 
-                    Log.d("SeniorShieldCallReceiver", "⏹️ Call Ended (IDLE). PickedUp: $wasPickedUp, Duration: ${durationSeconds}s, Monitored: $wasCallMonitored.")
+                    Log.d("SeniorShieldCallReceiver", "⏹️ Call Ended (IDLE). PickedUp: $wasPickedUp, Duration: ${durationSeconds}s, Caller: $lastIncomingNumber")
                     InCallAudioChunker.stopRecording()
                     SentinelForegroundService.dismissCallAlert(context)
 
-                    // Only emit call ended event if call was actually answered and monitored
-                    if (wasPickedUp && wasCallMonitored && durationSeconds >= 2) {
-                        Log.i("SeniorShieldCallReceiver", "🎙️ Emitting onCallEnded for stranger call: $lastIncomingNumber (${durationSeconds}s)")
+                    // Emit call ended event so SeniorShield automatically scans & processes the recording from storage
+                    if (wasPickedUp && durationSeconds >= 1) {
+                        Log.i("SeniorShieldCallReceiver", "🎙️ Emitting onCallEnded for call: $lastIncomingNumber (${durationSeconds}s)")
                         PreCallModule.sendCallEndedEvent(
                             phoneNumber = lastIncomingNumber,
                             durationSeconds = durationSeconds,
                             wasMonitored = true
                         )
                     } else {
-                        Log.d("SeniorShieldCallReceiver", "ℹ️ Call was missed, rejected, or whitelisted. No debrief needed.")
+                        Log.d("SeniorShieldCallReceiver", "ℹ️ Call was missed or rejected without pickup. No debrief needed.")
                     }
 
                     // Reset session flags

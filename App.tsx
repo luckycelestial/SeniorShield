@@ -77,7 +77,9 @@ export default function App() {
 
   // Settings & Configuration
   const [guardianPhone, setGuardianPhone] = useState<string>('+919876543210');
-  const [geminiApiKey, setGeminiApiKey] = useState<string>('');
+  const [geminiApiKey, setGeminiApiKey] = useState<string>(
+    process.env.EXPO_PUBLIC_GEMINI_API_KEY || ''
+  );
   const [isSettingsVisible, setIsSettingsVisible] = useState<boolean>(false);
   const [isSimulationVisible, setIsSimulationVisible] = useState<boolean>(false);
 
@@ -109,29 +111,28 @@ export default function App() {
       },
       async (callEndedData) => {
         console.log('📞 [App] Automatic Post-Call Trigger for:', callEndedData.phoneNumber, 'Duration:', callEndedData.durationSeconds);
-        
-        // Wait 1.5s for OS audio recorder to finalize file on disk
-        setTimeout(async () => {
-          try {
-            // Automatically grab newest recording from device recording folder
-            const recentFiles = await callRecordingService.scanDeviceRecordings(5);
-            const latestFile = recentFiles.length > 0 ? recentFiles[0] : null;
 
-            if (latestFile && (Date.now() - latestFile.lastModified < 180_000)) {
-              console.log('🎙️ [App] Automatically loading recorded call:', latestFile.fileName);
-              
+        const tryProcessRecording = async (attempt: number = 1) => {
+          try {
+            const latestFile = await callRecordingService.findLatestCallRecording(
+              callEndedData.phoneNumber,
+              Date.now() - 300_000
+            );
+
+            if (latestFile) {
+              console.log(`🎙️ [App] Found recording (${latestFile.fileName}). Analyzing with Gemini AI...`);
               const aiRecord = await callRecordingService.analyzeRecordedAudioWithAi(
                 latestFile.filePath,
                 callEndedData.phoneNumber,
-                geminiApiKey
+                geminiApiKey || process.env.EXPO_PUBLIC_GEMINI_API_KEY
               );
 
               if (aiRecord) {
                 setProcessedCalls((prev) => [aiRecord, ...prev.filter((p) => p.id !== aiRecord.id)]);
-                
-                // Show Debrief with 100% Real Gemini AI Analysis
+
+                // Show Post-Call Debrief Screen with genuine Gemini AI analysis
                 setPostCallDebrief({
-                  phoneNumber: callEndedData.phoneNumber,
+                  phoneNumber: callEndedData.phoneNumber || aiRecord.phoneNumber,
                   durationSeconds: aiRecord.durationSeconds || callEndedData.durationSeconds,
                   wasMonitored: true,
                   transcript: aiRecord.fullTranscript,
@@ -143,7 +144,7 @@ export default function App() {
                   const callEvent: DeviceEvent = {
                     id: `call_${Date.now()}`,
                     type: 'CALL',
-                    senderOrNumber: callEndedData.phoneNumber,
+                    senderOrNumber: callEndedData.phoneNumber || aiRecord.phoneNumber,
                     timestamp: Date.now(),
                     contentOrDuration: `[Recorded Audio Analyzed]: "${aiRecord.fullTranscript.substring(0, 120)}..."`,
                     rawPayload: { markers: aiRecord.scamMarkers, score: aiRecord.confidenceScore },
@@ -152,40 +153,18 @@ export default function App() {
                 }
                 return;
               }
-            }
-
-            // If no audio file on disk, check if live 10s chunks were recorded
-            if (callEndedData.transcript && callEndedData.transcript.trim().length > 0) {
-              const liveRecord: ProcessedCallRecord = {
-                id: `call_rec_${Date.now()}`,
-                phoneNumber: callEndedData.phoneNumber,
-                timestamp: Date.now(),
-                durationSeconds: callEndedData.durationSeconds || 10,
-                totalChunks: 1,
-                threatLevel: 'SAFE',
-                confidenceScore: 85,
-                scamType: 'Monitored Conversation',
-                impersonatedEntity: 'None',
-                seniorActionDirective: 'No suspicious requests detected during this call.',
-                fullTranscript: callEndedData.transcript,
-                chunkTranscripts: [{ chunkIndex: 1, text: callEndedData.transcript, intent: 'Live Monitored Speech' }],
-                scamMarkers: [],
-              };
-              setProcessedCalls((prev) => [liveRecord, ...prev]);
-
-              setPostCallDebrief({
-                phoneNumber: callEndedData.phoneNumber,
-                durationSeconds: callEndedData.durationSeconds,
-                wasMonitored: true,
-                transcript: callEndedData.transcript,
-                report: null,
-                timestamp: Date.now(),
-              });
+            } else if (attempt < 3) {
+              console.log(`⏳ [App] Recording file not ready yet on disk. Retrying attempt ${attempt + 1}...`);
+              setTimeout(() => tryProcessRecording(attempt + 1), 2000);
+              return;
             }
           } catch (err) {
             console.error('❌ [App] Error automatically analyzing call recording:', err);
           }
-        }, 1500);
+        };
+
+        // Start scanning after 1.5 seconds to let the dialer finish writing the audio file
+        setTimeout(() => tryProcessRecording(1), 1500);
       }
     );
   };

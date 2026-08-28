@@ -30,7 +30,8 @@ export interface AudioAnalysisResult {
   assets_at_risk: string[];
 }
 
-const GEMINI_MODEL = process.env.EXPO_PUBLIC_GEMINI_MODEL || 'gemini-2.5-flash-lite';
+const DEFAULT_GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
+const GEMINI_MODEL = process.env.EXPO_PUBLIC_GEMINI_MODEL || 'gemini-3.5-flash-lite';
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 class CallRecordingService {
@@ -54,6 +55,36 @@ class CallRecordingService {
   }
 
   /**
+   * Find the newest call recording saved on device within the last given window
+   */
+  async findLatestCallRecording(
+    phoneNumber?: string,
+    sinceTimestampMs: number = Date.now() - 300_000
+  ): Promise<DeviceRecordingFile | null> {
+    const files = await this.scanDeviceRecordings(10);
+    if (!files || files.length === 0) return null;
+
+    // Filter recordings modified after sinceTimestampMs (with 60s safety buffer)
+    const recent = files.filter(
+      (f) => f.lastModified >= sinceTimestampMs - 60_000
+    );
+
+    if (recent.length === 0) {
+      // If none in the exact window, pick the single newest file on disk
+      return files[0];
+    }
+
+    // If phone number provided, see if filename contains it
+    if (phoneNumber && phoneNumber !== 'Unknown') {
+      const cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
+      const match = recent.find((f) => f.fileName.includes(cleanPhone) || f.callerOrContact.includes(cleanPhone));
+      if (match) return match;
+    }
+
+    return recent[0];
+  }
+
+  /**
    * Read raw audio file from disk as Base64
    */
   async readAudioFileBase64(filePath: string): Promise<{
@@ -72,8 +103,12 @@ class CallRecordingService {
         console.error('❌ Failed to read audio file:', res?.error);
         return null;
       }
+
+      // Ensure base64 contains no newlines or spaces for Google Gemini API
+      const cleanBase64 = (res.base64 as string).replace(/\r?\n|\r/g, '').trim();
+
       return {
-        base64: res.base64,
+        base64: cleanBase64,
         mimeType: res.mimeType || 'audio/mp4',
         durationSeconds: res.durationSeconds || 0,
         fileName: res.fileName || '',
@@ -85,14 +120,14 @@ class CallRecordingService {
   }
 
   /**
-   * Send real recorded audio directly to Gemini 2.5 Flash Lite Multimodal Audio API
+   * Send real recorded audio directly to Gemini 3.5 Flash Lite Multimodal Audio API
    */
   async analyzeRecordedAudioWithAi(
     filePath: string,
     callerHint?: string,
     apiKeyOverride?: string
   ): Promise<ProcessedCallRecord | null> {
-    const apiKey = apiKeyOverride || process.env.EXPO_PUBLIC_GEMINI_API_KEY || '';
+    const apiKey = apiKeyOverride || DEFAULT_GEMINI_API_KEY;
     if (!apiKey) {
       throw new Error('Google Gemini API Key is required for audio transcription.');
     }
@@ -113,7 +148,7 @@ Listen to this REAL audio recording from a phone conversation received by a user
 Caller identifier from file: "${callerHint || audioData.fileName}".
 
 Tasks:
-1. Transcribe the spoken audio faithfully into normalized text (in English or Romanized Indian languages).
+1. Transcribe the spoken audio conversation faithfully into normalized text (in English or Romanized Indian languages).
 2. Segment the transcription into chronological chunks with speaker intent for each chunk.
 3. Determine if the caller is attempting a scam (e.g. Electricity bill disconnection, Digital arrest / CBI intimidation, Bank KYC update APK, Customs courier threat, Investment/Lottery fraud, or Legitimate conversation).
 4. Extract specific threat indicators, coercion keywords, and assets targeted.
@@ -161,7 +196,7 @@ Return ONLY a JSON object strictly matching this schema:
       },
     };
 
-    console.log(`🤖 [CallRecordingService] Sending real audio (${(audioData.base64.length / 1024).toFixed(1)} KB Base64) to Gemini API...`);
+    console.log(`🤖 [CallRecordingService] Sending real audio (${(audioData.base64.length / 1024).toFixed(1)} KB Base64) to Gemini ${GEMINI_MODEL}...`);
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -185,6 +220,7 @@ Return ONLY a JSON object strictly matching this schema:
       threatLevel: parsed.threat_level,
       scamType: parsed.scam_type,
       confidence: parsed.confidence_score,
+      transcriptSnippet: (parsed.transcript || '').substring(0, 80),
     });
 
     const record: ProcessedCallRecord = {
