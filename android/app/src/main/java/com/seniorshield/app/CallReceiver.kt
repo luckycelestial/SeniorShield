@@ -21,22 +21,40 @@ class CallReceiver : BroadcastReceiver() {
 
             when (state) {
                 TelephonyManager.EXTRA_STATE_RINGING -> {
-                    val incomingNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER) ?: "Unknown"
+                    val incomingNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)
+                    if (incomingNumber.isNullOrBlank() || incomingNumber.equals("Unknown", ignoreCase = true) || incomingNumber.equals("null", ignoreCase = true)) {
+                        Log.d("SeniorShieldCallReceiver", "ℹ️ Initial ringing intent without number. Skipping card to prevent false alarms.")
+                        return
+                    }
+
                     lastIncomingNumber = incomingNumber
                     callStartTimeMs = 0L
                     wasCallMonitored = false
                     Log.d("SeniorShieldCallReceiver", "🚨 Incoming Ringing Detected: $incomingNumber")
 
-                    // 1. Emit to React Native UI if open
-                    PreCallModule.sendIncomingCallEvent(incomingNumber)
+                    val isSafe = CallHistoryFilter.isSafeOrSavedContact(context, incomingNumber)
+                    if (isSafe) {
+                        Log.i("SeniorShieldCallReceiver", "🟢 Caller $incomingNumber is a SAVED / KNOWN CONTACT -> No warning card.")
+                        PreCallOverlayManager.dismissOverlay(context)
+                    } else {
+                        Log.w("SeniorShieldCallReceiver", "⚠️ Caller $incomingNumber is NON-SAVED STRANGER -> Opening Warning Card.")
+                        PreCallOverlayManager.showOverlayCard(
+                            context,
+                            incomingNumber,
+                            "⚠️ Suspected Unknown / Scam Caller",
+                            92,
+                            "DO NOT SHARE OTP OR BANK PASSWORDS. Unknown unsaved caller."
+                        )
+                    }
 
-                    // 2. Post Heads-Up Emergency Notification / Floating Card if outside of app
-                    SentinelForegroundService.handleIncomingCall(context, incomingNumber)
+                    // Emit to React Native UI if open
+                    PreCallModule.sendIncomingCallEvent(incomingNumber)
                 }
 
                 TelephonyManager.EXTRA_STATE_OFFHOOK -> {
                     Log.d("SeniorShieldCallReceiver", "📞 Call Picked Up (OFFHOOK) for: $lastIncomingNumber")
                     callStartTimeMs = System.currentTimeMillis()
+                    PreCallOverlayManager.dismissOverlay(context)
                     SentinelForegroundService.dismissCallAlert(context)
 
                     // Check Senior Whitelist Filter:
@@ -61,6 +79,7 @@ class CallReceiver : BroadcastReceiver() {
 
                     Log.d("SeniorShieldCallReceiver", "⏹️ Call Ended (IDLE). PickedUp: $wasPickedUp, Duration: ${durationSeconds}s, Caller: $lastIncomingNumber")
                     InCallAudioChunker.stopRecording()
+                    PreCallOverlayManager.dismissOverlay(context)
                     SentinelForegroundService.dismissCallAlert(context)
 
                     // Emit call ended event so SeniorShield automatically scans & processes the recording from storage

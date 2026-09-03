@@ -96,6 +96,18 @@ android {
         versionName "1.0.0"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
+
+        // Inject Gemini API key from root .env into native BuildConfig
+        def envFile = rootProject.file("../.env")
+        def geminiApiKey = ""
+        if (envFile.exists()) {
+            envFile.eachLine { line ->
+                if (line.startsWith("EXPO_PUBLIC_GEMINI_API_KEY=")) {
+                    geminiApiKey = line.split("=", 2)[1].trim()
+                }
+            }
+        }
+        buildConfigField "String", "GEMINI_API_KEY", "\"${geminiApiKey}\""
     }
     signingConfigs {
         debug {

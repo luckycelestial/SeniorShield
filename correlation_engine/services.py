@@ -3,22 +3,40 @@ import math
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime
 
-from correlation_engine import CampaignCorrelationEngine
-from campaign_clustering import (
-    run_leiden,
-    attach_communities,
-    summarize_campaigns,
-    classify_campaigns,
-    _to_dict
-)
-from neo4j_exporter import Neo4jScamGraphStore
-from schemas import (
-    CorrelateEventRequest,
-    CorrelateEventResponse,
-    CampaignInfo,
-    EvidenceInfo,
-    DecisionInfo
-)
+try:
+    from .correlation_engine import CampaignCorrelationEngine
+    from .campaign_clustering import (
+        run_leiden,
+        attach_communities,
+        summarize_campaigns,
+        classify_campaigns,
+        _to_dict
+    )
+    from .neo4j_exporter import Neo4jScamGraphStore
+    from .schemas import (
+        CorrelateEventRequest,
+        CorrelateEventResponse,
+        CampaignInfo,
+        EvidenceInfo,
+        DecisionInfo
+    )
+except ImportError:
+    from correlation_engine import CampaignCorrelationEngine
+    from campaign_clustering import (
+        run_leiden,
+        attach_communities,
+        summarize_campaigns,
+        classify_campaigns,
+        _to_dict
+    )
+    from neo4j_exporter import Neo4jScamGraphStore
+    from schemas import (
+        CorrelateEventRequest,
+        CorrelateEventResponse,
+        CampaignInfo,
+        EvidenceInfo,
+        DecisionInfo
+    )
 
 class CorrelationService:
     def __init__(self, csv_filepath: Optional[str] = None):

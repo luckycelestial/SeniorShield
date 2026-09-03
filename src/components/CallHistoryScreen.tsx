@@ -26,17 +26,19 @@ import { ProcessedCallRecord } from '../types/callLog';
 import { TRANSLATIONS } from '../constants/languages';
 
 interface CallHistoryScreenProps {
-  visible: boolean;
+  visible?: boolean;
+  isModal?: boolean;
   calls: ProcessedCallRecord[];
   selectedLanguage: string;
-  onClose: () => void;
+  onClose?: () => void;
   onBlockNumber: (phoneNumber: string) => void;
   onAlertGuardian: (phoneNumber: string) => void;
   onAddProcessedRecord?: (record: ProcessedCallRecord) => void;
 }
 
 export const CallHistoryScreen: React.FC<CallHistoryScreenProps> = ({
-  visible,
+  visible = true,
+  isModal = false,
   calls,
   selectedLanguage,
   onClose,
@@ -46,7 +48,7 @@ export const CallHistoryScreen: React.FC<CallHistoryScreenProps> = ({
   const [filter, setFilter] = useState<'ALL' | 'THREATS' | 'SAFE'>('ALL');
   const [selectedCall, setSelectedCall] = useState<ProcessedCallRecord | null>(null);
 
-  if (!visible) return null;
+  if (isModal && !visible) return null;
 
   const t = TRANSLATIONS[selectedLanguage] || TRANSLATIONS.en;
 
@@ -73,19 +75,20 @@ export const CallHistoryScreen: React.FC<CallHistoryScreenProps> = ({
     return `${Math.round(hours / 24)}d ago`;
   };
 
-  return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
+  const mainContent = (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={[styles.header, !isModal && styles.headerInline]}>
+        {isModal && onClose && (
           <TouchableOpacity style={styles.backButton} onPress={onClose} activeOpacity={0.7}>
             <ArrowLeft size={22} color="#0F172A" />
           </TouchableOpacity>
-          <View style={styles.headerTitleGroup}>
-            <Text style={styles.headerTitle}>In-Call Audio Shield Logs</Text>
-            <Text style={styles.headerSubtitle}>Every Call Processed by Autonomous Gemini AI</Text>
-          </View>
+        )}
+        <View style={styles.headerTitleGroup}>
+          <Text style={styles.headerTitle}>In-Call Audio Shield Logs</Text>
+          <Text style={styles.headerSubtitle}>Calls Processed & Transcribed by Gemini AI</Text>
         </View>
+      </View>
 
         {/* Filter Pills */}
         <View style={styles.filterRow}>
@@ -361,8 +364,17 @@ export const CallHistoryScreen: React.FC<CallHistoryScreenProps> = ({
           </Modal>
         )}
       </View>
-    </Modal>
   );
+
+  if (isModal) {
+    return (
+      <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+        {mainContent}
+      </Modal>
+    );
+  }
+
+  return mainContent;
 };
 
 const styles = StyleSheet.create({
@@ -379,6 +391,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#E2E8F0',
+  },
+  headerInline: {
+    paddingTop: 14,
   },
   backButton: {
     width: 40,

@@ -17,7 +17,7 @@ class MainActivity : ReactActivity() {
     // This is required for expo-splash-screen.
     setTheme(R.style.AppTheme);
     super.onCreate(null)
-    SentinelForegroundService.startService(this)
+    SentinelForegroundService.stopService(this)
   }
 
   /**

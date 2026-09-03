@@ -6,6 +6,7 @@ from typing import Dict, Any
 from fastapi import FastAPI, Request, HTTPException, status, Header
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 
 from schemas import CorrelateEventRequest, CorrelateEventResponse
@@ -20,6 +21,14 @@ app = FastAPI(
     title="SeniorShield Fraud Intelligence Engine",
     description="Multi-Channel Scam Campaign Correlation & Graph Intelligence API",
     version="1.0.0"
+)
+
+# Allow requests from the React Native dev client and local backend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Global Correlation Service Instance
@@ -146,3 +155,10 @@ async def correlate_event(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while processing the correlation engine."
         )
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("CORRELATION_ENGINE_PORT", "8002"))
+    host = os.getenv("CORRELATION_ENGINE_HOST", "0.0.0.0")
+    logger.info(f"Starting SeniorShield Correlation Engine on {host}:{port}")
+    uvicorn.run("api:app", host=host, port=port, reload=False)

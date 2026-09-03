@@ -4,11 +4,14 @@ SeniorShield Backend - main.py
 Clean, minimal AI fraud analysis service for SeniorShield.
 
 Endpoints:
-    GET  /health       -> Service health check (returns {"status": "ok"})
-    POST /api/analyze  -> Unified AI fraud analysis pipeline (bert-tiny-scam-v1 + XAI + Rules + TI + Groq)
+    GET  /health                  -> Service health check (returns {"status": "ok"})
+    GET  /api/v1/correlate/health -> Correlation engine + AuraDB liveness
+    POST /api/analyze             -> Unified AI fraud analysis pipeline (DistilBERT + XAI + Rules + TI + Groq)
+    POST /api/v1/correlate        -> Leiden campaign correlation + AuraDB sync
 """
 
 import os
+import sys
 import threading
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -19,8 +22,16 @@ from dotenv import load_dotenv
 env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
 load_dotenv(dotenv_path=env_path)
 
+# ── Inject workspace root into Python path ────────────────────────────────────
+_WORKSPACE_ROOT = os.path.abspath(os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), ".."
+))
+if _WORKSPACE_ROOT not in sys.path:
+    sys.path.append(_WORKSPACE_ROOT)
+
 from api.health import router as health_router
 from api.analysis import router as analysis_router
+from api.correlate import router as correlate_router
 
 
 @asynccontextmanager
@@ -74,3 +85,4 @@ async def root_check():
 # Primary Endpoints
 app.include_router(health_router)
 app.include_router(analysis_router)
+app.include_router(correlate_router)

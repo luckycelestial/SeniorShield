@@ -59,33 +59,6 @@ export const Header: React.FC<HeaderProps> = ({
         </View>
 
         <View style={styles.headerRightActions}>
-          {onOpenCallLogs && (
-            <TouchableOpacity
-              style={styles.callLogsHeaderButton}
-              onPress={onOpenCallLogs}
-              activeOpacity={0.7}
-              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
-            >
-              <Mic size={13} color="#E11D48" />
-              <Text style={styles.callLogsHeaderText}>Logs</Text>
-              {callLogsCount > 0 && (
-                <View style={styles.callLogsBadge}>
-                  <Text style={styles.callLogsBadgeText}>{callLogsCount}</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          )}
-
-          {onOpenOnboarding && (
-            <TouchableOpacity
-              style={styles.onboardingHeaderButton}
-              onPress={onOpenOnboarding}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.onboardingHeaderText}>Guide</Text>
-            </TouchableOpacity>
-          )}
-
           {/* Language Dropdown Selector Button */}
           <TouchableOpacity
             style={styles.languageButton}

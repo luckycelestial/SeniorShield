@@ -29,11 +29,13 @@ class SentinelForegroundService : Service() {
     private val executor = Executors.newSingleThreadExecutor()
     private var smsObserver: ContentObserver? = null
     private val processedSmsIds = HashSet<String>()
+    // Gemini API key — injected via buildConfigField in app/build.gradle
     private val GEMINI_API_KEY: String
         get() = try {
-            val field = BuildConfig::class.java.getField("EXPO_PUBLIC_GEMINI_API_KEY")
+            val field = BuildConfig::class.java.getField("GEMINI_API_KEY")
             field.get(null) as? String ?: ""
         } catch (e: Exception) {
+            Log.w(TAG, "GEMINI_API_KEY not found in BuildConfig. Add buildConfigField to app/build.gradle.")
             ""
         }
 
@@ -49,76 +51,27 @@ class SentinelForegroundService : Service() {
         private val armedScamNumbers = HashSet<String>()
 
         fun startService(context: Context) {
-            val intent = Intent(context, SentinelForegroundService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
+            // Disabled per user preference to prevent persistent notification bar clutter
+            stopService(context)
+        }
+
+        fun stopService(context: Context) {
+            try {
+                val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                manager.cancel(NOTIFICATION_ID)
+                manager.cancel(CALL_ALERT_NOTIFICATION_ID)
+                manager.cancel(PREDICTIVE_ALERT_NOTIFICATION_ID)
+                val intent = Intent(context, SentinelForegroundService::class.java)
+                context.stopService(intent)
+                Log.d(TAG, "SentinelForegroundService stopped & notifications cleared.")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error stopping SentinelForegroundService", e)
             }
         }
 
         fun handleIncomingCall(context: Context, incomingNumber: String) {
-            try {
-                val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-                val cleanNumber = incomingNumber.replace("[^0-9+]".toRegex(), "")
-                val isArmedPredictiveMatch = armedScamNumbers.any { armed ->
-                    cleanNumber.contains(armed.replace("[^0-9+]".toRegex(), ""))
-                }
-                val isVoipSpoof = cleanNumber.startsWith("+92") || cleanNumber.startsWith("+880") || cleanNumber.startsWith("+44") || cleanNumber.startsWith("+1")
-                val isMobileNumber = cleanNumber.startsWith("+91") || cleanNumber.length == 10
-
-                val riskTag = if (isArmedPredictiveMatch) {
-                    "🚨 PREDICTED SCAM CALLER: Matches Recent Fraud SMS"
-                } else if (isVoipSpoof) {
-                    "⚠️ HIGH RISK: International / Spoofed Number"
-                } else if (isMobileNumber) {
-                    "⚠️ CAUTION: Unverified Unknown Mobile"
-                } else {
-                    "⚠️ SCAM CALL WARNING"
-                }
-
-                val directive = if (isArmedPredictiveMatch) {
-                    "DO NOT ANSWER! This is the follow-up extortion call from the scam message received earlier. Let it ring."
-                } else {
-                    "DO NOT ANSWER! Known scam vector attempting extortion or bank fraud. Let the phone ring."
-                }
-
-                val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-                val pendingIntent = PendingIntent.getActivity(
-                    context,
-                    CALL_ALERT_NOTIFICATION_ID,
-                    launchIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-
-                val notification = NotificationCompat.Builder(context, ALERT_CHANNEL_ID)
-                    .setContentTitle("🚨 PRE-CALL ALERT: $incomingNumber")
-                    .setContentText(riskTag)
-                    .setStyle(NotificationCompat.BigTextStyle().bigText("$riskTag\n\n👉 $directive"))
-                    .setSmallIcon(android.R.drawable.stat_sys_warning)
-                    .setPriority(NotificationCompat.PRIORITY_MAX)
-                    .setCategory(NotificationCompat.CATEGORY_CALL)
-                    .setVibrate(longArrayOf(0, 500, 200, 500))
-                    .setContentIntent(pendingIntent)
-                    .setAutoCancel(true)
-                    .setFullScreenIntent(pendingIntent, true)
-                    .build()
-
-                manager.notify(CALL_ALERT_NOTIFICATION_ID, notification)
-                Log.d(TAG, "🚨 Heads-Up Pre-Call Notification posted for $incomingNumber")
-
-                // 2. Launch Truecaller-Style Floating Overlay Card via WindowManager
-                PreCallOverlayManager.showOverlayCard(
-                    context,
-                    incomingNumber,
-                    if (isArmedPredictiveMatch) "🚨 PREDICTED SCAM OPERATOR" else "⚠️ Suspected Scam Caller",
-                    if (isArmedPredictiveMatch) 99 else 95,
-                    directive
-                )
-            } catch (e: Exception) {
-                Log.e(TAG, "Error posting Pre-Call Alert Notification", e)
-            }
+            // Notification during call removed per user preference
+            Log.d(TAG, "Incoming call detected for: $incomingNumber (notification suppressed)")
         }
 
         fun dismissCallAlert(context: Context) {
@@ -142,15 +95,21 @@ class SentinelForegroundService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannels()
-        registerSmsContentObserver()
-        Log.d(TAG, "🛡️ SentinelForegroundService created and running 24/7.")
+        try {
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.cancel(NOTIFICATION_ID)
+        } catch (_: Exception) {}
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val notification = buildPersistentNotification()
-        startForeground(NOTIFICATION_ID, notification)
-        return START_STICKY
+        try {
+            stopForeground(true)
+            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.cancel(NOTIFICATION_ID)
+            manager.cancelAll()
+        } catch (_: Exception) {}
+        stopSelf()
+        return START_NOT_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

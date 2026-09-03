@@ -52,7 +52,22 @@ class PreCallSentinel {
     // Step 1: Query Truecaller-style lightweight reputation lookup
     const rep: NumberReputation = await reputationService.lookupReputation(phoneNumber);
 
-    // Step 2: Check multi-channel correlation with recent SMS/links
+    // Rule 1: Saved Contact is ALWAYS GREEN (bypass further suspicion checks)
+    if (rep.trafficLight === 'GREEN') {
+      return {
+        phoneNumber,
+        callerName: rep.callerName,
+        spamScore: 0,
+        threatCategory: 'SAFE_VERIFIED',
+        impersonationTag: 'Saved Contact',
+        seniorDirective: 'Safe to answer. This is a contact saved in your address book.',
+        isMultiChannelAttack: false,
+        reportsCount: 0,
+        trafficLight: 'GREEN',
+      };
+    }
+
+    // Step 2: Check multi-channel correlation with recent SMS/links for non-saved callers
     const hasRecentScamSms = recentEvents.some((e) => {
       const text = (e.contentOrDuration || '').toLowerCase();
       return (

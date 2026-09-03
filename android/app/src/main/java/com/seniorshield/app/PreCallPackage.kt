@@ -54,6 +54,16 @@ class PreCallModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
         }
     }
 
+    @ReactMethod
+    fun isContactSaved(phoneNumber: String, promise: com.facebook.react.bridge.Promise) {
+        try {
+            val isSaved = CallHistoryFilter.isSafeOrSavedContact(reactApplicationContext, phoneNumber)
+            promise.resolve(isSaved)
+        } catch (e: Exception) {
+            promise.resolve(false)
+        }
+    }
+
     companion object {
         private var instance: PreCallModule? = null
 
